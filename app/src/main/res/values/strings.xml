@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">HireTop</string>
+    <string name="create_account_text">Créer un compte</string>
+    <string name="account_type_subheader_text">Prêt(e) pour l\'étape suivante ?</string>
+    <string name="account_type_info_text">Précisez votre type de compte pour accéder à des outils pratiques.</string>
+    <string name="talent_button_text">Talent</string>
+    <string name="button_entreprise_text">Entreprise</string>
+    <string name="login_screen_header_text">Connectez-vous ici</string>
+    <string name="login_screen_subheader_text">Bon retour ! Vous nous avez manqué</string>
+    <string name="email_field_placeholder_text">Entrez votre adresse email</string>
+    <string name="email_field_label_text">Email</string>
+    <string name="password_field_lable_text">Mot de passe</string>
+    <string name="password_field_placeholder_text">Entrez votre mot de passe</string>
+    <string name="password_filed_visibility_icon_desc">Password filed visibility icon</string>
+    <string name="forgot_password_text">Mot de passe oublié?</string>
+    <string name="login_button_text">Se connecter</string>
+    <string name="continue_with_text">Ou continuez avec</string>
+    <string name="new_user_text">Nouvel utilisateur?</string>
+    <string name="signup_screen_subheader_text">Créez un compte pour explorer tous les emplois disponibles.</string>
+    <string name="confirm_password_field_label_text">Confirmer le mot de passe</string>
+    <string name="confirm_password_field_placeholder_text">Confirmez votre mot de passe</string>
+    <string name="confirm_password_field_visibility_icon_desc">Confirm password field visibility icon</string>
+    <string name="signup_button_text">S\'inscrire</string>
+    <string name="welcome_screen_headline_text">Trouvez l\'emploi parfait</string>
+    <string name="welcome_screen_subheadline_text">Trouver l\'emploi de vos rêves est plus facile et plus rapide avec HireTop</string>
+    <string name="let_get_started_text">Commençons</string>
+    <string name="started_button_icon_des">Started button icon</string>
+</resources>
