@@ -6,9 +6,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.hiretop.ui.screens.AccountTypeScreen
 import com.example.hiretop.ui.screens.LoginScreen
 import com.example.hiretop.ui.screens.SignupScreen
+import com.example.hiretop.ui.screens.TalentProfileScreen
 import com.example.hiretop.ui.screens.WelcomeScreen
 import com.example.hiretop.ui.theme.HiretopTheme
 
+/*
 @Preview
 @Composable
 fun WelcomeScreenPreview() {
@@ -38,5 +40,14 @@ fun SignupScreenPreview() {
 fun AccountTypeScreenPreview() {
     HiretopTheme {
         AccountTypeScreen(navController = rememberNavController())
+    }
+}
+*/
+
+@Preview
+@Composable
+fun TalentProfileScreenPreview() {
+    HiretopTheme {
+        TalentProfileScreen()
     }
 }
