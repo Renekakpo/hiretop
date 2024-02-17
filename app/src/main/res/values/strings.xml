@@ -25,4 +25,81 @@
     <string name="welcome_screen_subheadline_text">Trouver l\'emploi de vos rêves est plus facile et plus rapide avec HireTop</string>
     <string name="let_get_started_text">Commençons</string>
     <string name="started_button_icon_des">Started button icon</string>
+    <string name="indicates_required_text">* Indique un champ obligatoire</string>
+    <string name="required_firstname_text">Prénom*</string>
+    <string name="required_lastname_text">Nom*</string>
+    <string name="required_headline_text">Titre du profil*</string>
+    <string name="save_button_text">Enregistrer</string>
+    <string name="about_profile_label">Infos</string>
+    <string name="job_title_text">Intitulé de poste*</string>
+    <string name="employment_type_text">Type d\'emploi</string>
+    <string name="company_name_text">Nom de l\'entreprise*</string>
+    <string name="location_text">Lieu</string>
+    <string name="location_type_text">Type de lieu</string>
+    <string name="required_start_date_text">Date de début*</string>
+    <string name="end_date_text">Date de fin*</string>
+    <string name="industry_text">Secteur*</string>
+    <string name="description_text">Descriptif</string>
+    <string name="optional_skills_text">Compétences</string>
+    <string name="current_job_text">J\'occupe actuellement ce poste</string>
+    <string name="required_school_text">École</string>
+    <string name="optional_degree_text">Diplôme</string>
+    <string name="optional_field_of_study_text">Domaine d\'études</string>
+    <string name="optional_start_date">Date de début</string>
+    <string name="optional_end_or_planned_date_text">Date de fin (ou prévue)</string>
+    <string name="optional_grade_text">Résultat obtenu</string>
+    <string name="optional_activities_text">Activités et associations</string>
+    <string name="optional_description_text">Description</string>
+    <string name="required_certification_name_text">Nom*</string>
+    <string name="issuing_organization_text">Organisme de délivrance*</string>
+    <string name="optional_issued_date_text">Date d\'émission</string>
+    <string name="optional_expiration_date_text">Date d\'expiration</string>
+    <string name="optional_credential_id_text">ID du diplôme</string>
+    <string name="optional_credential_url_text">URL du diplôme</string>
+    <string name="optional_skills_field_placeholder_text">Ex: React | VueJS</string>
+    <string name="optional_project_name_text">Nom du projet*</string>
+    <string name="required_skill_text">Compétence*</string>
+    <string name="optional_about_text">À propos</string>
+    <string name="edit_icon_desc_text">Edit icon</string>
+    <string name="experience_text">Experience</string>
+    <string name="add_experience_icon_desc_text">Add experience</string>
+    <string name="education_text">Education</string>
+    <string name="add_education_icon_desc_text">Add education</string>
+    <string name="certifications_text">Certifications</string>
+    <string name="add_certification_icon_desc_text">Add certification</string>
+    <string name="projects_text">Projets</string>
+    <string name="add_project_icon_desc_text">Add project</string>
+    <string name="add_skills_icon_desc_text">Add skills</string>
+    <string-array name="job_type_list">
+        <item>Veuillez sélectionner</item>
+        <item>Temps plein</item>
+        <item>Temps partiel</item>
+        <item>Indépendant</item>
+        <item>Freelance</item>
+        <item>CDD</item>
+        <item>Stage</item>
+        <item>Contrat en alternance</item>
+        <item>Saisonnier</item>
+    </string-array>
+    <string-array name="location_type_list">
+        <item>Veuillez sélectionner</item>
+        <item>Sur site</item>
+        <item>Hybride</item>
+        <item>À distance</item>
+    </string-array>
+    <string-array name="months_array">
+        <item>Mois</item>
+        <item>Janvier</item>
+        <item>Février</item>
+        <item>Mars</item>
+        <item>Avril</item>
+        <item>Mai</item>
+        <item>Juin</item>
+        <item>Juillet</item>
+        <item>Août</item>
+        <item>Septembre</item>
+        <item>Octobre</item>
+        <item>Novembre</item>
+        <item>Décembre</item>
+    </string-array>
 </resources>

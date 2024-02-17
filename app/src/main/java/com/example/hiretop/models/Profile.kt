@@ -29,7 +29,6 @@ data class Experience(
     val endYear: String,
     val industry: String,
     val description: String,
-    val profileHeadline: String,
     val skills: List<String>
 )
 data class Education(

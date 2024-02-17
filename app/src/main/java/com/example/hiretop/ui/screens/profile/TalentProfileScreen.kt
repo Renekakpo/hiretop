@@ -1,13 +1,11 @@
-package com.example.hiretop.ui.screens
+package com.example.hiretop.ui.screens.profile
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,34 +18,49 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
+import com.example.hiretop.ui.extras.HireTopBottomSheet
 
 @Composable
 fun TalentProfileScreen() {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
+    var sheetTitle by remember { mutableStateOf("") }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var bottomSheetContent by remember { mutableStateOf<@Composable (() -> Unit)?>(null) }
+
+    if (showBottomSheet && bottomSheetContent != null) {
+        HireTopBottomSheet(
+            title = sheetTitle,
+            onDismiss = { showBottomSheet = false }) {
+            bottomSheetContent?.invoke()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -59,27 +72,63 @@ fun TalentProfileScreen() {
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
-        AboutSection()
+        AboutSection(onEditAboutClicked = {
+            sheetTitle = mContext.getString(R.string.optional_about_text)
+            bottomSheetContent = {
+                EditProfileAboutSection()
+            }
+            showBottomSheet = true
+        })
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
-        ExperienceSection()
+        ExperienceSection(onEditExperienceClicked = {
+            sheetTitle = mContext.getString(R.string.experience_text)
+            bottomSheetContent = {
+                EditOrAddExperienceSection()
+            }
+            showBottomSheet = true
+        })
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
-        EducationSection()
+        EducationSection(onEditEducationClicked = {
+            sheetTitle = mContext.getString(R.string.education_text)
+            bottomSheetContent = {
+                EditOrAddEducationSection()
+            }
+            showBottomSheet = true
+        })
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
-        CertificationsSection()
+        CertificationsSection(onEditCertificationClicked = {
+            sheetTitle = mContext.getString(R.string.certifications_text)
+            bottomSheetContent = {
+                EditOrAddCertificationSection()
+            }
+            showBottomSheet = true
+        })
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
-        ProjectsSection()
+        ProjectsSection(onEditProjectClicked = {
+            sheetTitle = mContext.getString(R.string.projects_text)
+            bottomSheetContent = {
+                EditOrAddProjectSection()
+            }
+            showBottomSheet = true
+        })
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
-        SkillsSection()
+        SkillsSection(onEditSkillsClicked = {
+            sheetTitle = mContext.getString(R.string.optional_skills_text)
+            bottomSheetContent = {
+                EditOrAddSkillSection()
+            }
+            showBottomSheet = true
+        })
 
         Spacer(modifier = Modifier.height(height = 15.dp))
     }
@@ -167,8 +216,12 @@ fun HeaderSection(width: Dp) {
 }
 
 @Composable
-fun AboutSection() {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+fun AboutSection(onEditAboutClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+    ) {
         Divider(modifier = Modifier.padding(horizontal = 15.dp))
 
         Row(
@@ -178,7 +231,7 @@ fun AboutSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "A propos",
+                text = stringResource(R.string.optional_about_text),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
@@ -189,12 +242,13 @@ fun AboutSection() {
 
             Icon(
                 painter = painterResource(id = R.drawable.ic_mode_edit_outline_24),
-                contentDescription = "Edit icon"
+                contentDescription = stringResource(R.string.edit_icon_desc_text),
+                modifier = Modifier.clickable { onEditAboutClicked() }
             )
         }
 
         Text(
-            text = "User description on 10 lines",
+            text = "Profile description goes here..",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 10,
@@ -207,8 +261,12 @@ fun AboutSection() {
 }
 
 @Composable
-fun ExperienceSection() {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+fun ExperienceSection(onEditExperienceClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+    ) {
         Divider(modifier = Modifier.padding(horizontal = 15.dp))
 
         Row(
@@ -218,7 +276,7 @@ fun ExperienceSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Experience",
+                text = stringResource(R.string.experience_text),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
@@ -229,8 +287,10 @@ fun ExperienceSection() {
 
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add experience",
-                modifier = Modifier.size(size = 32.dp)
+                contentDescription = stringResource(R.string.add_experience_icon_desc_text),
+                modifier = Modifier
+                    .size(size = 32.dp)
+                    .clickable { onEditExperienceClicked() }
             )
         }
 
@@ -337,8 +397,12 @@ fun ExperienceItemRow() {
 }
 
 @Composable
-fun EducationSection() {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+fun EducationSection(onEditEducationClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+    ) {
         Divider(modifier = Modifier.padding(horizontal = 15.dp))
 
         Row(
@@ -348,7 +412,7 @@ fun EducationSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Education",
+                text = stringResource(R.string.education_text),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
@@ -359,8 +423,8 @@ fun EducationSection() {
 
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add experience",
-                modifier = Modifier.size(size = 32.dp)
+                contentDescription = stringResource(R.string.add_education_icon_desc_text),
+                modifier = Modifier.size(size = 32.dp).clickable { onEditEducationClicked() }
             )
         }
 
@@ -402,9 +466,14 @@ fun EducationItemRow() {
         )
     }
 }
+
 @Composable
-fun CertificationsSection() {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+fun CertificationsSection(onEditCertificationClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+    ) {
         Divider(modifier = Modifier.padding(horizontal = 15.dp))
 
         Row(
@@ -414,7 +483,7 @@ fun CertificationsSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Certifications",
+                text = stringResource(R.string.certifications_text),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
@@ -425,8 +494,8 @@ fun CertificationsSection() {
 
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add experience",
-                modifier = Modifier.size(size = 32.dp)
+                contentDescription = stringResource(R.string.add_certification_icon_desc_text),
+                modifier = Modifier.size(size = 32.dp).clickable { onEditCertificationClicked() }
             )
         }
 
@@ -480,8 +549,12 @@ fun CertificationItemRow() {
 }
 
 @Composable
-fun ProjectsSection() {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+fun ProjectsSection(onEditProjectClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+    ) {
         Divider(modifier = Modifier.padding(horizontal = 15.dp))
 
         Row(
@@ -491,7 +564,7 @@ fun ProjectsSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Projets",
+                text = stringResource(R.string.projects_text),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
@@ -502,8 +575,8 @@ fun ProjectsSection() {
 
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add experience",
-                modifier = Modifier.size(size = 32.dp)
+                contentDescription = stringResource(R.string.add_project_icon_desc_text),
+                modifier = Modifier.size(size = 32.dp).clickable { onEditProjectClicked() }
             )
         }
 
@@ -565,8 +638,12 @@ fun ProjectItemRow() {
 }
 
 @Composable
-fun SkillsSection() {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+fun SkillsSection(onEditSkillsClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+    ) {
         Divider(modifier = Modifier.padding(horizontal = 15.dp))
 
         Row(
@@ -576,7 +653,7 @@ fun SkillsSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Compétences",
+                text = stringResource(id = R.string.optional_skills_text),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
@@ -587,8 +664,8 @@ fun SkillsSection() {
 
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add experience",
-                modifier = Modifier.size(size = 32.dp)
+                contentDescription = stringResource(R.string.add_skills_icon_desc_text),
+                modifier = Modifier.size(size = 32.dp).clickable { onEditSkillsClicked() }
             )
         }
 
