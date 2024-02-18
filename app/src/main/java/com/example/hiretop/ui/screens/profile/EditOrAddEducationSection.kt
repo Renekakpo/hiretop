@@ -35,9 +35,8 @@ import com.example.hiretop.R
 import com.example.hiretop.ui.extras.DropdownListWords
 import com.example.hiretop.utils.Utils
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditOrAddEducationSection() {
+fun EditOrAddEducationSection(onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val descMaxLength = 1000
@@ -246,7 +245,7 @@ fun EditOrAddEducationSection() {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveButtonClicked() }
+            onClick = { onSaveClicked() }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),
@@ -254,8 +253,4 @@ fun EditOrAddEducationSection() {
             )
         }
     }
-}
-
-private fun onSaveButtonClicked() {
-    TODO("Not yet implemented")
 }

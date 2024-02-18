@@ -38,7 +38,7 @@ import com.example.hiretop.utils.Utils.getYearsList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditOrAddExperienceSection() {
+fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 300
@@ -260,7 +260,7 @@ fun EditOrAddExperienceSection() {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveButtonClicked() }
+            onClick = { onSaveClicked() }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),
@@ -268,8 +268,4 @@ fun EditOrAddExperienceSection() {
             )
         }
     }
-}
-
-private fun onSaveButtonClicked() {
-    TODO("Not yet implemented")
 }

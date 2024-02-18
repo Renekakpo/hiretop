@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -31,9 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditOrAddProjectSection() {
+fun EditOrAddProjectSection(onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 2000
@@ -125,7 +123,7 @@ fun EditOrAddProjectSection() {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveButtonClicked() }
+            onClick = { onSaveClicked() }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),
@@ -133,8 +131,4 @@ fun EditOrAddProjectSection() {
             )
         }
     }
-}
-
-private fun onSaveButtonClicked() {
-    TODO("Not yet implemented")
 }

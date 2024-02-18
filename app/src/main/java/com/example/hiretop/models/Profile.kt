@@ -12,8 +12,8 @@ data class Profile(
     val certifications: List<Certification>,
     val projects: List<Project>,
     val skills: List<String>,
-    val createdAt: String,
-    val updatedAt: String
+    val createdAt: Long,
+    val updatedAt: Long
 )
 
 data class Experience(

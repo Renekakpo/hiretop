@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -27,17 +26,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditOrAddSkillSection(onSaveClicked: () -> Unit) {
+fun EditHeaderSection(onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
-    var skillName by remember { mutableStateOf("") }
+    var firstname by remember { mutableStateOf("") }
+    var lastname by remember { mutableStateOf("") }
+    var headline by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -55,11 +56,42 @@ fun EditOrAddSkillSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = skillName,
-            onValueChange = { skillName = it },
+            value = firstname,
+            onValueChange = { firstname = it },
             label = {
                 Text(
-                    text = stringResource(R.string.required_skill_text),
+                    text = stringResource(R.string.required_firstname_text),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            },
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(height = 15.dp))
+
+        OutlinedTextField(
+            value = lastname,
+            onValueChange = { lastname = it },
+            label = {
+                Text(
+                    text = stringResource(R.string.required_lastname_text),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            },
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(height = 15.dp))
+
+        OutlinedTextField(
+            value = headline,
+            onValueChange = { headline = it },
+            label = {
+                Text(
+                    text = stringResource(R.string.required_headline_text),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },

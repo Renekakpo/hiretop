@@ -70,6 +70,18 @@
     <string name="projects_text">Projets</string>
     <string name="add_project_icon_desc_text">Add project</string>
     <string name="add_skills_icon_desc_text">Add skills</string>
+    <string name="user_profile_picture_desc_text">user profile picture</string>
+    <string name="edit_profile_icon_text">Modify profile picture</string>
+    <string name="profile_banner_desc_text">Profile banner</string>
+    <string name="modify_summary_text">Modifié le résumé</string>
+    <string name="search_offer_icon_desc_text">Rechercher un emploi</string>
+    <string name="bookmark_offer_icon_desc">Enregistrer l\'offre</string>
+    <string name="profile_insights_text">Informations sur le profil</string>
+    <string name="profile_insights_info_text">Vous disposez des qualifications correspondantes, en fonction de votre profil et de la description de poste</string>
+    <string name="education_offer_icon_desc">Icône éducation</string>
+    <string name="job_info_text">Information sur l\'offre</string>
+    <string name="apply_text">Postuler</string>
+    <string name="job_search_field_placeholder_text">Titre d\'emploi ou entreprise</string>
     <string-array name="job_type_list">
         <item>Veuillez sélectionner</item>
         <item>Temps plein</item>
