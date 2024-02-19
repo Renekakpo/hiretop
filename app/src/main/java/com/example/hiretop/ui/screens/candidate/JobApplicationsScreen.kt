@@ -229,7 +229,7 @@ fun ExpandableSection(
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 Text(
-                    text = if (counter > 99) "+$counter" else "$counter",
+                    text = if (counter > 99) "+99" else "$counter",
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.align(alignment = Alignment.CenterVertically)
                 )

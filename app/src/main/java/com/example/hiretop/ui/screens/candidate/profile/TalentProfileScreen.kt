@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.profile
+package com.example.hiretop.ui.screens.candidate.profile
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -157,7 +157,7 @@ fun TalentProfileScreen() {
 }
 
 @Composable
-fun HeaderSection(onEditHeaderClicked: () -> Unit) {
+private fun HeaderSection(onEditHeaderClicked: () -> Unit) {
     val context = LocalContext.current
     var requestCode = 0
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -291,8 +291,8 @@ fun HeaderSection(onEditHeaderClicked: () -> Unit) {
 
         Column(modifier = Modifier.clickable { onEditHeaderClicked() }) {
             Text(
-                text = "Lorem Ipsum",
-                style = MaterialTheme.typography.headlineLarge,
+                text = stringResource(R.string.firstname_lastname_info),
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -301,8 +301,8 @@ fun HeaderSection(onEditHeaderClicked: () -> Unit) {
             )
 
             Text(
-                text = "Profile headline on 5 lines max",
-                style = MaterialTheme.typography.bodyLarge,
+                text = stringResource(R.string.profile_headline_info),
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 5,
                 overflow = TextOverflow.Ellipsis,
@@ -314,7 +314,7 @@ fun HeaderSection(onEditHeaderClicked: () -> Unit) {
 }
 
 @Composable
-fun AboutSection(onEditAboutClicked: () -> Unit) {
+private fun AboutSection(onEditAboutClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -330,7 +330,7 @@ fun AboutSection(onEditAboutClicked: () -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.optional_about_text),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -346,7 +346,7 @@ fun AboutSection(onEditAboutClicked: () -> Unit) {
         }
 
         Text(
-            text = "Profile description goes here..",
+            text = stringResource(R.string.profil_presentation_info),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 10,
@@ -359,7 +359,7 @@ fun AboutSection(onEditAboutClicked: () -> Unit) {
 }
 
 @Composable
-fun ExperienceSection(onEditExperienceClicked: () -> Unit) {
+private fun ExperienceSection(onEditExperienceClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -375,7 +375,7 @@ fun ExperienceSection(onEditExperienceClicked: () -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.experience_text),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -397,14 +397,14 @@ fun ExperienceSection(onEditExperienceClicked: () -> Unit) {
 }
 
 @Composable
-fun ExperienceItemRow() {
+private fun ExperienceItemRow() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
         Text(
-            text = "Company Name",
+            text = stringResource(id = R.string.enterprise_name_info),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -431,7 +431,7 @@ fun ExperienceItemRow() {
                 Spacer(modifier = Modifier.width(15.dp))
 
                 Text(
-                    text = "Job position Développeur Mobile",
+                    text = stringResource(R.string.role_position_info),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
@@ -441,7 +441,7 @@ fun ExperienceItemRow() {
 
             Column(modifier = Modifier.padding(start = 25.dp)) {
                 Text(
-                    text = "Job type: Contract or Freelance",
+                    text = stringResource(R.string.job_type_info),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
@@ -449,7 +449,7 @@ fun ExperienceItemRow() {
                 )
                 Spacer(modifier = Modifier.height(height = 3.dp))
                 Text(
-                    text = "Start date - End date: Jan 20223 - Dec 2024",
+                    text = stringResource(R.string.start_date_end_date_info),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     maxLines = 2,
@@ -457,7 +457,7 @@ fun ExperienceItemRow() {
                 )
                 Spacer(modifier = Modifier.height(height = 3.dp))
                 Text(
-                    text = "Job location: Benin - Location type: Hybrid",
+                    text = stringResource(R.string.location_and_location_type_info),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     maxLines = 2,
@@ -465,7 +465,7 @@ fun ExperienceItemRow() {
                 )
                 Spacer(modifier = Modifier.height(height = 3.dp))
                 Text(
-                    text = "Job description or accomplishment",
+                    text = stringResource(R.string.job_description_or_accomplishment_info),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 20,
@@ -477,14 +477,14 @@ fun ExperienceItemRow() {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_skills_icon),
-                        contentDescription = "Skills icon",
+                        contentDescription = stringResource(R.string.skills_icon_desc_text),
                         modifier = Modifier.size(size = 14.dp)
                     )
 
                     Spacer(modifier = Modifier.width(5.dp))
 
                     Text(
-                        text = "Skills",
+                        text = stringResource(id = R.string.optional_skills_text),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -495,7 +495,7 @@ fun ExperienceItemRow() {
 }
 
 @Composable
-fun EducationSection(onEditEducationClicked: () -> Unit) {
+private fun EducationSection(onEditEducationClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -511,7 +511,7 @@ fun EducationSection(onEditEducationClicked: () -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.education_text),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -533,14 +533,14 @@ fun EducationSection(onEditEducationClicked: () -> Unit) {
 }
 
 @Composable
-fun EducationItemRow() {
+private fun EducationItemRow() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
         Text(
-            text = "School or University name",
+            text = stringResource(R.string.school_name_info),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -548,7 +548,7 @@ fun EducationItemRow() {
         )
 
         Text(
-            text = "Degree, Field name: Master degree, Computer Science",
+            text = stringResource(R.string.degree_study_field_info),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 3,
@@ -558,7 +558,7 @@ fun EducationItemRow() {
         Spacer(modifier = Modifier.height(height = 3.dp))
 
         Text(
-            text = "Start date - End date: 20223 - 2024",
+            text = stringResource(R.string.education_start_date_end_date_info),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             maxLines = 1,
@@ -568,7 +568,7 @@ fun EducationItemRow() {
 }
 
 @Composable
-fun CertificationsSection(onEditCertificationClicked: () -> Unit) {
+private fun CertificationsSection(onEditCertificationClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -584,7 +584,7 @@ fun CertificationsSection(onEditCertificationClicked: () -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.certifications_text),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -606,14 +606,14 @@ fun CertificationsSection(onEditCertificationClicked: () -> Unit) {
 }
 
 @Composable
-fun CertificationItemRow() {
+private fun CertificationItemRow() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
         Text(
-            text = "Certification name",
+            text = stringResource(R.string.certification_name_info),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -621,7 +621,7 @@ fun CertificationItemRow() {
         )
 
         Text(
-            text = "Issued by: Meta",
+            text = stringResource(id = R.string.issuing_organization_text).replace("*", ""),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 3,
@@ -630,8 +630,11 @@ fun CertificationItemRow() {
 
         Spacer(modifier = Modifier.height(height = 3.dp))
 
+        val certificationDate = stringResource(id = R.string.optional_issued_date_text)
+        // TODO: Add expiration date if its defined
+
         Text(
-            text = "Issued date: Sep 20223",
+            text = certificationDate,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             maxLines = 1,
@@ -641,7 +644,7 @@ fun CertificationItemRow() {
         Spacer(modifier = Modifier.height(height = 3.dp))
 
         Text(
-            text = "Credential ID XXXXXXXX",
+            text = stringResource(id = R.string.optional_credential_id_text),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             maxLines = 1,
@@ -651,7 +654,7 @@ fun CertificationItemRow() {
 }
 
 @Composable
-fun ProjectsSection(onEditProjectClicked: () -> Unit) {
+private fun ProjectsSection(onEditProjectClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -667,7 +670,7 @@ fun ProjectsSection(onEditProjectClicked: () -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.projects_text),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -689,14 +692,14 @@ fun ProjectsSection(onEditProjectClicked: () -> Unit) {
 }
 
 @Composable
-fun ProjectItemRow() {
+private fun ProjectItemRow() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
         Text(
-            text = "Project name",
+            text = "Nom du projet",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -704,7 +707,7 @@ fun ProjectItemRow() {
         )
 
         Text(
-            text = "start date - end date",
+            text = stringResource(id = R.string.start_date_end_date_info),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
@@ -714,7 +717,7 @@ fun ProjectItemRow() {
         Spacer(modifier = Modifier.height(height = 5.dp))
 
         Text(
-            text = "Project description",
+            text = stringResource(R.string.project_description_info),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 5,
@@ -726,14 +729,14 @@ fun ProjectItemRow() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_skills_icon),
-                contentDescription = "Skills icon",
+                contentDescription = stringResource(id = R.string.skills_icon_desc_text),
                 modifier = Modifier.size(size = 14.dp)
             )
 
             Spacer(modifier = Modifier.width(5.dp))
 
             Text(
-                text = "Skills: Android, Coroutines Kotlin and +6 skills",
+                text = stringResource(R.string.skills_info),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -742,7 +745,7 @@ fun ProjectItemRow() {
 }
 
 @Composable
-fun SkillsSection(onEditSkillsClicked: () -> Unit) {
+private fun SkillsSection(onEditSkillsClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -758,7 +761,7 @@ fun SkillsSection(onEditSkillsClicked: () -> Unit) {
         ) {
             Text(
                 text = stringResource(id = R.string.optional_skills_text),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -776,7 +779,7 @@ fun SkillsSection(onEditSkillsClicked: () -> Unit) {
         }
 
         Text(
-            text = "Liste des compétences",
+            text = stringResource(R.string.skills_list_info),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 15.dp)

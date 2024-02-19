@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.profile
+package com.example.hiretop.ui.screens.candidate.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -188,8 +188,8 @@ fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
             },
             placeholder = {
                 Text(
-                    text = stringResource(R.string.optional_skills_field_placeholder_text),
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = stringResource(R.string.skills_field_placeholder_text),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },

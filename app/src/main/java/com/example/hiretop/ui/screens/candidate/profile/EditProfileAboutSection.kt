@@ -1,18 +1,16 @@
-package com.example.hiretop.ui.screens.profile
+package com.example.hiretop.ui.screens.candidate.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -32,21 +30,21 @@ import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 
 @Composable
-fun EditHeaderSection(onSaveClicked: () -> Unit) {
+fun EditProfileAboutSection(currentAbout: String = "", onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
+    val maxLength = 2600
 
-    var firstname by remember { mutableStateOf("") }
-    var lastname by remember { mutableStateOf("") }
-    var headline by remember { mutableStateOf("") }
+    var editedAbout by remember { mutableStateOf(currentAbout) }
 
     Column(
         modifier = Modifier
             .wrapContentSize()
             .background(color = MaterialTheme.colorScheme.background)
-            .padding(horizontal = 25.dp, vertical = 15.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(horizontal = 25.dp),
     ) {
+        Spacer(modifier = Modifier.height(height = 5.dp))
+
         Text(
             text = stringResource(R.string.indicates_required_text),
             style = MaterialTheme.typography.bodyMedium,
@@ -56,47 +54,28 @@ fun EditHeaderSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = firstname,
-            onValueChange = { firstname = it },
+            value = editedAbout,
+            onValueChange = { if (it.length <= maxLength) editedAbout = it },
             label = {
                 Text(
-                    text = stringResource(R.string.required_firstname_text),
+                    text = stringResource(R.string.about_profile_label),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
-
-        OutlinedTextField(
-            value = lastname,
-            onValueChange = { lastname = it },
-            label = {
+            supportingText = {
                 Text(
-                    text = stringResource(R.string.required_lastname_text),
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = "${editedAbout.length} / $maxLength",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .fillMaxWidth()
                 )
             },
+            singleLine = false,
             shape = MaterialTheme.shapes.small,
             modifier = Modifier
                 .fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
-
-        OutlinedTextField(
-            value = headline,
-            onValueChange = { headline = it },
-            label = {
-                Text(
-                    text = stringResource(R.string.required_headline_text),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            },
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
+                .height(height = mWidth * 0.6f)
         )
 
         Spacer(modifier = Modifier.height(height = 25.dp))
@@ -112,12 +91,14 @@ fun EditHeaderSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveClicked() }
+            onClick = onSaveClicked
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),
                 style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
             )
         }
+
+        Spacer(modifier = Modifier.height(height = 25.dp))
     }
 }

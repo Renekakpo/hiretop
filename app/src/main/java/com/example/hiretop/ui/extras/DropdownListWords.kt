@@ -31,8 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.hiretop.R
 
 @Composable
 fun DropdownListWords(
@@ -79,7 +81,7 @@ fun DropdownListWords(
 
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
-                contentDescription = "Down arrow",
+                contentDescription = stringResource(R.string.down_arrow_icon_desc_text),
                 modifier = Modifier
                     .size(32.dp)
             )
@@ -108,7 +110,7 @@ fun DropdownListWords(
                             if (index == selectedIndex) {
                                 Icon(
                                     imageVector = Icons.Filled.Check,
-                                    contentDescription = "Checked icon",
+                                    contentDescription = stringResource(R.string.checked_icon_desc_text),
                                     modifier = Modifier.size(24.dp)
                                 )
 

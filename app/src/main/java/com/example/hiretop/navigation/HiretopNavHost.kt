@@ -6,8 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.hiretop.ui.screens.AccountTypeScreen
-import com.example.hiretop.ui.screens.LoginScreen
-import com.example.hiretop.ui.screens.SignupScreen
+import com.example.hiretop.ui.screens.auth.LoginScreen
+import com.example.hiretop.ui.screens.auth.SignupScreen
 import com.example.hiretop.ui.screens.WelcomeScreen
 
 @Composable

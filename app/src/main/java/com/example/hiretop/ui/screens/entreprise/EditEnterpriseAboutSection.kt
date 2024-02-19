@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.profile
+package com.example.hiretop.ui.screens.entreprise
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 
 @Composable
-fun EditProfileAboutSection(currentAbout: String = "", onSaveClicked: () -> Unit) {
+fun EditEnterpriseAboutSection(currentAbout: String = "", onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 2600
@@ -58,7 +58,7 @@ fun EditProfileAboutSection(currentAbout: String = "", onSaveClicked: () -> Unit
             onValueChange = { if (it.length <= maxLength) editedAbout = it },
             label = {
                 Text(
-                    text = stringResource(R.string.about_profile_label),
+                    text = stringResource(R.string.required_enterprise_presentation_text),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },
@@ -75,7 +75,7 @@ fun EditProfileAboutSection(currentAbout: String = "", onSaveClicked: () -> Unit
             shape = MaterialTheme.shapes.small,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(height = mWidth * 0.6f)
+                .height(height = mWidth * 0.8f)
         )
 
         Spacer(modifier = Modifier.height(height = 25.dp))

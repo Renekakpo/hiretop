@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.profile
+package com.example.hiretop.ui.screens.candidate.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -31,18 +32,17 @@ import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 
 @Composable
-fun EditOrAddProjectSection(onSaveClicked: () -> Unit) {
+fun EditHeaderSection(onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
-    val maxLength = 2000
 
-    var projectName by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var skills by remember { mutableStateOf("") }
+    var firstname by remember { mutableStateOf("") }
+    var lastname by remember { mutableStateOf("") }
+    var headline by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .wrapContentSize()
             .background(color = MaterialTheme.colorScheme.background)
             .padding(horizontal = 25.dp, vertical = 15.dp)
             .verticalScroll(rememberScrollState()),
@@ -56,11 +56,11 @@ fun EditOrAddProjectSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = projectName,
-            onValueChange = { projectName = it },
+            value = firstname,
+            onValueChange = { firstname = it },
             label = {
                 Text(
-                    text = stringResource(R.string.optional_project_name_text),
+                    text = stringResource(R.string.required_firstname_text),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },
@@ -71,38 +71,27 @@ fun EditOrAddProjectSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = description,
-            onValueChange = { if (it.length <= maxLength) description = it },
+            value = lastname,
+            onValueChange = { lastname = it },
             label = {
                 Text(
-                    text = stringResource(R.string.description_text),
+                    text = stringResource(R.string.required_lastname_text),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },
-            supportingText = {
-                Text(
-                    text = "${description.length} / $maxLength",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-            },
-            singleLine = false,
             shape = MaterialTheme.shapes.small,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(height = mWidth * 0.4f)
         )
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = skills,
-            onValueChange = { skills = it },
+            value = headline,
+            onValueChange = { headline = it },
             label = {
                 Text(
-                    text = stringResource(R.string.optional_skills_text),
+                    text = stringResource(R.string.required_headline_text),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },

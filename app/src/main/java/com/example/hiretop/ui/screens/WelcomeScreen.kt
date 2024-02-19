@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
 import com.example.hiretop.navigation.NavDestination
+import com.example.hiretop.ui.screens.auth.LoginScreen
 
 object WelcomeScreen : NavDestination {
     override val route: String = "welcome_screen"

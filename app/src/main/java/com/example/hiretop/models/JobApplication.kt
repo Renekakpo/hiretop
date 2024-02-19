@@ -1,6 +1,8 @@
 package com.example.hiretop.models
 
 data class JobApplication(
+    val candidateID: String = "",
+    val jobID: String = "",
     val jobTitle: String,
     val companyName: String,
     val location: String,

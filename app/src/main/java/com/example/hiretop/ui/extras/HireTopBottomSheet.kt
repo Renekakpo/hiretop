@@ -30,7 +30,8 @@ fun HireTopBottomSheet(title: String, onDismiss: () -> Unit, sheetContent: @Comp
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = sheetState,
-        dragHandle = { BottomSheetDefaults.SheetPeekHeight }
+        dragHandle = { BottomSheetDefaults.SheetPeekHeight },
+        tonalElevation = 8.dp
     ) {
         Column(
             modifier = Modifier

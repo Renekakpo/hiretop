@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.profile
+package com.example.hiretop.ui.screens.candidate.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -182,7 +182,7 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
             onValueChange = { lastName = it },
             label = {
                 Text(
-                    text = stringResource(R.string.industry_text),
+                    text = stringResource(R.string.required_industry_text),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },
