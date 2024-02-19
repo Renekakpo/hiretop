@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.offers
+package com.example.hiretop.ui.screens.candidate
 
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,55 +14,45 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.BusinessCenter
+import androidx.compose.material.icons.outlined.Grade
+import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.WorkOutline
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 import com.example.hiretop.models.JobOffer
+import com.example.hiretop.models.Profile
 import com.example.hiretop.models.generateFakeJobOffers
-import com.example.hiretop.ui.extras.HireTopBottomSheet
-import com.example.hiretop.utils.Utils.getPostedTimeAgo
+import com.example.hiretop.models.mockProfile
+import com.example.hiretop.utils.Utils
 
 @Composable
-fun JobOffersScreen() {
+fun StatisticsAndRecommendationScreen() {
     val mContext = LocalContext.current
-    val jobOffers = generateFakeJobOffers(10)
-    var searchInput by remember { mutableStateOf("") }
-
-    var sheetTitle by remember { mutableStateOf("") }
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var bottomSheetContent by remember { mutableStateOf<@Composable (() -> Unit)?>(null) }
-
-    if (showBottomSheet && bottomSheetContent != null) {
-        HireTopBottomSheet(
-            title = sheetTitle,
-            onDismiss = { showBottomSheet = false }) {
-            bottomSheetContent?.invoke()
-        }
-    }
+    val recommendations = generateFakeJobOffers(3)
 
     Column(
         modifier = Modifier
@@ -71,87 +60,134 @@ fun JobOffersScreen() {
             .background(color = MaterialTheme.colorScheme.background)
             .padding(15.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = searchInput,
-                onValueChange = { searchInput = it },
-                textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.job_search_field_placeholder_text),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = stringResource(R.string.search_offer_icon_desc_text),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(3.dp)
-                    )
-                },
-                shape = MaterialTheme.shapes.medium,
-                singleLine = true,
-                maxLines = 1,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(height = 60.dp)
-            )
-
-            Box(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(5.dp)
-                    .weight(0.2f)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(corner = CornerSize(8.dp))
-                    )
-                    .clickable {
-                        sheetTitle = mContext.getString(R.string.filter_sheet_title_text)
-                        bottomSheetContent = {
-                            FilterSheetContent(
-                                onApplyFilter = {
-                                    showBottomSheet = false
-                                },
-                                onResetFilter = {
-                                    showBottomSheet = false
-                                }
-                            )
-                        }
-                        showBottomSheet = true
-                    }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_filter_black_icon),
-                    contentDescription = stringResource(R.string.edit_icon_desc_text),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(size = 45.dp)
-                        .padding(5.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
+        Text(
+            text = stringResource(R.string.statistics_text),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
 
         Divider()
 
-        Spacer(modifier = Modifier.height(height = 15.dp))
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Statistics(profile = mockProfile)
+
+        Spacer(modifier = Modifier.height(25.dp))
+
+        Text(
+            text = stringResource(R.string.recommendations_text),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Divider()
+
+        Spacer(modifier = Modifier.height(15.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-            itemsIndexed(jobOffers) { _, item ->
-                JobOfferItemRow(
+            itemsIndexed(recommendations) { _, item ->
+                RecommendationsItemRow(
                     context = mContext,
                     jobOffer = item,
-                    onJobOfferClicked = { /* TODO: Navigate to JobOfferDetails screen with jobOffer as param */ })
+                    onJobOfferClicked = { TODO("Navigate to JobOfferDetails screen with jobOffer as param") })
             }
         }
     }
 }
 
 @Composable
-private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked: (JobOffer) -> Unit) {
+fun Statistics(profile: Profile) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.inversePrimary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            ProfileStatistic(
+                icon = Icons.Outlined.WorkOutline,
+                title = stringResource(id = R.string.experience_text),
+                value = profile.experiences.size.toString()
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            ProfileStatistic(
+                icon = Icons.Outlined.AutoAwesome,
+                title = stringResource(id = R.string.optional_skills_text),
+                value = profile.skills.size.toString()
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            ProfileStatistic(
+                icon = Icons.Outlined.BusinessCenter,
+                title = stringResource(id = R.string.projects_text),
+                value = profile.projects.size.toString()
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            ProfileStatistic(
+                icon = Icons.Outlined.School,
+                title = stringResource(id = R.string.education_text),
+                value = profile.education.size.toString()
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            ProfileStatistic(
+                icon = Icons.Outlined.Grade,
+                title = stringResource(id = R.string.certifications_text),
+                value = profile.certifications.size.toString()
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileStatistic(icon: ImageVector, title: String, value: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    shape = CircleShape
+                )
+                .padding(4.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+    }
+}
+
+@Composable
+fun RecommendationsItemRow(
+    context: Context,
+    jobOffer: JobOffer,
+    onJobOfferClicked: (JobOffer) -> Unit
+) {
     Column(
         modifier = Modifier
             .wrapContentSize()
@@ -224,7 +260,7 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = getPostedTimeAgo(context, jobOffer.postedAt),
+            text = Utils.getPostedTimeAgo(context, jobOffer.postedAt),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             maxLines = 4,

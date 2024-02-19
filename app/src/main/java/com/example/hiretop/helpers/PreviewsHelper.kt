@@ -2,23 +2,7 @@ package com.example.hiretop.helpers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
-import com.example.hiretop.models.generateFakeJobOffers
-import com.example.hiretop.ui.screens.AccountTypeScreen
-import com.example.hiretop.ui.screens.LoginScreen
-import com.example.hiretop.ui.screens.SignupScreen
-import com.example.hiretop.ui.screens.WelcomeScreen
-import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
-import com.example.hiretop.ui.screens.offers.JobOfferItemRow
-import com.example.hiretop.ui.screens.offers.JobOffersScreen
-import com.example.hiretop.ui.screens.profile.EditOrAddCertificationSection
-import com.example.hiretop.ui.screens.profile.EditOrAddEducationSection
-import com.example.hiretop.ui.screens.profile.EditOrAddExperienceSection
-import com.example.hiretop.ui.screens.profile.EditOrAddProjectSection
-import com.example.hiretop.ui.screens.profile.EditOrAddSkillSection
-import com.example.hiretop.ui.screens.profile.EditProfileAboutSection
-import com.example.hiretop.ui.screens.profile.EditProfileHeaderSection
-import com.example.hiretop.ui.screens.profile.TalentProfileScreen
+import com.example.hiretop.ui.screens.candidate.StatisticsAndRecommendationScreen
 import com.example.hiretop.ui.theme.HiretopTheme
 
 
@@ -124,13 +108,29 @@ fun JobOffersScreenPreview() {
     HiretopTheme {
         JobOffersScreen()
     }
-}*/
+}
 
 @Preview
 @Composable
 fun JobOfferDetailsScreenPreview() {
     HiretopTheme {
-        val jobOffer = generateFakeJobOffers(10).first()
+        val jobOffer = generateFakeJobOffers(1).first()
         JobOfferDetailsScreen(jobOffer)
+    }
+}
+
+@Preview
+@Composable
+fun JobApplicationsScreenPreview() {
+    HiretopTheme {
+        JobApplicationsScreen()
+    }
+}*/
+
+@Preview
+@Composable
+fun StatisticsAndRecommendationScreenPreview() {
+    HiretopTheme {
+        StatisticsAndRecommendationScreen()
     }
 }

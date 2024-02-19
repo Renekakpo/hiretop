@@ -4,9 +4,16 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import com.example.hiretop.R
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 object Utils {
@@ -26,7 +33,7 @@ object Utils {
     }
 
     fun compressImage(context: Context, uri: Uri, filename: String): File? {
-         try {
+        try {
             val inputStream = context.contentResolver.openInputStream(uri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
 
@@ -45,7 +52,7 @@ object Utils {
         }
     }
 
-    fun getTimeAgo(timestamp: Long): String {
+    fun getPostedTimeAgo(context: Context, timestamp: Long): String {
         val currentTime = System.currentTimeMillis()
         val timeDiff = currentTime - timestamp
 
@@ -55,11 +62,35 @@ object Utils {
         val days = TimeUnit.MILLISECONDS.toDays(timeDiff)
 
         return when {
-            seconds < 60 -> "Posted $seconds seconds ago"
-            minutes < 60 -> "Posted $minutes minutes ago"
-            hours < 24 -> "Posted $hours hours ago"
-            days < 7 -> "Posted $days days ago"
-            else -> "Posted ${days / 7} weeks ago"
+            seconds < 60 -> context.getString(R.string.posted_seconds_ago_text, seconds)
+            minutes < 60 -> context.getString(R.string.posted_minutes_ago_text, minutes)
+            hours < 24 -> context.getString(R.string.posted_hours_ago_text, hours)
+            days < 7 -> context.getString(R.string.posted_days_ago_text, days)
+            else -> context.getString(R.string.posted_weeks_ago_text, days / 7)
         }
+    }
+
+    fun getAppliedTimeAgo(context: Context, timestamp: Long): String {
+        val currentTime = System.currentTimeMillis()
+        val timeDiff = currentTime - timestamp
+
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(timeDiff)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiff)
+        val hours = TimeUnit.MILLISECONDS.toHours(timeDiff)
+        val days = TimeUnit.MILLISECONDS.toDays(timeDiff)
+
+        return when {
+            seconds < 60 -> context.getString(R.string.applied_seconds_ago_text, seconds)
+            minutes < 60 -> context.getString(R.string.applied_minutes_ago_text, minutes)
+            hours < 24 -> context.getString(R.string.applied_hours_ago_text, hours)
+            days < 7 -> context.getString(R.string.applied_days_ago_text, days)
+            else -> context.getString(R.string.applied_weeks_ago_text, days / 7)
+        }
+    }
+
+    fun formatDate(timestamp: Long): String {
+        val date = Date(timestamp)
+        val sdf = SimpleDateFormat("dd - MMMM - yyyy 'à' HH'h'mm", Locale.FRENCH)
+        return sdf.format(date)
     }
 }

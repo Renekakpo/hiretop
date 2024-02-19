@@ -63,7 +63,7 @@
     <string name="edit_icon_desc_text">Edit icon</string>
     <string name="experience_text">Experience</string>
     <string name="add_experience_icon_desc_text">Add experience</string>
-    <string name="education_text">Education</string>
+    <string name="education_text">Formation</string>
     <string name="add_education_icon_desc_text">Add education</string>
     <string name="certifications_text">Certifications</string>
     <string name="add_certification_icon_desc_text">Add certification</string>
@@ -82,6 +82,30 @@
     <string name="job_info_text">Information sur l\'offre</string>
     <string name="apply_text">Postuler</string>
     <string name="job_search_field_placeholder_text">Titre d\'emploi ou entreprise</string>
+    <string name="filter_sheet_title_text">Filtre</string>
+    <string name="reset_filter_text">Réinitialiser</string>
+    <string name="apply_filter_text">Appliquer</string>
+    <string name="job_type_text">Type d\'emploi</string>
+    <string name="filter_job_offers_text">Filtrer les offres d\'emploi</string>
+    <string name="on_hold_application_status_text">En attente</string>
+    <string name="on_going_application_status_text">En cours</string>
+    <string name="approved_application_status_text">Approuvé</string>
+    <string name="declined_application_status_text">Refusé</string>
+    <string name="posted_seconds_ago_text">Publié il y a %1$d seconde(s)</string>
+    <string name="posted_minutes_ago_text">Publié il y a %1$d minute(s)</string>
+    <string name="posted_hours_ago_text">Publié il y a %1$d heure(s)</string>
+    <string name="posted_days_ago_text">Publié il y a %1$d jour(s)</string>
+    <string name="posted_weeks_ago_text">Publié il y a %1$d semaine(s)</string>
+    <string name="applied_seconds_ago_text">Postulé il y a %1$d seconde(s)</string>
+    <string name="applied_minutes_ago_text">Postulé il y a %1$d minute(s)</string>
+    <string name="applied_hours_ago_text">Postulé il y a %1$d heure(s)</string>
+    <string name="applied_days_ago_text">Postulé il y a %1$d jour(s)</string>
+    <string name="applied_weeks_ago_text">Postulé il y a %1$d semaine(s)</string>
+    <string name="application_tracking_text">Suivi des candidatures</string>
+    <string name="interview_date_text">Intretien prévu pour le %1$s</string>
+    <string name="offer_received_text">Vous avez reçu une offre. Veuillez consulter votre boîte email.</string>
+    <string name="statistics_text">Statistiques</string>
+    <string name="recommendations_text">Recommandations</string>
     <string-array name="job_type_list">
         <item>Veuillez sélectionner</item>
         <item>Temps plein</item>
@@ -113,5 +137,17 @@
         <item>Octobre</item>
         <item>Novembre</item>
         <item>Décembre</item>
+    </string-array>
+    <string-array name="job_types">
+        <item>Temps plein</item>
+        <item>Temps partiel</item>
+        <item>Contrat</item>
+        <item>Stage</item>
+    </string-array>
+    <string-array name="education_levels">
+        <item>Licence</item>
+        <item>Maitrîse</item>
+        <item>Doctorat</item>
+        <item>MBA</item>
     </string-array>
 </resources>

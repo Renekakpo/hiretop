@@ -15,80 +15,81 @@ data class JobOffer(
 
 fun generateFakeJobOffers(count: Int): List<JobOffer> {
     val jobTitles = listOf(
-        "Software Engineer",
-        "Data Analyst",
-        "Product Manager",
-        "Marketing Specialist",
-        "Graphic Designer",
-        "Financial Analyst",
-        "Human Resources Manager",
-        "Sales Representative",
-        "Customer Service Representative",
-        "Project Manager"
+        "Ingénieur Logiciel",
+        "Analyste de Données",
+        "Chef de Produit",
+        "Spécialiste en Marketing",
+        "Designer Graphique",
+        "Analyste Financier",
+        "Directeur des Ressources Humaines",
+        "Représentant des Ventes",
+        "Représentant du Service Client",
+        "Chef de Projet"
     )
 
     val companies = listOf(
         "Tech Corp",
-        "Data Solutions Ltd.",
+        "Solutions de Données Ltd.",
         "InnovateTech",
-        "Marketing Pros",
-        "Design Studios Inc.",
-        "Financial Consultants Group",
-        "HR Solutions",
-        "Sales Enterprises",
-        "Customer Care Inc.",
-        "Project Management Experts"
+        "Pros du Marketing",
+        "Studios de Design Inc.",
+        "Groupe de Consultants Financiers",
+        "Solutions RH",
+        "Entreprises de Ventes",
+        "Inc. de Soin Client",
+        "Experts en Gestion de Projet"
     )
 
     val jobTypes = listOf(
-        "Full-time",
-        "Part-time",
-        "Contract",
-        "Internship"
+        "Temps Plein",
+        "Temps Partiel",
+        "Contrat",
+        "Stage"
     )
 
     val jobDescription = listOf(
-        "We're looking for a highly skilled software engineer to join our team...",
-        "Join our marketing team to help develop and implement marketing strategies...",
-        "We're seeking a skilled data analyst to analyze and interpret data...",
-        "We're hiring a talented UX/UI designer to create engaging and intuitive user experiences...",
-        "Join our finance team to analyze financial data and provide insights...",
-        "We're seeking a motivated sales representative to drive sales and revenue growth...",
-        "Lead product development and manage product lifecycle for our innovative products...",
-        "Coordinate HR activities and support the HR team in various administrative tasks...",
-        "Create visually appealing graphics and designs for various projects and campaigns...",
-        "Provide exceptional customer support to resolve inquiries and issues..."
+        "Nous recherchons un ingénieur logiciel hautement qualifié pour rejoindre notre équipe...",
+        "Rejoignez notre équipe marketing pour aider à développer et mettre en œuvre des stratégies de marketing...",
+        "Nous recherchons un analyste de données qualifié pour analyser et interpréter les données...",
+        "Nous embauchons un talentueux designer UX/UI pour créer des expériences utilisateur engageantes et intuitives...",
+        "Rejoignez notre équipe financière pour analyser les données financières et fournir des insights...",
+        "Nous recherchons un représentant des ventes motivé pour stimuler les ventes et la croissance des revenus...",
+        "Diriger le développement de produits et gérer le cycle de vie des produits pour nos produits innovants...",
+        "Coordonner les activités RH et soutenir l'équipe RH dans diverses tâches administratives...",
+        "Créer des graphiques et des designs visuellement attrayants pour divers projets et campagnes...",
+        "Fournir un support client exceptionnel pour résoudre les demandes de renseignements et les problèmes..."
     )
 
     val locationTypes = listOf(
-        "Remote",
-        "On-site"
+        "À Distance",
+        "Sur Place",
+        "Hybride"
     )
 
     val skills = listOf(
-        listOf("Java", "Kotlin", "Android", "Mobile Development"),
-        listOf("Python", "R", "Data Analysis", "SQL"),
-        listOf("Product Management", "Agile", "Scrum"),
-        listOf("Marketing", "Social Media", "SEO"),
-        listOf("Adobe Photoshop", "Illustrator", "UI/UX Design"),
-        listOf("Financial Analysis", "Accounting", "Excel"),
-        listOf("Recruitment", "Employee Relations", "HR Policies"),
-        listOf("Sales", "Negotiation", "CRM"),
-        listOf("Customer Support", "Communication", "Problem Solving"),
-        listOf("Project Management", "Team Leadership", "Time Management")
+        listOf("Java", "Kotlin", "Android", "Développement Mobile"),
+        listOf("Python", "R", "Analyse de Données", "SQL"),
+        listOf("Gestion de Produit", "Agile", "Scrum"),
+        listOf("Marketing", "Médias Sociaux", "SEO"),
+        listOf("Adobe Photoshop", "Illustrator", "Design UI/UX"),
+        listOf("Analyse Financière", "Comptabilité", "Excel"),
+        listOf("Recrutement", "Relations Employés", "Politiques RH"),
+        listOf("Ventes", "Négociation", "CRM"),
+        listOf("Support Client", "Communication", "Résolution de Problèmes"),
+        listOf("Gestion de Projet", "Leadership d'Équipe", "Gestion du Temps")
     )
 
     val educations = listOf(
-        listOf("Bachelor's Degree", "Computer Science"),
-        listOf("Master's Degree", "Statistics"),
-        listOf("MBA", "Business Administration"),
-        listOf("Bachelor's Degree", "Marketing"),
-        listOf("Bachelor's Degree", "Graphic Design"),
-        listOf("Bachelor's Degree", "Finance"),
-        listOf("Master's Degree", "Human Resources"),
-        listOf("Bachelor's Degree", "Sales Management"),
-        listOf("Bachelor's Degree", "Communication"),
-        listOf("Master's Degree", "Project Management")
+        listOf("Baccalauréat", "Informatique"),
+        listOf("Master", "Statistiques"),
+        listOf("MBA", "Administration des Affaires"),
+        listOf("Baccalauréat", "Marketing"),
+        listOf("Baccalauréat", "Design Graphique"),
+        listOf("Baccalauréat", "Finance"),
+        listOf("Master", "Ressources Humaines"),
+        listOf("Baccalauréat", "Gestion des Ventes"),
+        listOf("Baccalauréat", "Communication"),
+        listOf("Master", "Gestion de Projet")
     )
 
     val currentTimeMillis = System.currentTimeMillis()

@@ -75,7 +75,7 @@ fun JobOfferDetailsScreen(jobOffer: JobOffer) {
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
         Text(
             text = jobOffer.company,
