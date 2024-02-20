@@ -2,11 +2,8 @@ package com.example.hiretop.helpers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.hiretop.models.generateFakeJobOffers
-import com.example.hiretop.ui.screens.entreprise.CreateOrEditJobOfferScreen
-import com.example.hiretop.ui.screens.entreprise.EnterpriseApplicationsScreen
-import com.example.hiretop.ui.screens.entreprise.EnterpriseOffersScreen
-import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
+import com.example.hiretop.ui.screens.messaging.CandidateInteractionScreen
+import com.example.hiretop.ui.screens.messaging.ChatListScreen
 import com.example.hiretop.ui.theme.HiretopTheme
 
 
@@ -153,7 +150,7 @@ fun JobOfferManagementScreenPreview() {
     HiretopTheme {
         CreateOrEditJobOfferScreen()
     }
-}*/
+}
 
 @Preview
 @Composable
@@ -168,5 +165,21 @@ fun EnterpriseOffersScreenPreview() {
 fun EnterpriseApplicationsScreenPreview() {
     HiretopTheme {
         EnterpriseApplicationsScreen()
+    }
+}
+
+@Preview
+@Composable
+fun CandidateInteractionScreenPreview() {
+    HiretopTheme {
+        CandidateInteractionScreen()
+    }
+}*/
+
+@Preview
+@Composable
+fun ChatListScreenPreview() {
+    HiretopTheme {
+        ChatListScreen()
     }
 }

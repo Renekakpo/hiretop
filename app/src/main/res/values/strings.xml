@@ -147,6 +147,8 @@
     <string name="application_search_icon_desc_text">Rechercher une candidature</string>
     <string name="application_search_field_placeholder_text">Compétences ou Éducation</string>
     <string name="applications_management_text">Gestion des candidatures</string>
+    <string name="send_icon_desc_text">Send message icon</string>
+    <string name="message_field_placeholder">Entrez un message</string>
     <string-array name="job_type_list">
         <item>Veuillez sélectionner</item>
         <item>Temps plein</item>

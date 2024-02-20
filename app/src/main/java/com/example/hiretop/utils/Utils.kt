@@ -8,9 +8,6 @@ import com.example.hiretop.R
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -92,5 +89,35 @@ object Utils {
         val date = Date(timestamp)
         val sdf = SimpleDateFormat("dd - MMMM - yyyy 'à' HH'h'mm", Locale.FRENCH)
         return sdf.format(date)
+    }
+
+    fun getFormattedDateOrHour(timestamp: Long): String {
+        val calendar = Calendar.getInstance()
+        val today = calendar.clone() as Calendar
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
+
+        val yesterday = calendar.clone() as Calendar
+        yesterday.add(Calendar.DAY_OF_YEAR, -1)
+        yesterday.set(Calendar.HOUR_OF_DAY, 0)
+        yesterday.set(Calendar.MINUTE, 0)
+        yesterday.set(Calendar.SECOND, 0)
+        yesterday.set(Calendar.MILLISECOND, 0)
+
+        calendar.timeInMillis = timestamp
+
+        return when {
+            calendar.after(today) -> {
+                val hourMinuteFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                hourMinuteFormat.format(calendar.time)
+            }
+            calendar.after(yesterday) -> "Hier"
+            else -> {
+                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                dateFormat.format(calendar.time)
+            }
+        }
     }
 }
