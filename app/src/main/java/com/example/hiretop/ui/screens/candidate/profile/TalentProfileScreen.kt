@@ -50,7 +50,7 @@ import com.example.hiretop.utils.Utils.compressImage
 import java.io.File
 
 @Composable
-fun TalentProfileScreen() {
+fun TalentProfileScreen(modifier: Modifier = Modifier) {
     val mContext = LocalContext.current
     var sheetTitle by remember { mutableStateOf("") }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -65,7 +65,7 @@ fun TalentProfileScreen() {
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(color = MaterialTheme.colorScheme.background)

@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.candidate
+package com.example.hiretop.ui.screens.candidate.dashboard
 
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
@@ -50,15 +50,15 @@ import com.example.hiretop.models.mockProfile
 import com.example.hiretop.utils.Utils
 
 @Composable
-fun StatisticsAndRecommendationScreen() {
+fun TalentDashboardScreen(modifier: Modifier = Modifier) {
     val mContext = LocalContext.current
     val recommendations = generateFakeJobOffers(3)
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
-            .padding(15.dp)
+            .padding(top = 15.dp, start = 15.dp, end = 15.dp)
     ) {
         Text(
             text = stringResource(R.string.statistics_text),
@@ -267,8 +267,6 @@ fun RecommendationsItemRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 

@@ -10,6 +10,8 @@ data class JobOffer(
     val locationType: String,
     val skills: List<String>,
     val education: List<String>,
+    val updatedAt: Long,
+    val closedAt: Long? = null,
     val postedAt: Long
 )
 
@@ -103,7 +105,9 @@ fun generateFakeJobOffers(count: Int): List<JobOffer> {
             locationType = locationTypes.random(),
             skills = skills.random(),
             education = educations.random(),
-            postedAt = Random.nextLong(currentTimeMillis - 2592000000, currentTimeMillis) // Random timestamp within the last 30 days
+            updatedAt = Random.nextLong(currentTimeMillis - 2592000000, currentTimeMillis),
+            closedAt = Random.nextLong(currentTimeMillis - 2592000000, currentTimeMillis),
+            postedAt = Random.nextLong(currentTimeMillis - 2592000000, currentTimeMillis)
         )
     }
 }

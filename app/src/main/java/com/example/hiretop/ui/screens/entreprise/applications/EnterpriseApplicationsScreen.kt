@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.entreprise
+package com.example.hiretop.ui.screens.entreprise.applications
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -149,7 +149,7 @@ fun ApplicationItemRow(context: Context) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Titre du profil",
+                text = "Étape: Entretien RH",
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
@@ -159,7 +159,7 @@ fun ApplicationItemRow(context: Context) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Liste des compétences du candidat",
+                text = "Poste candidaté: Designer UI/UX Sénior",
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

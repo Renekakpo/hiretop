@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.entreprise
+package com.example.hiretop.ui.screens.entreprise.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

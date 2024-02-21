@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.entreprise
+package com.example.hiretop.ui.screens.entreprise.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,18 +29,18 @@ import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 
 @Composable
-fun EditEnterpriseAboutSection(currentAbout: String = "", onSaveClicked: () -> Unit) {
+fun EditEnterpriseCultureAndValuesSection(currentValues: String = "", onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
-    val maxLength = 2600
+    val maxLength = 1500
 
-    var editedAbout by remember { mutableStateOf(currentAbout) }
+    var editedValues by remember { mutableStateOf(currentValues) }
 
     Column(
         modifier = Modifier
             .wrapContentSize()
             .background(color = MaterialTheme.colorScheme.background)
-            .padding(horizontal = 25.dp),
+            .padding(25.dp),
     ) {
         Spacer(modifier = Modifier.height(height = 5.dp))
 
@@ -54,17 +53,17 @@ fun EditEnterpriseAboutSection(currentAbout: String = "", onSaveClicked: () -> U
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = editedAbout,
-            onValueChange = { if (it.length <= maxLength) editedAbout = it },
+            value = editedValues,
+            onValueChange = { if (it.length <= maxLength) editedValues = it },
             label = {
                 Text(
-                    text = stringResource(R.string.required_enterprise_presentation_text),
+                    text = stringResource(R.string.required_enterprise_culture_values_text),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },
             supportingText = {
                 Text(
-                    text = "${editedAbout.length} / $maxLength",
+                    text = "${editedValues.length} / $maxLength",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -75,7 +74,7 @@ fun EditEnterpriseAboutSection(currentAbout: String = "", onSaveClicked: () -> U
             shape = MaterialTheme.shapes.small,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(height = mWidth * 0.8f)
+                .height(height = mWidth * 0.60f)
         )
 
         Spacer(modifier = Modifier.height(height = 25.dp))

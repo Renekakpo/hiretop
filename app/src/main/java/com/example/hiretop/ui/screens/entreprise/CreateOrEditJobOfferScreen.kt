@@ -194,7 +194,7 @@ fun CreateOrEditJobOfferScreen() {
                 ),
                 border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary),
                 shape = MaterialTheme.shapes.large,
-                onClick = { TODO("Cancel operation") }
+                onClick = { TODO("Cancel modification or creation") }
             ) {
                 Text(
                     text = stringResource(R.string.cancel_text),
@@ -213,13 +213,32 @@ fun CreateOrEditJobOfferScreen() {
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 shape = MaterialTheme.shapes.large,
-                onClick = { TODO("Save offer in local and on remote server") }
+                onClick = { TODO("Save offer") }
             ) {
                 Text(
                     text = stringResource(R.string.save_button_text),
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
                 )
             }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError
+            ),
+            shape = MaterialTheme.shapes.large,
+            onClick = { TODO("Close offer") }
+        ) {
+            Text(
+                text = stringResource(R.string.close_offer_button_text),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
+            )
         }
 
     }

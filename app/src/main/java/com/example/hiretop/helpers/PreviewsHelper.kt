@@ -2,12 +2,36 @@ package com.example.hiretop.helpers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.example.hiretop.models.generateFakeJobOffers
+import com.example.hiretop.ui.screens.AccountTypeScreen
+import com.example.hiretop.ui.screens.WelcomeScreen
+import com.example.hiretop.ui.screens.auth.LoginScreen
+import com.example.hiretop.ui.screens.auth.SignupScreen
+import com.example.hiretop.ui.screens.candidate.dashboard.TalentDashboardScreen
+import com.example.hiretop.ui.screens.candidate.profile.EditOrAddCertificationSection
+import com.example.hiretop.ui.screens.candidate.profile.EditOrAddEducationSection
+import com.example.hiretop.ui.screens.candidate.profile.EditOrAddExperienceSection
+import com.example.hiretop.ui.screens.candidate.profile.EditOrAddProjectSection
+import com.example.hiretop.ui.screens.candidate.profile.EditOrAddSkillSection
+import com.example.hiretop.ui.screens.candidate.profile.EditProfileAboutSection
+import com.example.hiretop.ui.screens.candidate.profile.TalentProfileScreen
+import com.example.hiretop.ui.screens.candidate.tracking.JobApplicationsScreen
+import com.example.hiretop.ui.screens.entreprise.CreateOrEditJobOfferScreen
+import com.example.hiretop.ui.screens.entreprise.EnterpriseOffersScreen
+import com.example.hiretop.ui.screens.entreprise.applications.EditApplicationsDetailsScreen
+import com.example.hiretop.ui.screens.entreprise.applications.EnterpriseApplicationsScreen
+import com.example.hiretop.ui.screens.entreprise.dashboard.EnterpriseDashboardScreen
+import com.example.hiretop.ui.screens.entreprise.presentation.EditProfileHeaderSection
+import com.example.hiretop.ui.screens.entreprise.presentation.EnterpriseProfileScreen
 import com.example.hiretop.ui.screens.messaging.CandidateInteractionScreen
 import com.example.hiretop.ui.screens.messaging.ChatListScreen
+import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
+import com.example.hiretop.ui.screens.offers.JobOffersScreen
 import com.example.hiretop.ui.theme.HiretopTheme
 
 
-/*@Preview
+@Preview
 @Composable
 fun WelcomeScreenPreview() {
     HiretopTheme {
@@ -51,7 +75,7 @@ fun TalentProfileScreenPreview() {
 @Composable
 fun EditProfileHeaderSectionPreview() {
     HiretopTheme {
-        EditProfileHeaderSection()
+        EditProfileHeaderSection(onSaveClicked = {})
     }
 }
 
@@ -59,7 +83,7 @@ fun EditProfileHeaderSectionPreview() {
 @Composable
 fun EditProfileAboutSectionPreview() {
     HiretopTheme {
-        EditProfileAboutSection()
+        EditProfileAboutSection(onSaveClicked = {})
     }
 }
 
@@ -67,7 +91,7 @@ fun EditProfileAboutSectionPreview() {
 @Composable
 fun EditOrAddExperienceSectionPreview() {
     HiretopTheme {
-        EditOrAddExperienceSection()
+        EditOrAddExperienceSection(onSaveClicked = {})
     }
 }
 
@@ -75,7 +99,7 @@ fun EditOrAddExperienceSectionPreview() {
 @Composable
 fun EditOrAddEducationSectionPreview() {
     HiretopTheme {
-        EditOrAddEducationSection()
+        EditOrAddEducationSection(onSaveClicked = {})
     }
 }
 
@@ -83,7 +107,7 @@ fun EditOrAddEducationSectionPreview() {
 @Composable
 fun EditOrAddCertificationSectionPreview() {
     HiretopTheme {
-        EditOrAddCertificationSection()
+        EditOrAddCertificationSection{}
     }
 }
 
@@ -91,7 +115,7 @@ fun EditOrAddCertificationSectionPreview() {
 @Composable
 fun EditOrAddProjectSectionPreview() {
     HiretopTheme {
-        EditOrAddProjectSection()
+        EditOrAddProjectSection{}
     }
 }
 
@@ -99,7 +123,7 @@ fun EditOrAddProjectSectionPreview() {
 @Composable
 fun EditOrAddSkillSectionPreview() {
     HiretopTheme {
-        EditOrAddSkillSection()
+        EditOrAddSkillSection{}
     }
 }
 
@@ -132,7 +156,7 @@ fun JobApplicationsScreenPreview() {
 @Composable
 fun StatisticsAndRecommendationScreenPreview() {
     HiretopTheme {
-        StatisticsAndRecommendationScreen()
+        TalentDashboardScreen()
     }
 }
 
@@ -140,7 +164,7 @@ fun StatisticsAndRecommendationScreenPreview() {
 @Composable
 fun EnterprisePresentationScreenPreview() {
     HiretopTheme {
-        EnterprisePresentationScreen()
+        EnterpriseProfileScreen()
     }
 }
 
@@ -174,12 +198,28 @@ fun CandidateInteractionScreenPreview() {
     HiretopTheme {
         CandidateInteractionScreen()
     }
-}*/
+}
 
 @Preview
 @Composable
 fun ChatListScreenPreview() {
     HiretopTheme {
         ChatListScreen()
+    }
+}
+
+@Preview
+@Composable
+fun EnterpriseDashboardScreenPreview() {
+    HiretopTheme {
+        EnterpriseDashboardScreen()
+    }
+}
+
+@Preview
+@Composable
+fun ApplicationsDetailsScreenPreview() {
+    HiretopTheme {
+        EditApplicationsDetailsScreen()
     }
 }

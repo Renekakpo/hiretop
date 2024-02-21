@@ -2,6 +2,7 @@ package com.example.hiretop.ui.screens.auth
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Button
@@ -39,6 +42,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
 import com.example.hiretop.navigation.NavDestination
@@ -63,16 +67,26 @@ fun SignupScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(color = MaterialTheme.colorScheme.background)
+            .padding(15.dp)
     ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+            contentDescription = stringResource(id = R.string.back_arrow_icon_desc_text),
+            modifier = Modifier
+                .size(34.dp)
+                .clickable { onBackClicked(navController = navController) }
+                .align(alignment = Alignment.Start)
+        )
+
+        Spacer(modifier = Modifier.height(height = 40.dp))
+
         Text(
             text = stringResource(R.string.create_account_text),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier
-                .padding(horizontal = 15.dp)
+                .align(alignment = Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(height = 30.dp))
@@ -82,7 +96,7 @@ fun SignupScreen(navController: NavHostController) {
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier
-                .padding(horizontal = 15.dp)
+                .align(alignment = Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(height = mWidth * 0.2F))
@@ -100,7 +114,7 @@ fun SignupScreen(navController: NavHostController) {
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 25.dp),
+                .align(alignment = Alignment.CenterHorizontally),
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.email_field_placeholder_text),
@@ -134,7 +148,7 @@ fun SignupScreen(navController: NavHostController) {
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 25.dp),
+                .align(alignment = Alignment.CenterHorizontally),
             placeholder = {
                 Text(
                     text = stringResource(R.string.password_field_placeholder_text),
@@ -184,7 +198,7 @@ fun SignupScreen(navController: NavHostController) {
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 25.dp),
+                .align(alignment = Alignment.CenterHorizontally),
             placeholder = {
                 Text(
                     text = stringResource(R.string.confirm_password_field_placeholder_text),
@@ -223,7 +237,7 @@ fun SignupScreen(navController: NavHostController) {
             modifier = Modifier
                 .width(width = mWidth * 0.7F)
                 .height(45.dp)
-                .padding(horizontal = 15.dp),
+                .align(alignment = Alignment.CenterHorizontally),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -245,6 +259,10 @@ fun SignupScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(height = 25.dp))
 
     }
+}
+
+private fun onBackClicked(navController: NavController) {
+    navController.popBackStack()
 }
 
 fun onSignupClicked(mContext: Context, navController: NavHostController) {

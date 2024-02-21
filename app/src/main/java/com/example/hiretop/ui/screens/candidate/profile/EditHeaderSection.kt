@@ -30,7 +30,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.navigation.NavDestination
 
+object EditHeaderSection : NavDestination {
+    override val route: String = "edit_header_section"
+}
 @Composable
 fun EditHeaderSection(onSaveClicked: () -> Unit) {
     val mContext = LocalContext.current

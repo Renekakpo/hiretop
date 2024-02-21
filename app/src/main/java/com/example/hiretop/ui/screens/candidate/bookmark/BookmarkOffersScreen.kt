@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.offers
+package com.example.hiretop.ui.screens.candidate.bookmark
 
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -45,10 +44,11 @@ import com.example.hiretop.R
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.models.generateFakeJobOffers
 import com.example.hiretop.ui.extras.HireTopBottomSheet
+import com.example.hiretop.ui.screens.offers.FilterSheetContent
 import com.example.hiretop.utils.Utils.getPostedTimeAgo
 
 @Composable
-fun JobOffersScreen(modifier: Modifier = Modifier) {
+fun BookmarkOffersScreen(modifier: Modifier = Modifier) {
     val mContext = LocalContext.current
     val jobOffers = generateFakeJobOffers(10)
     var searchInput by remember { mutableStateOf("") }
@@ -165,28 +165,14 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
             )
             .padding(15.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = jobOffer.title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.weight(0.1f))
-
-            Icon(
-                imageVector = Icons.Outlined.BookmarkBorder,
-                contentDescription = stringResource(R.string.bookmark_offer_icon_desc),
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .size(34.dp)
-                    .padding(3.dp)
-                    .clickable { onBookmarkOfferClicked() }
-            )
-        }
+        Text(
+            text = jobOffer.title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -234,8 +220,4 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
 
         Spacer(modifier = Modifier.height(10.dp))
     }
-}
-
-private fun onBookmarkOfferClicked() {
-    TODO("Not yet implemented")
 }

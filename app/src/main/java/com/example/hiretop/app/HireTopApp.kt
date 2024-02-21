@@ -8,5 +8,9 @@ import com.example.hiretop.navigation.HireTopNavHost
 @Composable
 fun HireTopApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    HireTopNavHost(modifier = modifier, navController = navController)
+    HireTopNavHost(
+        modifier = modifier,
+        navController = navController,
+        accountType = 1
+    )
 }

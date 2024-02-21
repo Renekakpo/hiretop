@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "702305220056",
+    "project_id": "hiretop-6c0ef",
+    "storage_bucket": "hiretop-6c0ef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702305220056:android:58a9fa7df480a47b85eead",
+        "android_client_info": {
+          "package_name": "com.example.hiretop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGtBdBCKz8CDlAkBF4eWlfg9sP570Id0U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

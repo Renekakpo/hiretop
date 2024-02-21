@@ -46,17 +46,17 @@ import com.example.hiretop.models.generateFakeJobOffers
 import com.example.hiretop.utils.Utils
 
 @Composable
-fun EnterpriseOffersScreen() {
+fun EnterpriseOffersScreen(modifier: Modifier = Modifier) {
     val mContext = LocalContext.current
     val jobOffers = generateFakeJobOffers(5)
 
     var searchInput by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
-            .padding(15.dp)
+            .padding(top = 15.dp, start = 15.dp, end = 15.dp)
     ) {
         Text(
             text = "Gestion des offres",
@@ -119,6 +119,7 @@ private fun OfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked
     Column(
         modifier = Modifier
             .wrapContentSize()
+            .clickable { onJobOfferClicked(jobOffer) }
             .background(
                 color = MaterialTheme.colorScheme.background
             )
@@ -127,7 +128,6 @@ private fun OfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked
                 shape = RoundedCornerShape(CornerSize(8.dp))
             )
             .padding(15.dp)
-            .clickable { onJobOfferClicked(jobOffer) }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(

@@ -33,7 +33,7 @@ import com.example.hiretop.R
 import com.example.hiretop.utils.Utils.getFormattedDateOrHour
 
 @Composable
-fun ChatListScreen() {
+fun ChatListScreen(modifier: Modifier = Modifier) {
     ChatItemRow()
 }
 

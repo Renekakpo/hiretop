@@ -1,4 +1,4 @@
-package com.example.hiretop.ui.screens.entreprise
+package com.example.hiretop.ui.screens.entreprise.presentation
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,7 +46,7 @@ import com.example.hiretop.ui.extras.HireTopBottomSheet
 import com.example.hiretop.utils.Utils
 
 @Composable
-fun EnterprisePresentationScreen() {
+fun EnterpriseProfileScreen(modifier: Modifier = Modifier) {
     val mContext = LocalContext.current
     var sheetTitle by remember { mutableStateOf("") }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -61,7 +61,7 @@ fun EnterprisePresentationScreen() {
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(color = MaterialTheme.colorScheme.background)
@@ -111,8 +111,6 @@ fun EnterprisePresentationScreen() {
             }
             showBottomSheet = true
         })
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
     }
 }
 
@@ -131,19 +129,23 @@ private fun HeaderSection(onEditHeaderClicked: () -> Unit) {
             try {
                 // Load and set the compressed image to the appropriate AsyncImage
                 if (requestCode == 1) {
-                    bannerFilePath =
-                        Utils.compressImage(
-                            context,
-                            imageUri,
-                            "compressed_banner.png"
-                        )?.absolutePath ?: ""
+                    val bannerFile = Utils.compressImage(context, imageUri,
+                            "compressed_banner.png")
+                    bannerFilePath = if (bannerFile != null) {
+                        bannerFile.absolutePath
+                        TODO("Store it to EnterpriseProfile data class")
+                    } else {
+                        ""
+                    }
                 } else if (requestCode == 2) {
-                    profilePictureFilePath =
-                        Utils.compressImage(
-                            context,
-                            imageUri,
-                            "compressed_profile_picture.png"
-                        )?.absolutePath ?: ""
+                    val profileFile = Utils.compressImage(context, imageUri,
+                            "compressed_profile_picture.png")
+                    profilePictureFilePath = if (profileFile != null) {
+                        profileFile.absolutePath
+                        TODO("Store it to EnterpriseProfile data class")
+                    } else {
+                        ""
+                    }
                 }
             } catch (e: Exception) {
                 // TODO: Handle exception
