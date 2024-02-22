@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,7 +36,26 @@ import com.example.hiretop.utils.Utils.getFormattedDateOrHour
 
 @Composable
 fun ChatListScreen(modifier: Modifier = Modifier) {
-    ChatItemRow()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
+            .padding(15.dp)
+    ) {
+        Text(
+            text = "Discussions",
+            style = MaterialTheme.typography.headlineMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.wrapContentWidth()
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        repeat(5) {
+            ChatItemRow()
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +81,7 @@ fun ChatItemRow() {
             error = painterResource(id = R.drawable.ai_profile_picture),
             placeholder = painterResource(id = R.drawable.ai_profile_picture),
             modifier = Modifier
-                .size(70.dp)
+                .size(60.dp)
                 .padding(4.dp)
                 .clip(CircleShape)
         )
@@ -79,24 +100,14 @@ fun ChatItemRow() {
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.wrapContentWidth()
                 )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Text(
-                    text = getFormattedDateOrHour(System.currentTimeMillis() - 3600000),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
-
-            Spacer(modifier = Modifier.width(5.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Dernier message de la conversation",
+                    text = "Titre de l'emploi",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,

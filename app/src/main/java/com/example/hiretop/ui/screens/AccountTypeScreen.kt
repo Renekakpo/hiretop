@@ -23,18 +23,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
 import com.example.hiretop.navigation.EnterpriseBottomNavGraph
 import com.example.hiretop.navigation.NavDestination
-import com.example.hiretop.navigation.TalentBottomNavGraph
+import com.example.hiretop.navigation.CandidateBottomNavGraph
+import com.example.hiretop.viewModels.MainViewModel
 
 object AccountTypeScreen : NavDestination {
     override val route: String = "account_type_screen"
 }
 
 @Composable
-fun AccountTypeScreen(navController: NavHostController) {
+fun AccountTypeScreen(
+    navController: NavHostController,
+    mainViewModel: MainViewModel = hiltViewModel()
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
@@ -83,7 +88,10 @@ fun AccountTypeScreen(navController: NavHostController) {
                 .padding(horizontal = 10.dp),
             shape = MaterialTheme.shapes.small,
             border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary),
-            onClick = { onTalentClicked(navController) }
+            onClick = {
+                mainViewModel.saveAccountType(value = false)
+                onNavigateToNextScreen(navController, CandidateBottomNavGraph.route)
+            }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -108,7 +116,10 @@ fun AccountTypeScreen(navController: NavHostController) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onEnterpriseClicked(navController) }
+            onClick = {
+                mainViewModel.saveAccountType(value = true)
+                onNavigateToNextScreen(navController, EnterpriseBottomNavGraph.route)
+            }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -124,17 +135,9 @@ fun AccountTypeScreen(navController: NavHostController) {
     }
 }
 
-fun onTalentClicked(navController: NavHostController) {
-    navController.navigate(route = TalentBottomNavGraph.route) {
-        popUpTo(route = TalentBottomNavGraph.route) {
-            inclusive = true
-        }
-    }
-}
-
-fun onEnterpriseClicked(navController: NavHostController) {
-    navController.navigate(route = EnterpriseBottomNavGraph.route) {
-        popUpTo(route = EnterpriseBottomNavGraph.route) {
+private fun onNavigateToNextScreen(navController: NavHostController, destination: String) {
+    navController.navigate(route = destination) {
+        popUpTo(route = AccountTypeScreen.route) {
             inclusive = true
         }
     }

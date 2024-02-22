@@ -4,11 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.hiretop.models.generateFakeJobOffers
+import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
 import com.example.hiretop.ui.screens.AccountTypeScreen
 import com.example.hiretop.ui.screens.WelcomeScreen
 import com.example.hiretop.ui.screens.auth.LoginScreen
 import com.example.hiretop.ui.screens.auth.SignupScreen
-import com.example.hiretop.ui.screens.candidate.dashboard.TalentDashboardScreen
+import com.example.hiretop.ui.screens.candidate.dashboard.CandidateDashboardScreen
 import com.example.hiretop.ui.screens.candidate.profile.EditOrAddCertificationSection
 import com.example.hiretop.ui.screens.candidate.profile.EditOrAddEducationSection
 import com.example.hiretop.ui.screens.candidate.profile.EditOrAddExperienceSection
@@ -31,13 +32,13 @@ import com.example.hiretop.ui.screens.offers.JobOffersScreen
 import com.example.hiretop.ui.theme.HiretopTheme
 
 
-@Preview
+/*@Preview
 @Composable
 fun WelcomeScreenPreview() {
     HiretopTheme {
         WelcomeScreen(navController = rememberNavController())
     }
-}
+}*/
 
 @Preview
 @Composable
@@ -55,13 +56,13 @@ fun SignupScreenPreview() {
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun AccountTypeScreenPreview() {
     HiretopTheme {
         AccountTypeScreen(navController = rememberNavController())
     }
-}
+}*/
 
 @Preview
 @Composable
@@ -154,9 +155,9 @@ fun JobApplicationsScreenPreview() {
 
 @Preview
 @Composable
-fun StatisticsAndRecommendationScreenPreview() {
+fun CandidateDashboardScreenScreenPreview() {
     HiretopTheme {
-        TalentDashboardScreen()
+        CandidateDashboardScreen()
     }
 }
 
@@ -170,7 +171,7 @@ fun EnterprisePresentationScreenPreview() {
 
 @Preview
 @Composable
-fun JobOfferManagementScreenPreview() {
+fun CreateOrEditJobOfferScreenPreview() {
     HiretopTheme {
         CreateOrEditJobOfferScreen()
     }
@@ -221,5 +222,13 @@ fun EnterpriseDashboardScreenPreview() {
 fun ApplicationsDetailsScreenPreview() {
     HiretopTheme {
         EditApplicationsDetailsScreen()
+    }
+}
+
+@Preview
+@Composable
+fun HireTopCircularProgressIndicatorPreview() {
+    HiretopTheme {
+        HireTopCircularProgressIndicator()
     }
 }

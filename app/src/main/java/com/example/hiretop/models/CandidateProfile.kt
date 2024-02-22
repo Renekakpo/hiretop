@@ -1,19 +1,24 @@
 package com.example.hiretop.models
 
-data class Profile(
-    val bannerUrl: String,
-    val profilePictureUrl: String,
-    val firstname: String,
-    val lastname: String,
-    val headline: String,
-    val about: String,
-    val experiences: List<Experience>,
-    val education: List<Education>,
-    val certifications: List<Certification>,
-    val projects: List<Project>,
-    val skills: List<String>,
-    val createdAt: Long,
-    val updatedAt: Long
+import com.google.firebase.firestore.DocumentId
+
+data class CandidateProfile(
+    @DocumentId
+    val profileId: String? = null,
+    val bannerUrl: String?,
+    val pictureUrl: String?,
+    val firstname: String?,
+    val lastname: String?,
+    val name: String = "$firstname $lastname",
+    val headline: String?,
+    val about: String?,
+    val experiences: List<Experience>?,
+    val education: List<Education>?,
+    val certifications: List<Certification>?,
+    val projects: List<Project>?,
+    val skills: List<String>?,
+    val createdAt: Long?,
+    val updatedAt: Long?
 )
 
 data class Experience(
@@ -64,9 +69,9 @@ data class Project(
     val endYear: String,
 )
 
-val mockProfile = Profile(
+val mockCandidateProfile = CandidateProfile(
     bannerUrl = "https://example.com/banner.jpg",
-    profilePictureUrl = "https://example.com/profile.jpg",
+    pictureUrl = "https://example.com/profile.jpg",
     firstname = "Jean",
     lastname = "Dupont",
     headline = "Développeur Full Stack",

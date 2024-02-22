@@ -1,9 +1,13 @@
 package com.example.hiretop.models
 
+import com.google.firebase.firestore.DocumentId
+
 data class JobApplication(
-    val candidateID: String = "",
-    val jobID: String = "",
-    val jobTitle: String,
+    @DocumentId
+    val jobApplicationId: String? = null,
+    val profileId: String = "",
+    val jobOfferId: String = "",
+    val jobOfferTitle: String,
     val companyName: String,
     val location: String,
     val locationType: String,
@@ -14,9 +18,9 @@ data class JobApplication(
     val offerReceived: Boolean = false
 )
 
-val jobApplicationsList = listOf(
+val jobApplicationsLists = listOf(
     JobApplication(
-        jobTitle = "Ingénieur Logiciel",
+        jobOfferTitle = "Ingénieur Logiciel",
         companyName = "Tech Corp",
         location = "San Francisco",
         locationType = "À distance",
@@ -27,7 +31,7 @@ val jobApplicationsList = listOf(
         offerReceived = true
     ),
     JobApplication(
-        jobTitle = "Analyste de Données",
+        jobOfferTitle = "Analyste de Données",
         companyName = "Data Insights Inc.",
         location = "New York",
         locationType = "Sur site",
@@ -36,7 +40,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 172800000 // Il y a 2 jours
     ),
     JobApplication(
-        jobTitle = "Chef de Produit",
+        jobOfferTitle = "Chef de Produit",
         companyName = "Product Innovations",
         location = "Seattle",
         locationType = "À distance",
@@ -47,7 +51,7 @@ val jobApplicationsList = listOf(
         offerReceived = true
     ),
     JobApplication(
-        jobTitle = "Designer UI/UX",
+        jobOfferTitle = "Designer UI/UX",
         companyName = "Design Studios",
         location = "Los Angeles",
         locationType = "Sur site",
@@ -56,7 +60,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 345600000 // Il y a 4 jours
     ),
     JobApplication(
-        jobTitle = "Spécialiste en Marketing",
+        jobOfferTitle = "Spécialiste en Marketing",
         companyName = "Marketing Masters",
         location = "Chicago",
         locationType = "À distance",
@@ -65,7 +69,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 432000000 // Il y a 5 jours
     ),
     JobApplication(
-        jobTitle = "Ingénieur Logiciel",
+        jobOfferTitle = "Ingénieur Logiciel",
         companyName = "Tech Corp",
         location = "San Francisco",
         locationType = "À distance",
@@ -76,7 +80,7 @@ val jobApplicationsList = listOf(
         offerReceived = true
     ),
     JobApplication(
-        jobTitle = "Analyste de Données",
+        jobOfferTitle = "Analyste de Données",
         companyName = "Data Insights Inc.",
         location = "New York",
         locationType = "Sur site",
@@ -85,7 +89,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 604800000 // Il y a 7 jours
     ),
     JobApplication(
-        jobTitle = "Chef de Produit",
+        jobOfferTitle = "Chef de Produit",
         companyName = "Product Innovations",
         location = "Seattle",
         locationType = "À distance",
@@ -94,7 +98,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 691200000 // Il y a 8 jours
     ),
     JobApplication(
-        jobTitle = "Designer UI/UX",
+        jobOfferTitle = "Designer UI/UX",
         companyName = "Design Studios",
         location = "Los Angeles",
         locationType = "Sur site",
@@ -105,7 +109,7 @@ val jobApplicationsList = listOf(
         offerReceived = true
     ),
     JobApplication(
-        jobTitle = "Spécialiste en Marketing",
+        jobOfferTitle = "Spécialiste en Marketing",
         companyName = "Marketing Masters",
         location = "Chicago",
         locationType = "À distance",
@@ -114,7 +118,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 864000000 // Il y a 10 jours
     ),
     JobApplication(
-        jobTitle = "Ingénieur Logiciel",
+        jobOfferTitle = "Ingénieur Logiciel",
         companyName = "Tech Corp",
         location = "San Francisco",
         locationType = "À distance",
@@ -123,7 +127,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 950400000 // Il y a 11 jours
     ),
     JobApplication(
-        jobTitle = "Analyste de Données",
+        jobOfferTitle = "Analyste de Données",
         companyName = "Data Insights Inc.",
         location = "New York",
         locationType = "Sur site",
@@ -132,7 +136,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 1036800000 // Il y a 12 jours
     ),
     JobApplication(
-        jobTitle = "Chef de Produit",
+        jobOfferTitle = "Chef de Produit",
         companyName = "Product Innovations",
         location = "Seattle",
         locationType = "À distance",
@@ -143,7 +147,7 @@ val jobApplicationsList = listOf(
         offerReceived = true
     ),
     JobApplication(
-        jobTitle = "Designer UI/UX",
+        jobOfferTitle = "Designer UI/UX",
         companyName = "Design Studios",
         location = "Los Angeles",
         locationType = "Sur site",
@@ -152,7 +156,7 @@ val jobApplicationsList = listOf(
         appliedAt = System.currentTimeMillis() - 1209600000 // Il y a 14 jours
     ),
     JobApplication(
-        jobTitle = "Spécialiste en Marketing",
+        jobOfferTitle = "Spécialiste en Marketing",
         companyName = "Marketing Masters",
         location = "Chicago",
         locationType = "À distance",

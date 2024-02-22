@@ -2,7 +2,9 @@ package com.example.hiretop.app
 
 import android.app.Application
 import android.content.Context
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class HireTop: Application() {
     companion object {
         lateinit var appContext: Context

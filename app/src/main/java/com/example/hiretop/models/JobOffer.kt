@@ -1,15 +1,20 @@
 package com.example.hiretop.models
 
+import com.google.firebase.firestore.DocumentId
 import kotlin.random.Random
 
 data class JobOffer(
+    @DocumentId
+    val jobOfferID: String? = null,
     val title: String,
     val company: String,
+    val enterpriseID: String,
     val jobType: String,
     val description: String,
     val locationType: String,
     val skills: List<String>,
     val education: List<String>,
+    val viewCount: Long = 0,
     val updatedAt: Long,
     val closedAt: Long? = null,
     val postedAt: Long
@@ -100,6 +105,7 @@ fun generateFakeJobOffers(count: Int): List<JobOffer> {
         JobOffer(
             title = jobTitles.random(),
             company = companies.random(),
+            enterpriseID = "",
             jobType = jobTypes.random(),
             description = jobDescription.random(),
             locationType = locationTypes.random(),

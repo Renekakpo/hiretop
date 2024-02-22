@@ -155,6 +155,9 @@
     <string name="reject_text">Rejeter</string>
     <string name="back_arrow_icon_desc_text">Back arrow</string>
     <string name="required_stages_text">Étape*</string>
+    <string name="complete_profile_info">Complétez les informations de votre profil pour obtenir des analyses et des recommandations d\'emploi.</string>
+    <string name="no_skills_defined_on_profile">Ajouter vos compétences à votre profil pour recevoir des recommandations d\'emploi.</string>
+    <string name="no_job_recommendations_found">Aucune recommandation d\'emploi trouvée.</string>
     <string-array name="job_type_list">
         <item>Veuillez sélectionner</item>
         <item>Temps plein</item>

@@ -41,7 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.hiretop.R
 import com.example.hiretop.models.JobApplication
-import com.example.hiretop.models.jobApplicationsList
+import com.example.hiretop.models.jobApplicationsLists
 import com.example.hiretop.utils.Utils.formatDate
 import com.example.hiretop.utils.Utils.getAppliedTimeAgo
 
@@ -65,7 +65,7 @@ fun JobApplicationsScreen(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        jobApplicationsList.groupBy { it.status }.forEach { (status, applications) ->
+        jobApplicationsLists.groupBy { it.status }.forEach { (status, applications) ->
             var expanded by remember { mutableStateOf(false) }
 
             ExpandableSection(
@@ -118,7 +118,7 @@ fun JobApplicationItem(context: Context, jobApplication: JobApplication) {
             .padding(15.dp)
     ) {
         Text(
-            text = jobApplication.jobTitle,
+            text = jobApplication.jobOfferTitle,
             color = statusContentColor,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.fillMaxWidth()

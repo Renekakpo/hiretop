@@ -1,7 +1,10 @@
 package com.example.hiretop.models
 
+import com.google.firebase.firestore.DocumentId
+
 data class EnterpriseProfile(
-    val enterpriseID: String,
+    @DocumentId
+    val enterpriseID: String? = null,
     val bannerUrl: String?,
     val pictureUrl: String?,
     val name: String?,

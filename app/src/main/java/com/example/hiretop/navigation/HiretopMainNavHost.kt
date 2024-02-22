@@ -25,7 +25,6 @@ import com.example.hiretop.ui.screens.entreprise.presentation.EditEnterpriseCont
 import com.example.hiretop.ui.screens.entreprise.presentation.EditEnterpriseCultureAndValuesSection
 import com.example.hiretop.ui.screens.messaging.CandidateInteractionScreen
 import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
-import com.example.hiretop.utils.Constant.TALENT_ACCOUNT
 
 @Composable
 fun HireTopNavHost(
@@ -54,7 +53,7 @@ fun HireTopNavHost(
             AccountTypeScreen(navController = navController)
         }
 
-        composable(route = TalentBottomNavGraph.route) {
+        composable(route = CandidateBottomNavGraph.route) {
             TalentBottomNavHost(navController = navController)
         }
 
@@ -88,7 +87,7 @@ fun HireTopNavHost(
         }
 
         composable(route = EditHeaderSection.route) {
-            EditProfileAboutSection(currentAbout = "") { }
+            EditProfileAboutSection() { }
         }
 
         composable(route = EditHeaderSection.route) {

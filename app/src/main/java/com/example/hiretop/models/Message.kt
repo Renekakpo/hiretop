@@ -1,8 +1,13 @@
 package com.example.hiretop.models
 
+import com.google.firebase.firestore.DocumentId
+
 data class Message(
-    val sender: Map<String, String>,
-    val receiver: Map<String, String>,
+    @DocumentId
+    val messageId: String? = null,
+    val subject: String, // Chat ID
+    val to: String, // Receiver ID
+    val from: String, // Sender ID
     val content: String,
     val received: Boolean = false,
     val isRead: Boolean = false,
@@ -12,26 +17,30 @@ data class Message(
 // Mock data
 val mockMessages = listOf(
     Message(
-        sender = mapOf("id" to "sender_id_1", "name" to "John Doe"),
-        receiver = mapOf("id" to "receiver_id_1", "name" to "Jane Smith"),
+        subject = "sender_id_1",
+        to = "sender_id_1",
+        from = "receiver_id_1",
         content = "Hello, how are you?",
         createdAt = System.currentTimeMillis() - 3600000 // 1 hour ago
     ),
     Message(
-        sender = mapOf("id" to "sender_id_2", "name" to "Alice Johnson"),
-        receiver = mapOf("id" to "receiver_id_2", "name" to "Bob Brown"),
+        subject = "sender_id_1",
+        to = "sender_id_1",
+        from = "receiver_id_1",
         content = "I'm doing great, thank you!",
         createdAt = System.currentTimeMillis() - 7200000 // 2 hours ago
     ),
     Message(
-        sender = mapOf("id" to "sender_id_1", "name" to "John Doe"),
-        receiver = mapOf("id" to "receiver_id_1", "name" to "Jane Smith"),
+        subject = "sender_id_1",
+        to = "sender_id_1",
+        from = "receiver_id_1",
         content = "Would you like to meet for coffee?",
         createdAt = System.currentTimeMillis() - 10800000 // 3 hours ago
     ),
     Message(
-        sender = mapOf("id" to "sender_id_2", "name" to "Alice Johnson"),
-        receiver = mapOf("id" to "receiver_id_2", "name" to "Bob Brown"),
+        subject = "sender_id_1",
+        to = "sender_id_1",
+        from = "receiver_id_1",
         content = "Sure, I'd love to!",
         createdAt = System.currentTimeMillis() - 14400000 // 4 hours ago
     )
