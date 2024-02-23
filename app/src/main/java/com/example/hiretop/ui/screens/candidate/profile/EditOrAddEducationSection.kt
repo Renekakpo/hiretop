@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -32,26 +31,35 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.models.Education
 import com.example.hiretop.ui.extras.DropdownListWords
+import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.utils.Utils
 
 @Composable
-fun EditOrAddEducationSection(onSaveClicked: () -> Unit) {
+fun EditOrAddEducationSection(currentValue: Education?,onSaveClicked: (Education) -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val descMaxLength = 1000
     val actMaxLength = 500
 
-    var schoolName by remember { mutableStateOf("") }
-    var degree by remember { mutableStateOf("") }
-    var fieldOfStudy by remember { mutableStateOf("") }
-    var grade by remember { mutableStateOf("") }
-    var activities by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var startMonth by remember { mutableStateOf("") }
-    var startYear by remember { mutableStateOf("") }
-    var endMonth by remember { mutableStateOf("") }
-    var endYear by remember { mutableStateOf("") }
+    var requiredSchoolName by remember { mutableStateOf(currentValue?.school ?: "") }
+    var degree by remember { mutableStateOf(currentValue?.degree ?: "") }
+    var fieldOfStudy by remember { mutableStateOf(currentValue?.fieldOfStudy ?: "") }
+    var grade by remember { mutableStateOf(currentValue?.grade?: "") }
+    var activities by remember { mutableStateOf(currentValue?.activities ?: "") }
+    var description by remember { mutableStateOf(currentValue?.description ?: "") }
+    var startMonth by remember { mutableStateOf(currentValue?.startMonth ?: "") }
+    var startYear by remember { mutableStateOf(currentValue?.startYear ?: "") }
+    var endMonth by remember { mutableStateOf(currentValue?.endMonth ?: "") }
+    var endYear by remember { mutableStateOf(currentValue?.endYear ?: "") }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null // Reset error message
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -69,8 +77,8 @@ fun EditOrAddEducationSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = schoolName,
-            onValueChange = { schoolName = it },
+            value = requiredSchoolName,
+            onValueChange = { requiredSchoolName = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_school_text),
@@ -123,7 +131,7 @@ fun EditOrAddEducationSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
-                    onItemSelected = { startMonth = it}
+                    onItemSelected = { startMonth = it }
                 )
 
                 Spacer(modifier = Modifier.width(15.dp))
@@ -132,7 +140,7 @@ fun EditOrAddEducationSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = Utils.getYearsList().toTypedArray(),
-                    onItemSelected = { startYear = it}
+                    onItemSelected = { startYear = it }
                 )
             }
         }
@@ -149,7 +157,7 @@ fun EditOrAddEducationSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
-                    onItemSelected = { endMonth = it}
+                    onItemSelected = { endMonth = it }
                 )
 
                 Spacer(modifier = Modifier.width(15.dp))
@@ -158,7 +166,7 @@ fun EditOrAddEducationSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = Utils.getYearsList().toTypedArray(),
-                    onItemSelected = { endYear = it}
+                    onItemSelected = { endYear = it }
                 )
             }
         }
@@ -245,7 +253,26 @@ fun EditOrAddEducationSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveClicked() }
+            onClick = {
+                if (requiredSchoolName.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.empty_school_name_error_text)
+                } else {
+                    val education = Education(
+                        school = requiredSchoolName,
+                        degree = degree,
+                        fieldOfStudy = fieldOfStudy,
+                        grade = grade,
+                        startMonth = startMonth,
+                        startYear = startYear,
+                        endMonth = endMonth,
+                        endYear = endYear,
+                        activities = activities,
+                        description = description
+                    )
+
+                    onSaveClicked(education)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

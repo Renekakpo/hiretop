@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -29,6 +28,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,20 +39,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.hiretop.R
 import com.example.hiretop.models.JobOffer
-import com.example.hiretop.models.generateFakeJobOffers
+import com.example.hiretop.models.UIState
 import com.example.hiretop.ui.extras.HireTopBottomSheet
+import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
 import com.example.hiretop.utils.Utils.getPostedTimeAgo
+import com.example.hiretop.viewModels.CandidateViewModel
+import com.google.gson.Gson
 
 @Composable
-fun JobOffersScreen(modifier: Modifier = Modifier) {
+fun JobOffersScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    candidateViewModel: CandidateViewModel = hiltViewModel()
+) {
     val mContext = LocalContext.current
-    val jobOffers = generateFakeJobOffers(10)
+
+    // Observe candidate profile and recommended jobs states
+    val candidateProfile by candidateViewModel.candidateProfile.collectAsState(null)
+    val jobOffers by candidateViewModel.jobOffers.collectAsState(null)
+    var uiState by remember { mutableStateOf(UIState.LOADING) }
+
     var searchInput by remember { mutableStateOf("") }
+    var filteredJobOffers by remember { mutableStateOf(jobOffers) }
 
     var sheetTitle by remember { mutableStateOf("") }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -65,6 +82,19 @@ fun JobOffersScreen(modifier: Modifier = Modifier) {
         }
     }
 
+    LaunchedEffect(Unit) {
+        uiState = if (candidateProfile == null) {
+            UIState.FAILURE
+        } else {
+            if (candidateProfile?.skills.isNullOrEmpty()) {
+                UIState.FAILURE
+            } else {
+                candidateViewModel.getAllRelevantJobs(candidateProfile?.skills?.toList().orEmpty())
+                UIState.SUCCESS
+            }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -74,7 +104,16 @@ fun JobOffersScreen(modifier: Modifier = Modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = searchInput,
-                onValueChange = { searchInput = it },
+                onValueChange = {
+                    searchInput = it
+                    if (searchInput.length >= 3) {
+                        filteredJobOffers = jobOffers?.filter { jobOffer ->
+                            jobOffer.title.lowercase()
+                                .contains(searchInput.lowercase(), ignoreCase = true)
+                        }
+                    }
+                },
+                enabled = !jobOffers.isNullOrEmpty(),
                 textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                 placeholder = {
                     Text(
@@ -108,18 +147,27 @@ fun JobOffersScreen(modifier: Modifier = Modifier) {
                         shape = RoundedCornerShape(corner = CornerSize(8.dp))
                     )
                     .clickable {
-                        sheetTitle = mContext.getString(R.string.filter_sheet_title_text)
-                        bottomSheetContent = {
-                            FilterSheetContent(
-                                onApplyFilter = {
-                                    showBottomSheet = false
-                                },
-                                onResetFilter = {
-                                    showBottomSheet = false
-                                }
-                            )
+                        if (!jobOffers.isNullOrEmpty()) {
+                            sheetTitle = mContext.getString(R.string.filter_sheet_title_text)
+                            bottomSheetContent = {
+                                FilterSheetContent(
+                                    onApplyFilter = { jobTypes, educations, locationTypes ->
+                                        filteredJobOffers = jobOffers?.filter { jobOffer ->
+                                            // Apply filter based on job types, educations, location types
+                                            jobTypes.isEmpty() || jobOffer.jobType in jobTypes &&
+                                                    educations.isEmpty() || jobOffer.education.any { it in educations } &&
+                                                    locationTypes.isEmpty() || jobOffer.locationType in locationTypes
+                                        }
+                                        showBottomSheet = false
+                                    },
+                                    onResetFilter = {
+                                        filteredJobOffers = jobOffers
+                                        showBottomSheet = false
+                                    }
+                                )
+                            }
+                            showBottomSheet = true
                         }
-                        showBottomSheet = true
                     }
             ) {
                 Icon(
@@ -139,19 +187,68 @@ fun JobOffersScreen(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-            itemsIndexed(jobOffers) { _, item ->
-                JobOfferItemRow(
-                    context = mContext,
-                    jobOffer = item,
-                    onJobOfferClicked = { /* TODO: Navigate to JobOfferDetails screen with jobOffer as param */ })
+        when (uiState) {
+            UIState.LOADING -> {
+                // Display loader while fetching data
+                HireTopCircularProgressIndicator()
+            }
+
+            UIState.FAILURE -> {
+                if (candidateProfile == null) {
+                    // Display text prompting user to complete profile
+                    Text(
+                        text = stringResource(R.string.update_profile_info),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                } else if (candidateProfile?.skills.isNullOrEmpty()) {
+                    // Display text prompting user to complete profile skills
+                    Text(
+                        text = stringResource(R.string.incomplet_profile_text),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    // No job offers found
+                    Text(
+                        text = stringResource(R.string.no_job_offers_found_text),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            UIState.SUCCESS -> {
+                filteredJobOffers?.let {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
+                        itemsIndexed(it) { _, item ->
+                            JobOfferItemRow(
+                                context = mContext,
+                                jobOffer = item,
+                                onJobOfferClicked = { onJobOfferClicked(navController, it) })
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked: (JobOffer) -> Unit) {
+private fun JobOfferItemRow(
+    context: Context,
+    jobOffer: JobOffer,
+    onJobOfferClicked: (JobOffer) -> Unit
+) {
     Column(
         modifier = Modifier
             .wrapContentSize()
@@ -165,33 +262,19 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
             )
             .padding(15.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = jobOffer.title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.weight(0.1f))
-
-            Icon(
-                imageVector = Icons.Outlined.BookmarkBorder,
-                contentDescription = stringResource(R.string.bookmark_offer_icon_desc),
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .size(34.dp)
-                    .padding(3.dp)
-                    .clickable { onBookmarkOfferClicked() }
-            )
-        }
+        Text(
+            text = jobOffer.title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = jobOffer.company,
+            text = jobOffer.company ?: "N/A",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -202,7 +285,7 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
-            text = jobOffer.locationType,
+            text = jobOffer.locationType ?: "N/A",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
@@ -213,7 +296,7 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = jobOffer.description,
+            text = jobOffer.description ?: "N/A",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
             maxLines = 4,
@@ -236,6 +319,6 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
     }
 }
 
-private fun onBookmarkOfferClicked() {
-    TODO("Not yet implemented")
+private fun onJobOfferClicked(navController: NavController, jobOffer: JobOffer) {
+    navController.navigate(route = "${JobOfferDetailsScreen.route}/${Gson().toJson(jobOffer)}/${false}")
 }

@@ -29,12 +29,12 @@ import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 
 @Composable
-fun EditProfileAboutSection(onSaveClicked: () -> Unit) {
+fun EditProfileAboutSection(currentValue: String?, onSaveClicked: (String) -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 2600
 
-    var editedAbout by remember { mutableStateOf("") }
+    var editedAbout by remember { mutableStateOf(currentValue ?: "") }
 
     Column(
         modifier = Modifier
@@ -90,7 +90,7 @@ fun EditProfileAboutSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = onSaveClicked
+            onClick = { onSaveClicked(editedAbout) }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

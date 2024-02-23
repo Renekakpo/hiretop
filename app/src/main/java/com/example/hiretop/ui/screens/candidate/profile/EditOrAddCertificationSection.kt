@@ -31,24 +31,35 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.models.Certification
 import com.example.hiretop.ui.extras.DropdownListWords
+import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.utils.Utils
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
+fun EditOrAddCertificationSection(
+    currentValue: Certification?,
+    onSaveClicked: (Certification) -> Unit
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
-    var name by remember { mutableStateOf("") }
-    var issuingOrganization by remember { mutableStateOf("") }
-    var issuedMonth by remember { mutableStateOf("") }
-    var issuedYear by remember { mutableStateOf("") }
-    var expirationMonth by remember { mutableStateOf("") }
-    var expirationYear by remember { mutableStateOf("") }
-    var credentialID by remember { mutableStateOf("") }
-    var credentialURL by remember { mutableStateOf("") }
-    var skills by remember { mutableStateOf("") }
+    var requiredName by remember { mutableStateOf(currentValue?.name ?: "") }
+    var requiredIssuingOrganization by remember { mutableStateOf(currentValue?.issuingOrganization ?: "") }
+    var issuedMonth by remember { mutableStateOf(currentValue?.issueMonth ?: "") }
+    var issuedYear by remember { mutableStateOf(currentValue?.issueYear ?: "") }
+    var expirationMonth by remember { mutableStateOf(currentValue?.expireMonth ?: "") }
+    var expirationYear by remember { mutableStateOf(currentValue?.expireYear ?: "") }
+    var credentialID by remember { mutableStateOf(currentValue?.credentialID ?: "") }
+    var credentialURL by remember { mutableStateOf(currentValue?.credentialURL ?: "") }
+    var skills by remember { mutableStateOf(currentValue?.skills?.joinToString { ", " } ?: "") }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null // Reset error message
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -66,8 +77,8 @@ fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
+            value = requiredName,
+            onValueChange = { requiredName = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_certification_name_text),
@@ -81,8 +92,8 @@ fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = issuingOrganization,
-            onValueChange = { issuingOrganization = it },
+            value = requiredIssuingOrganization,
+            onValueChange = { requiredIssuingOrganization = it },
             label = {
                 Text(
                     text = stringResource(R.string.issuing_organization_text),
@@ -105,7 +116,7 @@ fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
-                    onItemSelected = { issuedMonth = it}
+                    onItemSelected = { issuedMonth = it }
                 )
 
                 Spacer(modifier = Modifier.width(15.dp))
@@ -114,7 +125,7 @@ fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = Utils.getYearsList().toTypedArray(),
-                    onItemSelected = { issuedYear = it}
+                    onItemSelected = { issuedYear = it }
                 )
             }
         }
@@ -131,7 +142,7 @@ fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
-                    onItemSelected = { expirationMonth = it}
+                    onItemSelected = { expirationMonth = it }
                 )
 
                 Spacer(modifier = Modifier.width(15.dp))
@@ -140,7 +151,7 @@ fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = Utils.getYearsList().toTypedArray(),
-                    onItemSelected = { expirationYear = it}
+                    onItemSelected = { expirationYear = it }
                 )
             }
         }
@@ -210,7 +221,29 @@ fun EditOrAddCertificationSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveClicked() }
+            onClick = {
+                if (requiredName.isEmpty()) {
+                    onErrorMessage =
+                        mContext.getString(R.string.empty_certification_title_error_text)
+                } else if (requiredIssuingOrganization.isEmpty()) {
+                    onErrorMessage =
+                        mContext.getString(R.string.empty_issuing_organization_title_error_text)
+                } else {
+                    val certification = Certification(
+                        name = requiredName,
+                        issuingOrganization = requiredIssuingOrganization,
+                        issueMonth = issuedMonth,
+                        issueYear = issuedYear,
+                        expireMonth = expirationMonth,
+                        expireYear = expirationYear,
+                        credentialID = credentialID,
+                        credentialURL = credentialURL,
+                        skills = skills.split(",").toSet()
+                    )
+
+                    onSaveClicked(certification)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

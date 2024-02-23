@@ -34,21 +34,44 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hiretop.R
+import com.example.hiretop.models.JobOffer
 import com.example.hiretop.ui.extras.DropdownListWords
+import com.example.hiretop.ui.extras.FailurePopup
+import com.example.hiretop.viewModels.EnterpriseViewModel
 
 @Composable
-fun CreateOrEditJobOfferScreen() {
+fun CreateOrEditJobOfferScreen(
+    isEditing: Boolean,
+    jobOffer: JobOffer,
+    onCancelClicked: () -> Unit,
+    onSaveClicked: () -> Unit,
+    onCloseClicked: () -> Unit,
+    enterpriseViewModel: EnterpriseViewModel = hiltViewModel()
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 3000
 
-    var offerName by remember { mutableStateOf("") }
-    var selectedLocationType by remember { mutableStateOf("") }
-    var selectedJobType by remember { mutableStateOf("") }
-    var requiredSkills by remember { mutableStateOf("") }
-    var requiredEducationLevel by remember { mutableStateOf("") }
-    var offerDescription by remember { mutableStateOf("") }
+    val headerText = if (isEditing)
+        stringResource(R.string.edit_job_offer_text)
+    else
+        stringResource(R.string.create_job_offer_text)
+    var offerName by remember { mutableStateOf(jobOffer.title) }
+    var selectedLocationType by remember { mutableStateOf(jobOffer.locationType) }
+    var selectedJobType by remember { mutableStateOf(jobOffer.jobType) }
+    var requiredSkills by remember { mutableStateOf(jobOffer.skills.toString()) }
+    var requiredEducationLevel by remember { mutableStateOf(jobOffer.education.toString()) }
+    var offerDescription by remember { mutableStateOf(jobOffer.description) }
+
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -58,7 +81,7 @@ fun CreateOrEditJobOfferScreen() {
             .verticalScroll(rememberScrollState())
     ) {
         Text(
-            text = stringResource(R.string.create_job_offer_text),
+            text = headerText,
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -82,7 +105,9 @@ fun CreateOrEditJobOfferScreen() {
 
         OutlinedTextField(
             value = offerName,
-            onValueChange = { offerName = it },
+            onValueChange = {
+                offerName = it
+            },
             label = {
                 Text(
                     text = stringResource(R.string.required_name_text),
@@ -157,7 +182,7 @@ fun CreateOrEditJobOfferScreen() {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = offerDescription,
+            value = offerDescription ?: "",
             onValueChange = { if (it.length <= maxLength) offerDescription = it },
             label = {
                 Text(
@@ -167,7 +192,7 @@ fun CreateOrEditJobOfferScreen() {
             },
             supportingText = {
                 Text(
-                    text = "${offerDescription.length} / $maxLength",
+                    text = "${offerDescription?.length} / $maxLength",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -194,7 +219,9 @@ fun CreateOrEditJobOfferScreen() {
                 ),
                 border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary),
                 shape = MaterialTheme.shapes.large,
-                onClick = { TODO("Cancel modification or creation") }
+                onClick = {
+                    onCancelClicked() // Close the bottom sheet
+                }
             ) {
                 Text(
                     text = stringResource(R.string.cancel_text),
@@ -213,7 +240,53 @@ fun CreateOrEditJobOfferScreen() {
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 shape = MaterialTheme.shapes.large,
-                onClick = { TODO("Save offer") }
+                onClick = {
+                    if (offerName.isEmpty()) {
+                        onErrorMessage = mContext.getString(R.string.empty_job_offer_title_text)
+                    } else if (requiredSkills.isEmpty()) {
+                        onErrorMessage = mContext.getString(R.string.empty_job_offer_skills_text)
+                    } else if (requiredEducationLevel.isEmpty()) {
+                        onErrorMessage = mContext.getString(R.string.empty_job_offer_education_text)
+                    } else {
+                        var jobOfferCopy = jobOffer.copy(
+                            title = offerName,
+                            location = "",
+                            locationType = selectedLocationType,
+                            jobType = selectedJobType,
+                            skills = requiredSkills.split(","),
+                            education = requiredEducationLevel.split(","),
+                            description = offerDescription
+                        )
+
+                        if (isEditing) {
+                            // Change the updateAt timestamp
+                            jobOfferCopy = jobOfferCopy.copy(updatedAt = System.currentTimeMillis())
+
+                            enterpriseViewModel.updateJobOffer(
+                                jobOffer = jobOfferCopy,
+                                onSuccess = {
+                                    onSaveClicked() // Close the bottom sheet
+                                },
+                                onFailure = {
+                                    onErrorMessage = it
+                                }
+                            )
+                        } else {
+                            // Update the postedAt timestamp
+                            jobOfferCopy = jobOfferCopy.copy(postedAt = System.currentTimeMillis())
+
+                            enterpriseViewModel.addJobOffer(
+                                jobOffer = jobOfferCopy,
+                                onSuccess = {
+                                    onSaveClicked() // Close the bottom sheet
+                                },
+                                onFailure = {
+                                    onErrorMessage = it
+                                }
+                            )
+                        }
+                    }
+                }
             ) {
                 Text(
                     text = stringResource(R.string.save_button_text),
@@ -233,7 +306,20 @@ fun CreateOrEditJobOfferScreen() {
                 contentColor = MaterialTheme.colorScheme.onError
             ),
             shape = MaterialTheme.shapes.large,
-            onClick = { TODO("Close offer") }
+            onClick = {
+                val jobOfferCopy =
+                    jobOffer.copy(isClosed = true, closedAt = System.currentTimeMillis())
+
+                enterpriseViewModel.updateJobOffer(
+                    jobOffer = jobOfferCopy,
+                    onSuccess = {
+                        onCloseClicked() // Close the sheet
+                    },
+                    onFailure = {
+                        onErrorMessage = it
+                    }
+                )
+            }
         ) {
             Text(
                 text = stringResource(R.string.close_offer_button_text),

@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -33,21 +32,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.models.Experience
 import com.example.hiretop.ui.extras.DropdownListWords
+import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.utils.Utils.getYearsList
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
+fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experience) -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 300
 
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var headline by remember { mutableStateOf("") }
-    var selectedJobType by remember { mutableStateOf("") }
+    var requiredJobTitle by remember { mutableStateOf(currentValue?.title ?: "") }
+    var selectedJobType by remember { mutableStateOf(currentValue?.employmentType ?: "") }
+    var requiredCompanyName by remember { mutableStateOf(currentValue?.companyName ?: "") }
+    var location by remember { mutableStateOf(currentValue?.location ?: "") }
+    var selectedLocationType by remember { mutableStateOf(currentValue?.locationType ?: "") }
+    var selectedStartMonth by remember { mutableStateOf(currentValue?.startMonth ?: "") }
+    var selectedStartYear by remember { mutableStateOf(currentValue?.startYear ?: "") }
+    var selectedEndMonth by remember { mutableStateOf(currentValue?.endMonth ?: "") }
+    var selectedEndYear by remember { mutableStateOf(currentValue?.endYear ?: "") }
+    var requiredIndustry by remember { mutableStateOf(currentValue?.industry ?: "") }
+    var description by remember { mutableStateOf(currentValue?.description ?: "") }
+    var skills by remember { mutableStateOf(currentValue?.skills?.joinToString { "," } ?: "") }
     var isCurrentPosition by remember { mutableStateOf(false) }
+
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -65,8 +81,8 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = firstName,
-            onValueChange = { firstName = it },
+            value = requiredJobTitle,
+            onValueChange = { requiredJobTitle = it },
             label = {
                 Text(
                     text = stringResource(R.string.job_title_text),
@@ -82,14 +98,14 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
         DropdownListWords(
             title = stringResource(R.string.employment_type_text),
             items = stringArrayResource(id = R.array.job_type_list),
-            onItemSelected = { selectedJobType = it}
+            onItemSelected = { selectedJobType = it }
         )
 
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
+            value = requiredCompanyName,
+            onValueChange = { requiredCompanyName = it },
             label = {
                 Text(
                     text = stringResource(R.string.company_name_text),
@@ -103,8 +119,8 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
+            value = location,
+            onValueChange = { location = it },
             label = {
                 Text(
                     text = stringResource(R.string.location_text),
@@ -120,7 +136,7 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
         DropdownListWords(
             title = stringResource(R.string.location_type_text),
             items = stringArrayResource(id = R.array.location_type_list),
-            onItemSelected = { selectedJobType = it}
+            onItemSelected = { selectedLocationType = it }
         )
 
         Spacer(modifier = Modifier.height(height = 15.dp))
@@ -135,7 +151,7 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
-                    onItemSelected = { selectedJobType = it}
+                    onItemSelected = { selectedStartMonth = it }
                 )
 
                 Spacer(modifier = Modifier.width(15.dp))
@@ -144,7 +160,7 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = getYearsList().toTypedArray(),
-                    onItemSelected = { selectedJobType = it}
+                    onItemSelected = { selectedStartYear = it }
                 )
             }
         }
@@ -161,7 +177,7 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
-                    onItemSelected = { selectedJobType = it}
+                    onItemSelected = { selectedEndMonth = it }
                 )
 
                 Spacer(modifier = Modifier.width(15.dp))
@@ -170,7 +186,7 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = getYearsList().toTypedArray(),
-                    onItemSelected = { selectedJobType = it}
+                    onItemSelected = { selectedEndYear = it }
                 )
             }
         }
@@ -178,8 +194,8 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
+            value = requiredIndustry,
+            onValueChange = { requiredIndustry = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_industry_text),
@@ -193,8 +209,8 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = headline,
-            onValueChange = { if (it.length <= maxLength) headline = it },
+            value = description,
+            onValueChange = { if (it.length <= maxLength) description = it },
             label = {
                 Text(
                     text = stringResource(R.string.description_text),
@@ -203,7 +219,7 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
             },
             supportingText = {
                 Text(
-                    text = "${headline.length} / $maxLength",
+                    text = "${description.length} / $maxLength",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -220,8 +236,8 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
+            value = skills,
+            onValueChange = { skills = it },
             label = {
                 Text(
                     text = stringResource(R.string.optional_skills_text),
@@ -235,7 +251,6 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 25.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-
             Checkbox(checked = isCurrentPosition, onCheckedChange = { isCurrentPosition = it })
 
             Spacer(modifier = Modifier.width(10.dp))
@@ -246,7 +261,7 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
-        
+
         Spacer(modifier = Modifier.height(height = 25.dp))
 
         Button(
@@ -260,7 +275,41 @@ fun EditOrAddExperienceSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveClicked() }
+            onClick = {
+                val experience: Experience?
+                if (requiredJobTitle.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.experience_title_error_text)
+                } else if (requiredCompanyName.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.experience_company_name_error_text)
+                } else if (requiredIndustry.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.experience_industry_title_error_text)
+                } else if (selectedStartMonth.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.experience_start_month_error_text)
+                } else if (selectedStartYear.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.experience_start_year_error_text)
+                } else if (selectedEndMonth.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.experience_end_month_error_text)
+                } else if (selectedEndYear.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.experience_end_year_error_text)
+                } else {
+                    experience = Experience(
+                        title = requiredJobTitle,
+                        employmentType = selectedJobType,
+                        companyName = requiredCompanyName,
+                        location = location,
+                        locationType = selectedLocationType,
+                        isCurrentWork = isCurrentPosition,
+                        startMonth = selectedStartMonth,
+                        startYear = selectedStartYear,
+                        endMonth = selectedEndMonth,
+                        endYear = selectedEndYear,
+                        industry = requiredIndustry,
+                        description = description,
+                        skills = skills.split(",").toSet()
+                    )
+                    onSaveClicked(experience)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

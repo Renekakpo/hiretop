@@ -31,7 +31,7 @@ import com.example.hiretop.R
 
 @Composable
 fun FilterSheetContent(
-    onApplyFilter: () -> Unit,
+    onApplyFilter: (Set<String>, Set<String>, Set<String>) -> Unit,
     onResetFilter: () -> Unit
 ) {
     var selectedJobTypes by rememberSaveable { mutableStateOf(setOf<String>()) }
@@ -127,7 +127,7 @@ fun FilterSheetContent(
                 )
             }
             Button(
-                onClick = { onApplyFilter() },
+                onClick = { onApplyFilter(selectedJobTypes, selectedEducations, selectedLocationTypes) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp)

@@ -1,13 +1,18 @@
 package com.example.hiretop.di.repository
 
 import com.example.hiretop.models.Message
+import com.example.hiretop.utils.Constant.MESSAGES_COLLECTION_NAME
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
+@Singleton
 class MessageRepository @Inject constructor(
     private val db: FirebaseFirestore,
+    @Named(MESSAGES_COLLECTION_NAME)
     private val messagesCollection: CollectionReference,
 ) {
 

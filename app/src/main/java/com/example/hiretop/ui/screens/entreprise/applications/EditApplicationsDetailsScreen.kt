@@ -41,7 +41,12 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
+import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.utils.Utils
+
+object EditApplicationsDetailsScreen : NavDestination {
+    override val route: String = "edit_applications_details_screen"
+}
 
 @Composable
 fun EditApplicationsDetailsScreen() {

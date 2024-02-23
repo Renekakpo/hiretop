@@ -6,18 +6,34 @@ import com.example.hiretop.models.EnterpriseProfile
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.models.CandidateProfile
+import com.example.hiretop.utils.Constant
+import com.example.hiretop.utils.Constant.CANDIDATES_COLLECTION_NAME
+import com.example.hiretop.utils.Constant.CHATS_COLLECTION_NAME
+import com.example.hiretop.utils.Constant.ENTERPRISES_COLLECTION_NAME
+import com.example.hiretop.utils.Constant.JOB_APPLICATIONS_COLLECTION_NAME
+import com.example.hiretop.utils.Constant.JOB_OFFERS_COLLECTION_NAME
+import com.example.hiretop.utils.Constant.MESSAGES_COLLECTION_NAME
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
+@Singleton
 class ChatItemRepository @Inject constructor(
     private val db: FirebaseFirestore,
+    @Named(MESSAGES_COLLECTION_NAME)
     private val messagesCollection: CollectionReference,
+    @Named(CHATS_COLLECTION_NAME)
     private val chatsCollection: CollectionReference,
+    @Named(CANDIDATES_COLLECTION_NAME)
     private val candidateProfilesCollection: CollectionReference,
+    @Named(ENTERPRISES_COLLECTION_NAME)
     private val enterpriseProfilesCollection: CollectionReference,
+    @Named(JOB_OFFERS_COLLECTION_NAME)
     private val jobOffersCollection: CollectionReference,
+    @Named(JOB_APPLICATIONS_COLLECTION_NAME)
     private val jobApplicationsCollection: CollectionReference,
 ) {
 

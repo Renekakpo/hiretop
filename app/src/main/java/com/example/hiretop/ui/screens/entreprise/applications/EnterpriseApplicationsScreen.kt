@@ -41,7 +41,12 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
+import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.utils.Utils
+
+object EnterpriseApplicationsScreen : NavDestination {
+    override val route: String = "enterprise_applications_Screen"
+}
 
 @Composable
 fun EnterpriseApplicationsScreen() {

@@ -57,6 +57,7 @@ import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
 import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
 import com.example.hiretop.utils.Utils
 import com.example.hiretop.viewModels.CandidateViewModel
+import com.google.gson.Gson
 
 @Composable
 fun CandidateDashboardScreen(
@@ -74,14 +75,14 @@ fun CandidateDashboardScreen(
 
     LaunchedEffect(candidateViewModel) {
         if (candidateProfileId == null) {
-
+            uiState = UIState.FAILURE
         } else {
             candidateViewModel.getCandidateProfile(profileId = "$candidateProfileId") { profile ->
                 uiState = if (profile == null) {
                     UIState.FAILURE
                 } else {
                     if (!profile.skills.isNullOrEmpty()) {
-                        candidateViewModel.getRecommendedJobs(profile.skills)
+                        candidateViewModel.getRecommendedJobs(profile.skills.toList())
                     }
                     UIState.SUCCESS
                 }
@@ -158,12 +159,15 @@ fun CandidateDashboardScreen(
                         )
                     } else {
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-                            itemsIndexed(jobs) { _, jobOffer ->
+                            itemsIndexed(jobs) { _, offer ->
                                 RecommendationsItemRow(
                                     context = mContext,
-                                    jobOffer = jobOffer,
+                                    jobOffer = offer,
                                     onJobOfferClicked = {
-                                        TODO("Navigate to JobOfferDetails screen with jobOffer as param")
+                                        val jobOffer = Gson().toJson(offer)
+                                        navController.navigate(
+                                            route = "${JobOfferDetailsScreen.route}/$jobOffer/${false}"
+                                        )
                                     }
                                 )
                             }
@@ -215,7 +219,7 @@ fun Statistics(candidateProfile: CandidateProfile) {
             ProfileStatistic(
                 icon = Icons.Outlined.School,
                 title = stringResource(id = R.string.education_text),
-                value = "${candidateProfile.education?.size}"
+                value = "${candidateProfile.educations?.size ?: 0}"
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -223,7 +227,7 @@ fun Statistics(candidateProfile: CandidateProfile) {
             ProfileStatistic(
                 icon = Icons.Outlined.Grade,
                 title = stringResource(id = R.string.certifications_text),
-                value = "${candidateProfile.certifications?.size}"
+                value = "${candidateProfile.certifications?.size ?: 0}"
             )
         }
     }
@@ -281,33 +285,19 @@ fun RecommendationsItemRow(
             .padding(15.dp)
             .clickable { onJobOfferClicked(jobOffer) }
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = jobOffer.title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-
-            /*Spacer(modifier = Modifier.weight(0.1f))
-
-            Icon(
-                imageVector = Icons.Outlined.BookmarkBorder,
-                contentDescription = stringResource(R.string.bookmark_offer_icon_desc),
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .size(34.dp)
-                    .padding(3.dp)
-                    .clickable { onBookmarkOfferClicked() }
-            )*/
-        }
+        Text(
+            text = jobOffer.title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = jobOffer.company,
+            text = jobOffer.company ?: "",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -318,7 +308,7 @@ fun RecommendationsItemRow(
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
-            text = jobOffer.locationType,
+            text = jobOffer.locationType ?: "",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
@@ -329,7 +319,7 @@ fun RecommendationsItemRow(
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = jobOffer.description,
+            text = jobOffer.description ?: "",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
             maxLines = 4,
@@ -348,8 +338,4 @@ fun RecommendationsItemRow(
             modifier = Modifier.fillMaxWidth()
         )
     }
-}
-
-private fun onBookmarkOfferClicked() {
-    TODO("Not yet implemented")
 }

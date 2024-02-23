@@ -28,13 +28,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.ui.extras.FailurePopup
 
 @Composable
-fun EditOrAddSkillSection(onSaveClicked: () -> Unit) {
+fun EditOrAddSkillSection(currentValue: String?, onSaveClicked: (List<String>) -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
-    var skillName by remember { mutableStateOf("") }
+    var skillName by remember { mutableStateOf(currentValue ?: "") }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null // Reset error message
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -77,7 +85,14 @@ fun EditOrAddSkillSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveClicked() }
+            onClick = {
+                if (skillName.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.empty_skill_title_error_text)
+                } else {
+                    val skills = skillName.split(",")
+                    onSaveClicked(skills)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

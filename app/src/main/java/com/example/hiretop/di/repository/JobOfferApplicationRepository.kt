@@ -1,13 +1,18 @@
 package com.example.hiretop.di.repository
 
 import com.example.hiretop.models.JobApplication
+import com.example.hiretop.utils.Constant
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
+@Singleton
 class JobOfferApplicationRepository @Inject constructor(
     private val db: FirebaseFirestore,
+    @Named(Constant.JOB_APPLICATIONS_COLLECTION_NAME)
     private val jobApplicationsCollection: CollectionReference,
 ) {
 

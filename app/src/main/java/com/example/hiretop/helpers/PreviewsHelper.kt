@@ -4,9 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.hiretop.models.generateFakeJobOffers
+import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
-import com.example.hiretop.ui.screens.AccountTypeScreen
-import com.example.hiretop.ui.screens.WelcomeScreen
 import com.example.hiretop.ui.screens.auth.LoginScreen
 import com.example.hiretop.ui.screens.auth.SignupScreen
 import com.example.hiretop.ui.screens.candidate.dashboard.CandidateDashboardScreen
@@ -16,7 +15,7 @@ import com.example.hiretop.ui.screens.candidate.profile.EditOrAddExperienceSecti
 import com.example.hiretop.ui.screens.candidate.profile.EditOrAddProjectSection
 import com.example.hiretop.ui.screens.candidate.profile.EditOrAddSkillSection
 import com.example.hiretop.ui.screens.candidate.profile.EditProfileAboutSection
-import com.example.hiretop.ui.screens.candidate.profile.TalentProfileScreen
+import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
 import com.example.hiretop.ui.screens.candidate.tracking.JobApplicationsScreen
 import com.example.hiretop.ui.screens.entreprise.CreateOrEditJobOfferScreen
 import com.example.hiretop.ui.screens.entreprise.EnterpriseOffersScreen
@@ -68,7 +67,7 @@ fun AccountTypeScreenPreview() {
 @Composable
 fun TalentProfileScreenPreview() {
     HiretopTheme {
-        TalentProfileScreen()
+        CandidateProfileScreen()
     }
 }
 
@@ -84,7 +83,7 @@ fun EditProfileHeaderSectionPreview() {
 @Composable
 fun EditProfileAboutSectionPreview() {
     HiretopTheme {
-        EditProfileAboutSection(onSaveClicked = {})
+        EditProfileAboutSection(currentValue = null, onSaveClicked = {})
     }
 }
 
@@ -92,7 +91,7 @@ fun EditProfileAboutSectionPreview() {
 @Composable
 fun EditOrAddExperienceSectionPreview() {
     HiretopTheme {
-        EditOrAddExperienceSection(onSaveClicked = {})
+        EditOrAddExperienceSection(currentValue = null, onSaveClicked = {})
     }
 }
 
@@ -100,7 +99,7 @@ fun EditOrAddExperienceSectionPreview() {
 @Composable
 fun EditOrAddEducationSectionPreview() {
     HiretopTheme {
-        EditOrAddEducationSection(onSaveClicked = {})
+        EditOrAddEducationSection(currentValue = null, onSaveClicked = {})
     }
 }
 
@@ -108,7 +107,7 @@ fun EditOrAddEducationSectionPreview() {
 @Composable
 fun EditOrAddCertificationSectionPreview() {
     HiretopTheme {
-        EditOrAddCertificationSection{}
+        EditOrAddCertificationSection(currentValue = null, ) {}
     }
 }
 
@@ -116,7 +115,7 @@ fun EditOrAddCertificationSectionPreview() {
 @Composable
 fun EditOrAddProjectSectionPreview() {
     HiretopTheme {
-        EditOrAddProjectSection{}
+        EditOrAddProjectSection(currentValue = null, ) {}
     }
 }
 
@@ -124,7 +123,7 @@ fun EditOrAddProjectSectionPreview() {
 @Composable
 fun EditOrAddSkillSectionPreview() {
     HiretopTheme {
-        EditOrAddSkillSection{}
+        EditOrAddSkillSection(currentValue = null, ) {}
     }
 }
 
@@ -132,7 +131,7 @@ fun EditOrAddSkillSectionPreview() {
 @Composable
 fun JobOffersScreenPreview() {
     HiretopTheme {
-        JobOffersScreen()
+        JobOffersScreen(navController = rememberNavController())
     }
 }
 
@@ -141,7 +140,11 @@ fun JobOffersScreenPreview() {
 fun JobOfferDetailsScreenPreview() {
     HiretopTheme {
         val jobOffer = generateFakeJobOffers(1).first()
-        JobOfferDetailsScreen(jobOffer)
+        JobOfferDetailsScreen(
+            navController = rememberNavController(),
+            jobOffer = jobOffer,
+            isEditable = false
+        )
     }
 }
 
@@ -157,7 +160,9 @@ fun JobApplicationsScreenPreview() {
 @Composable
 fun CandidateDashboardScreenScreenPreview() {
     HiretopTheme {
-        CandidateDashboardScreen()
+        CandidateDashboardScreen(
+            navController = rememberNavController()
+        )
     }
 }
 
@@ -173,7 +178,13 @@ fun EnterprisePresentationScreenPreview() {
 @Composable
 fun CreateOrEditJobOfferScreenPreview() {
     HiretopTheme {
-        CreateOrEditJobOfferScreen()
+        CreateOrEditJobOfferScreen(
+            isEditing = false,
+            jobOffer = generateFakeJobOffers(1).first(),
+            onCancelClicked = {},
+            onSaveClicked = {},
+            onCloseClicked = {},
+        )
     }
 }
 
@@ -230,5 +241,16 @@ fun ApplicationsDetailsScreenPreview() {
 fun HireTopCircularProgressIndicatorPreview() {
     HiretopTheme {
         HireTopCircularProgressIndicator()
+    }
+}
+
+@Preview
+@Composable
+fun FailurePopupPreview() {
+    HiretopTheme {
+        FailurePopup(
+            errorMessage = "Error message goes here.",
+            onDismiss= {}
+        )
     }
 }

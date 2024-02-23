@@ -22,9 +22,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
-import com.example.hiretop.ui.screens.candidate.bookmark.BookmarkOffersScreen
 import com.example.hiretop.ui.screens.candidate.dashboard.CandidateDashboardScreen
-import com.example.hiretop.ui.screens.candidate.profile.TalentProfileScreen
+import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
 import com.example.hiretop.ui.screens.candidate.tracking.JobApplicationsScreen
 import com.example.hiretop.ui.screens.messaging.ChatListScreen
 import com.example.hiretop.ui.screens.offers.JobOffersScreen
@@ -41,9 +40,7 @@ sealed class CandidateBottomNavScreen(val route: String, val label: String, val 
     object Tracking :
         CandidateBottomNavScreen("tracking", "Suivi", R.drawable.ic_tracking_menu_icon)
 
-    object Chat : CandidateBottomNavScreen("chat", "Discussion", R.drawable.ic_chat_menu_icon)
-    object Bookmark :
-        CandidateBottomNavScreen("bookmark", "Signet", R.drawable.ic_bookmark_menu_icon)
+    object Chat : CandidateBottomNavScreen("chat", "Discussions", R.drawable.ic_chat_menu_icon)
 
     object Profile : CandidateBottomNavScreen("profile", "Profil", R.drawable.ic_profile_menu_icon)
 }
@@ -55,7 +52,6 @@ fun TalentBottomNavHost(modifier: Modifier = Modifier, navController: NavHostCon
         CandidateBottomNavScreen.Discover,
         CandidateBottomNavScreen.Tracking,
         CandidateBottomNavScreen.Chat,
-        CandidateBottomNavScreen.Bookmark,
         CandidateBottomNavScreen.Profile
     )
 
@@ -118,7 +114,10 @@ fun BottomNav(
             }
 
             CandidateBottomNavScreen.Discover.route -> {
-                JobOffersScreen(modifier = Modifier.padding(innerPadding))
+                JobOffersScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController
+                )
             }
 
             CandidateBottomNavScreen.Tracking.route -> {
@@ -129,12 +128,8 @@ fun BottomNav(
                 ChatListScreen(modifier = Modifier.padding(innerPadding))
             }
 
-            CandidateBottomNavScreen.Bookmark.route -> {
-                BookmarkOffersScreen(modifier = Modifier.padding(innerPadding))
-            }
-
             CandidateBottomNavScreen.Profile.route -> {
-                TalentProfileScreen(modifier = Modifier.padding(innerPadding))
+                CandidateProfileScreen(modifier = Modifier.padding(innerPadding))
             }
         }
     }

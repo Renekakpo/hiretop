@@ -157,7 +157,7 @@ private fun OfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = jobOffer.company,
+            text = jobOffer.company ?: "N/A",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -168,7 +168,7 @@ private fun OfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
-            text = jobOffer.locationType,
+            text = jobOffer.locationType ?: "N/A",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
@@ -179,7 +179,7 @@ private fun OfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = jobOffer.description,
+            text = jobOffer.description ?: "N/A",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
             maxLines = 4,

@@ -29,16 +29,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.models.Project
+import com.example.hiretop.ui.extras.FailurePopup
 
 @Composable
-fun EditOrAddProjectSection(onSaveClicked: () -> Unit) {
+fun EditOrAddProjectSection(currentValue: Project?, onSaveClicked: (Project) -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 2000
 
-    var projectName by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var skills by remember { mutableStateOf("") }
+    var requiredProjectName by remember { mutableStateOf(currentValue?.name ?: "") }
+    var description by remember { mutableStateOf(currentValue?.description ?: "") }
+    var skills by remember { mutableStateOf(currentValue?.skills?.joinToString { ", " } ?: "") }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null // Reset error message
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -56,8 +65,8 @@ fun EditOrAddProjectSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = projectName,
-            onValueChange = { projectName = it },
+            value = requiredProjectName,
+            onValueChange = { requiredProjectName = it },
             label = {
                 Text(
                     text = stringResource(R.string.optional_project_name_text),
@@ -123,7 +132,19 @@ fun EditOrAddProjectSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveClicked() }
+            onClick = {
+                if (requiredProjectName.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.empty_project_name_error_text)
+                } else {
+                    val project = Project(
+                        name = requiredProjectName,
+                        description = description,
+                        skills = skills.split(",")
+                    )
+
+                    onSaveClicked(project)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

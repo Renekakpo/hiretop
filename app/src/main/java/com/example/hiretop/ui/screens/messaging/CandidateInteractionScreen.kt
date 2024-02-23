@@ -51,7 +51,12 @@ import coil.request.ImageRequest
 import com.example.hiretop.R
 import com.example.hiretop.models.Message
 import com.example.hiretop.models.mockMessages
+import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.utils.toHourMinuteString
+
+object CandidateInteractionScreen : NavDestination {
+    override val route: String = "candidate_interaction_screen"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

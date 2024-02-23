@@ -5,14 +5,14 @@ import com.google.firebase.firestore.DocumentId
 data class JobApplication(
     @DocumentId
     val jobApplicationId: String? = null,
-    val profileId: String = "",
-    val jobOfferId: String = "",
+    val candidateProfileId: String,
+    val jobOfferId: String,
     val jobOfferTitle: String,
     val companyName: String,
     val location: String,
     val locationType: String,
-    val status: String,
-    val stages: String,
+    val status: String?,
+    val stages: String?,
     val appliedAt: Long,
     val interviewDate: Long? = null,
     val offerReceived: Boolean = false
@@ -21,6 +21,8 @@ data class JobApplication(
 val jobApplicationsLists = listOf(
     JobApplication(
         jobOfferTitle = "Ingénieur Logiciel",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Tech Corp",
         location = "San Francisco",
         locationType = "À distance",
@@ -32,6 +34,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Analyste de Données",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Data Insights Inc.",
         location = "New York",
         locationType = "Sur site",
@@ -41,6 +45,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Chef de Produit",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Product Innovations",
         location = "Seattle",
         locationType = "À distance",
@@ -52,6 +58,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Designer UI/UX",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Design Studios",
         location = "Los Angeles",
         locationType = "Sur site",
@@ -61,6 +69,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Spécialiste en Marketing",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Marketing Masters",
         location = "Chicago",
         locationType = "À distance",
@@ -70,6 +80,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Ingénieur Logiciel",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Tech Corp",
         location = "San Francisco",
         locationType = "À distance",
@@ -81,6 +93,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Analyste de Données",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Data Insights Inc.",
         location = "New York",
         locationType = "Sur site",
@@ -91,6 +105,8 @@ val jobApplicationsLists = listOf(
     JobApplication(
         jobOfferTitle = "Chef de Produit",
         companyName = "Product Innovations",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         location = "Seattle",
         locationType = "À distance",
         status = "Approuvé",
@@ -99,6 +115,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Designer UI/UX",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Design Studios",
         location = "Los Angeles",
         locationType = "Sur site",
@@ -110,6 +128,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Spécialiste en Marketing",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Marketing Masters",
         location = "Chicago",
         locationType = "À distance",
@@ -119,6 +139,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Ingénieur Logiciel",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Tech Corp",
         location = "San Francisco",
         locationType = "À distance",
@@ -128,6 +150,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Analyste de Données",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Data Insights Inc.",
         location = "New York",
         locationType = "Sur site",
@@ -137,6 +161,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Chef de Produit",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Product Innovations",
         location = "Seattle",
         locationType = "À distance",
@@ -148,6 +174,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Designer UI/UX",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Design Studios",
         location = "Los Angeles",
         locationType = "Sur site",
@@ -157,6 +185,8 @@ val jobApplicationsLists = listOf(
     ),
     JobApplication(
         jobOfferTitle = "Spécialiste en Marketing",
+        candidateProfileId = "profile_id",
+        jobOfferId = "job_offer_id",
         companyName = "Marketing Masters",
         location = "Chicago",
         locationType = "À distance",

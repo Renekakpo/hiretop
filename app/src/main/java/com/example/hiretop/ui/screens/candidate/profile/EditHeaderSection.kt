@@ -3,7 +3,6 @@ package com.example.hiretop.ui.screens.candidate.profile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,23 +25,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
 import com.example.hiretop.navigation.NavDestination
+import com.example.hiretop.ui.extras.FailurePopup
 
 object EditHeaderSection : NavDestination {
     override val route: String = "edit_header_section"
 }
+
 @Composable
-fun EditHeaderSection(onSaveClicked: () -> Unit) {
+fun EditHeaderSection(
+    currentFirstname: String?,
+    currentLastname: String?,
+    currentHeadline: String?,
+    onSaveClicked: (String, String, String) -> Unit
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
-    var firstname by remember { mutableStateOf("") }
-    var lastname by remember { mutableStateOf("") }
-    var headline by remember { mutableStateOf("") }
+    var firstname by remember { mutableStateOf(currentFirstname ?: "") }
+    var lastname by remember { mutableStateOf(currentLastname ?: "") }
+    var headline by remember { mutableStateOf(currentHeadline ?: "") }
+
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -116,7 +129,20 @@ fun EditHeaderSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveClicked() }
+            onClick = {
+                if (firstname.isEmpty()) {
+                    onErrorMessage =
+                        mContext.getString(R.string.empty_candidate_firstname_error_text)
+                } else if (lastname.isEmpty()) {
+                    onErrorMessage =
+                        mContext.getString(R.string.empty_candidate_lastname_error_text)
+                } else if (headline.isEmpty()) {
+                    onErrorMessage =
+                        mContext.getString(R.string.empty_candidate_headline_error_text)
+                } else {
+                    onSaveClicked(firstname, lastname, headline)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

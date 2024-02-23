@@ -120,4 +120,25 @@ object Utils {
             }
         }
     }
+
+    /**
+     * Function to convert month names to numbers for comparison
+     */
+    fun monthToNumber(month: String): String {
+        return when (month.lowercase(Locale.getDefault())) {
+            "janvier" -> "01"
+            "février" -> "02"
+            "mars" -> "03"
+            "avril" -> "04"
+            "mai" -> "05"
+            "juin" -> "06"
+            "juillet" -> "07"
+            "août" -> "08"
+            "septembre" -> "09"
+            "octobre" -> "10"
+            "novembre" -> "11"
+            "décembre" -> "12"
+            else -> "00" // Default to 00 for invalid months
+        }
+    }
 }

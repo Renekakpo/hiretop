@@ -69,7 +69,7 @@ fun JobApplicationsScreen(modifier: Modifier = Modifier) {
             var expanded by remember { mutableStateOf(false) }
 
             ExpandableSection(
-                title = status,
+                title = "$status",
                 expanded = expanded,
                 counter = applications.size,
                 onExpandToggle = { expanded = it }
