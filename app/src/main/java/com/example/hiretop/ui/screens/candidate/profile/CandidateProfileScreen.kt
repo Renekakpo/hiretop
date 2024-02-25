@@ -15,18 +15,26 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
@@ -52,6 +61,8 @@ import com.example.hiretop.models.Certification
 import com.example.hiretop.models.Education
 import com.example.hiretop.models.Experience
 import com.example.hiretop.models.Project
+import com.example.hiretop.models.UIState
+import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopBottomSheet
 import com.example.hiretop.utils.Utils.compressImage
@@ -62,13 +73,21 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
+object CandidateProfileScreen : NavDestination {
+    override val route: String = "candidate_profile_screen"
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CandidateProfileScreen(
     modifier: Modifier = Modifier,
+    isPreviewMode: Boolean,
+    argCandidateProfileId: String?,
+    navController: NavController? = null,
     candidateViewModel: CandidateViewModel = hiltViewModel()
 ) {
     val candidateProfile by candidateViewModel.candidateProfile.collectAsState()
-    val profileId by candidateViewModel.candidateProfileId.collectAsState(initial = null)
+    val profileId by candidateViewModel.candidateProfileId.collectAsState(initial = argCandidateProfileId)
 
     val mContext = LocalContext.current
     var onErrorMessage by remember { mutableStateOf<String?>(null) }
@@ -108,307 +127,368 @@ fun CandidateProfileScreen(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(color = MaterialTheme.colorScheme.background)
-    ) {
-        HeaderSection(
-            profile = candidateProfile,
-            onImageLoadingFailed = { error ->
-                onErrorMessage = error
-            },
-            onUploadBannerFile = { file ->
-                candidateViewModel.uploadFileToFirebaseStorageAndGetUrl(
-                    inputStream = file.inputStream(),
-                    fileName = file.nameWithoutExtension,
-                    onSuccess = { downloadUrl ->
-                        val profileCopy = candidateProfile?.copy(
-                            bannerUrl = downloadUrl
-                        ) ?: CandidateProfile(
-                            bannerUrl = downloadUrl
-                        )
+    LaunchedEffect(candidateViewModel) {
+        if (isPreviewMode) {
+            candidateViewModel.getCandidateProfile(
+                profileId = "$argCandidateProfileId",
+                onSuccess = {},
+                onFailure = {
+                    onErrorMessage = it
+                }
+            )
+        } else {
+            candidateViewModel.getCandidateProfile(
+                profileId = "$profileId",
+                onSuccess = {},
+                onFailure = {
+                    onErrorMessage = it
+                }
+            )
+        }
+    }
 
-                        CoroutineScope(Dispatchers.IO).launch {
-                            updateFunction(
-                                profileId,
-                                profileCopy
-                            )
-                        }
+    Scaffold(
+        topBar = {
+            if (isPreviewMode) {
+                TopAppBar(
+                    modifier = Modifier.wrapContentSize(),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                    navigationIcon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = stringResource(id = R.string.back_arrow_icon_desc_text),
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.clickable { navController?.navigateUp() }
+                        )
                     },
-                    onFailure = {
-                        onErrorMessage = it
+                    title = {
+                        Text(
+                            text = stringResource(R.string.candidate_profile_preview),
+                            style = MaterialTheme.typography.headlineSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.wrapContentWidth()
+                        )
                     }
                 )
-            },
-            onUploadProfilePictureFile = { file ->
-                candidateViewModel.uploadFileToFirebaseStorageAndGetUrl(
-                    inputStream = file.inputStream(),
-                    fileName = file.nameWithoutExtension,
-                    onSuccess = { downloadUrl ->
-                        val profileCopy = candidateProfile?.copy(
-                            pictureUrl = downloadUrl
-                        ) ?: CandidateProfile(
-                            pictureUrl = downloadUrl
-                        )
-
-                        CoroutineScope(Dispatchers.IO).launch {
-                            updateFunction(
-                                profileId,
-                                profileCopy
+            }
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(innerPadding)
+                .background(color = MaterialTheme.colorScheme.background)
+        ) {
+            HeaderSection(
+                profile = candidateProfile,
+                isPreviewMode = isPreviewMode,
+                onImageLoadingFailed = { error ->
+                    onErrorMessage = error
+                },
+                onUploadBannerFile = { file ->
+                    candidateViewModel.uploadFileToFirebaseStorageAndGetUrl(
+                        inputStream = file.inputStream(),
+                        fileName = file.nameWithoutExtension,
+                        onSuccess = { downloadUrl ->
+                            val profileCopy = candidateProfile?.copy(
+                                bannerUrl = downloadUrl
+                            ) ?: CandidateProfile(
+                                bannerUrl = downloadUrl
                             )
+
+                            CoroutineScope(Dispatchers.IO).launch {
+                                updateFunction(
+                                    profileId,
+                                    profileCopy
+                                )
+                            }
+                        },
+                        onFailure = {
+                            onErrorMessage = it
                         }
-                    },
-                    onFailure = {
-                        onErrorMessage = it
+                    )
+                },
+                onUploadProfilePictureFile = { file ->
+                    candidateViewModel.uploadFileToFirebaseStorageAndGetUrl(
+                        inputStream = file.inputStream(),
+                        fileName = file.nameWithoutExtension,
+                        onSuccess = { downloadUrl ->
+                            val profileCopy = candidateProfile?.copy(
+                                pictureUrl = downloadUrl
+                            ) ?: CandidateProfile(
+                                pictureUrl = downloadUrl
+                            )
+
+                            CoroutineScope(Dispatchers.IO).launch {
+                                updateFunction(
+                                    profileId,
+                                    profileCopy
+                                )
+                            }
+                        },
+                        onFailure = {
+                            onErrorMessage = it
+                        }
+                    )
+                },
+                onEditHeaderClicked = {
+                    sheetTitle = mContext.getString(R.string.modify_summary_text)
+                    bottomSheetContent = {
+                        EditHeaderSection(
+                            currentFirstname = candidateProfile?.firstname,
+                            currentLastname = candidateProfile?.lastname,
+                            currentHeadline = candidateProfile?.headline,
+                            onSaveClicked = { firstname, lastname, headline ->
+                                val profileCopy = candidateProfile?.copy(
+                                    firstname = firstname,
+                                    lastname = lastname,
+                                    headline = headline
+                                ) ?: CandidateProfile(
+                                    firstname = firstname,
+                                    lastname = lastname,
+                                    headline = headline
+                                )
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    updateFunction(
+                                        profileId,
+                                        profileCopy
+                                    )
+                                }
+
+                                showBottomSheet = false
+                            })
                     }
-                )
-            },
-            onEditHeaderClicked = {
-                sheetTitle = mContext.getString(R.string.modify_summary_text)
-                bottomSheetContent = {
-                    EditHeaderSection(
-                        currentFirstname = candidateProfile?.firstname,
-                        currentLastname = candidateProfile?.lastname,
-                        currentHeadline = candidateProfile?.headline,
-                        onSaveClicked = { firstname, lastname, headline ->
-                            val profileCopy = candidateProfile?.copy(
-                                firstname = firstname,
-                                lastname = lastname,
-                                headline = headline
-                            ) ?: CandidateProfile(
-                                firstname = firstname,
-                                lastname = lastname,
-                                headline = headline
-                            )
+                    showBottomSheet = true
+                })
 
-                            CoroutineScope(Dispatchers.IO).launch {
-                                updateFunction(
-                                    profileId,
-                                    profileCopy
+            Spacer(modifier = Modifier.height(height = 15.dp))
+
+            AboutSection(
+                editedAbout = candidateProfile?.about,
+                isPreviewMode = isPreviewMode,
+                onEditAboutClicked = {
+                    sheetTitle = mContext.getString(R.string.optional_about_text)
+                    bottomSheetContent = {
+                        EditProfileAboutSection(
+                            currentValue = candidateProfile?.about,
+                            onSaveClicked = { about ->
+                                val profileCopy = candidateProfile?.copy(
+                                    about = about,
+                                ) ?: CandidateProfile(
+                                    about = about
                                 )
-                            }
 
-                            showBottomSheet = false
-                        })
-                }
-                showBottomSheet = true
-            })
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
-
-        AboutSection(
-            editedAbout = candidateProfile?.about,
-            onEditAboutClicked = {
-                sheetTitle = mContext.getString(R.string.optional_about_text)
-                bottomSheetContent = {
-                    EditProfileAboutSection(
-                        currentValue = candidateProfile?.about,
-                        onSaveClicked = { about ->
-                            val profileCopy = candidateProfile?.copy(
-                                about = about,
-                            ) ?: CandidateProfile(
-                                about = about
-                            )
-
-                            CoroutineScope(Dispatchers.IO).launch {
-                                updateFunction(
-                                    profileId,
-                                    profileCopy
-                                )
-                            }
-
-                            showBottomSheet = false
-                        })
-                }
-                showBottomSheet = true
-            })
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
-
-        ExperienceSection(
-            experiences = candidateProfile?.experiences,
-            onAddOrEditExperienceClicked = { currentExperience ->
-                sheetTitle = mContext.getString(R.string.experience_text)
-                bottomSheetContent = {
-                    EditOrAddExperienceSection(
-                        currentValue = currentExperience,
-                        onSaveClicked = { experience ->
-                            val editedExperiences = if (currentExperience == null) {
-                                candidateProfile?.experiences.orEmpty() + setOf(experience) // Add new experience
-                            } else {
-                                candidateProfile?.experiences.orEmpty().toMutableSet().apply {
-                                    this.add(experience) // Update current set of experiences
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    updateFunction(
+                                        profileId,
+                                        profileCopy
+                                    )
                                 }
-                            }
 
-                            val profileCopy = candidateProfile?.copy(
-                                experiences = editedExperiences
-                            ) ?: CandidateProfile(
-                                experiences = editedExperiences
-                            )
+                                showBottomSheet = false
+                            })
+                    }
+                    showBottomSheet = true
+                })
 
-                            CoroutineScope(Dispatchers.IO).launch {
-                                updateFunction(
-                                    profileId,
-                                    profileCopy
-                                )
-                            }
+            Spacer(modifier = Modifier.height(height = 15.dp))
 
-                            showBottomSheet = false
-                        })
-                }
-                showBottomSheet = true
-            })
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
-
-        EducationSection(
-            educations = candidateProfile?.educations,
-            onAddOrEditEducationClicked = { currentEducation ->
-                sheetTitle = mContext.getString(R.string.education_text)
-                bottomSheetContent = {
-                    EditOrAddEducationSection(
-                        currentValue = currentEducation,
-                        onSaveClicked = { education ->
-                            val updatedEducations = if (currentEducation == null) {
-                                candidateProfile?.educations.orEmpty() + setOf(education) // Add new experience
-                            } else {
-                                candidateProfile?.educations.orEmpty().toMutableSet().apply {
-                                    this.add(education) // Update current set of experiences
+            ExperienceSection(
+                experiences = candidateProfile?.experiences,
+                isPreviewMode = isPreviewMode,
+                onAddOrEditExperienceClicked = { currentExperience ->
+                    sheetTitle = mContext.getString(R.string.experience_text)
+                    bottomSheetContent = {
+                        EditOrAddExperienceSection(
+                            currentValue = currentExperience,
+                            onSaveClicked = { experience ->
+                                val editedExperiences = if (currentExperience == null) {
+                                    candidateProfile?.experiences.orEmpty() + setOf(experience) // Add new experience
+                                } else {
+                                    candidateProfile?.experiences.orEmpty().toMutableSet().apply {
+                                        this.add(experience) // Update current set of experiences
+                                    }
                                 }
-                            }
 
-                            val profileCopy = candidateProfile?.copy(
-                                educations = updatedEducations
-                            ) ?: CandidateProfile(
-                                educations = updatedEducations
-                            )
-
-                            CoroutineScope(Dispatchers.IO).launch {
-                                updateFunction(
-                                    profileId,
-                                    profileCopy
+                                val profileCopy = candidateProfile?.copy(
+                                    experiences = editedExperiences
+                                ) ?: CandidateProfile(
+                                    experiences = editedExperiences
                                 )
-                            }
 
-                            showBottomSheet = false
-                        })
-                }
-                showBottomSheet = true
-            })
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
-
-        CertificationsSection(
-            certifications = candidateProfile?.certifications,
-            onAddOrEditCertificationClicked = { currentCertification ->
-                sheetTitle = mContext.getString(R.string.certifications_text)
-                bottomSheetContent = {
-                    EditOrAddCertificationSection(
-                        currentValue = currentCertification,
-                        onSaveClicked = { certification ->
-                            val updatedCertifications = if (currentCertification == null) {
-                                candidateProfile?.certifications.orEmpty() + setOf(certification) // Add new experience
-                            } else {
-                                candidateProfile?.certifications.orEmpty().toMutableSet().apply {
-                                    this.add(certification) // Update current set of experiences
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    updateFunction(
+                                        profileId,
+                                        profileCopy
+                                    )
                                 }
-                            }
 
-                            val profileCopy = candidateProfile?.copy(
-                                certifications = updatedCertifications
-                            ) ?: CandidateProfile(
-                                certifications = updatedCertifications
-                            )
+                                showBottomSheet = false
+                            })
+                    }
+                    showBottomSheet = true
+                })
 
-                            CoroutineScope(Dispatchers.IO).launch {
-                                updateFunction(
-                                    profileId,
-                                    profileCopy
-                                )
-                            }
+            Spacer(modifier = Modifier.height(height = 15.dp))
 
-                            showBottomSheet = false
-                        })
-                }
-                showBottomSheet = true
-            })
-
-        Spacer(modifier = Modifier.height(height = 15.dp))
-
-        ProjectsSection(
-            projects = candidateProfile?.projects,
-            onAddOrEditProjectClicked = { currentProject ->
-                sheetTitle = mContext.getString(R.string.projects_text)
-                bottomSheetContent = {
-                    EditOrAddProjectSection(
-                        currentValue = currentProject,
-                        onSaveClicked = { project ->
-                            val updatedProjects = if (currentProject == null) {
-                                candidateProfile?.projects.orEmpty() + setOf(project) // Add new experience
-                            } else {
-                                candidateProfile?.projects.orEmpty().toMutableSet().apply {
-                                    this.add(project) // Update current set of experiences
+            EducationSection(
+                educations = candidateProfile?.educations,
+                isPreviewMode = isPreviewMode,
+                onAddOrEditEducationClicked = { currentEducation ->
+                    sheetTitle = mContext.getString(R.string.education_text)
+                    bottomSheetContent = {
+                        EditOrAddEducationSection(
+                            currentValue = currentEducation,
+                            onSaveClicked = { education ->
+                                val updatedEducations = if (currentEducation == null) {
+                                    candidateProfile?.educations.orEmpty() + setOf(education) // Add new experience
+                                } else {
+                                    candidateProfile?.educations.orEmpty().toMutableSet().apply {
+                                        this.add(education) // Update current set of experiences
+                                    }
                                 }
-                            }
 
-                            val profileCopy = candidateProfile?.copy(
-                                projects = updatedProjects
-                            ) ?: CandidateProfile(
-                                projects = updatedProjects
-                            )
-
-                            CoroutineScope(Dispatchers.IO).launch {
-                                updateFunction(
-                                    profileId,
-                                    profileCopy
+                                val profileCopy = candidateProfile?.copy(
+                                    educations = updatedEducations
+                                ) ?: CandidateProfile(
+                                    educations = updatedEducations
                                 )
-                            }
 
-                            showBottomSheet = false
-                        })
-                }
-                showBottomSheet = true
-            })
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    updateFunction(
+                                        profileId,
+                                        profileCopy
+                                    )
+                                }
 
-        Spacer(modifier = Modifier.height(height = 15.dp))
+                                showBottomSheet = false
+                            })
+                    }
+                    showBottomSheet = true
+                })
 
-        SkillsSection(
-            skills = candidateProfile?.skills?.joinToString { ", " },
-            onAddOrEditSkillsClicked = { currentSkills ->
-                sheetTitle = mContext.getString(R.string.optional_skills_text)
-                bottomSheetContent = {
-                    EditOrAddSkillSection(
-                        currentValue = currentSkills,
-                        onSaveClicked = { skills ->
-                            val profileCopy = candidateProfile?.copy(
-                                skills = skills.toSet(),
-                            ) ?: CandidateProfile(
-                                skills = skills.toSet()
-                            )
+            Spacer(modifier = Modifier.height(height = 15.dp))
 
-                            CoroutineScope(Dispatchers.IO).launch {
-                                updateFunction(
-                                    profileId,
-                                    profileCopy
+            CertificationsSection(
+                certifications = candidateProfile?.certifications,
+                isPreviewMode = isPreviewMode,
+                onAddOrEditCertificationClicked = { currentCertification ->
+                    sheetTitle = mContext.getString(R.string.certifications_text)
+                    bottomSheetContent = {
+                        EditOrAddCertificationSection(
+                            currentValue = currentCertification,
+                            onSaveClicked = { certification ->
+                                val updatedCertifications = if (currentCertification == null) {
+                                    candidateProfile?.certifications.orEmpty() + setOf(certification) // Add new experience
+                                } else {
+                                    candidateProfile?.certifications.orEmpty().toMutableSet()
+                                        .apply {
+                                            this.add(certification) // Update current set of experiences
+                                        }
+                                }
+
+                                val profileCopy = candidateProfile?.copy(
+                                    certifications = updatedCertifications
+                                ) ?: CandidateProfile(
+                                    certifications = updatedCertifications
                                 )
-                            }
 
-                            showBottomSheet = false
-                        })
-                }
-                showBottomSheet = true
-            })
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    updateFunction(
+                                        profileId,
+                                        profileCopy
+                                    )
+                                }
 
-        Spacer(modifier = Modifier.height(height = 15.dp))
+                                showBottomSheet = false
+                            })
+                    }
+                    showBottomSheet = true
+                })
+
+            Spacer(modifier = Modifier.height(height = 15.dp))
+
+            ProjectsSection(
+                projects = candidateProfile?.projects,
+                isPreviewMode = isPreviewMode,
+                onAddOrEditProjectClicked = { currentProject ->
+                    sheetTitle = mContext.getString(R.string.projects_text)
+                    bottomSheetContent = {
+                        EditOrAddProjectSection(
+                            currentValue = currentProject,
+                            onSaveClicked = { project ->
+                                val updatedProjects = if (currentProject == null) {
+                                    candidateProfile?.projects.orEmpty() + setOf(project) // Add new experience
+                                } else {
+                                    candidateProfile?.projects.orEmpty().toMutableSet().apply {
+                                        this.add(project) // Update current set of experiences
+                                    }
+                                }
+
+                                val profileCopy = candidateProfile?.copy(
+                                    projects = updatedProjects
+                                ) ?: CandidateProfile(
+                                    projects = updatedProjects
+                                )
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    updateFunction(
+                                        profileId,
+                                        profileCopy
+                                    )
+                                }
+
+                                showBottomSheet = false
+                            })
+                    }
+                    showBottomSheet = true
+                })
+
+            Spacer(modifier = Modifier.height(height = 15.dp))
+
+            SkillsSection(
+                skills = candidateProfile?.skills?.joinToString { ", " },
+                isPreviewMode = isPreviewMode,
+                onAddOrEditSkillsClicked = { currentSkills ->
+                    sheetTitle = mContext.getString(R.string.optional_skills_text)
+                    bottomSheetContent = {
+                        EditOrAddSkillSection(
+                            currentValue = currentSkills,
+                            onSaveClicked = { skills ->
+                                val profileCopy = candidateProfile?.copy(
+                                    skills = skills.toSet(),
+                                ) ?: CandidateProfile(
+                                    skills = skills.toSet()
+                                )
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    updateFunction(
+                                        profileId,
+                                        profileCopy
+                                    )
+                                }
+
+                                showBottomSheet = false
+                            })
+                    }
+                    showBottomSheet = true
+                })
+
+            Spacer(modifier = Modifier.height(height = 15.dp))
+        }
     }
 }
 
 @Composable
 private fun HeaderSection(
     profile: CandidateProfile?,
+    isPreviewMode: Boolean,
     onImageLoadingFailed: (String) -> Unit,
     onEditHeaderClicked: () -> Unit,
     onUploadBannerFile: (File) -> Unit,
@@ -431,14 +511,12 @@ private fun HeaderSection(
                         context, imageUri,
                         "${UUID.randomUUID()}_compressed_banner.png"
                     )
-//                    bannerFilePath = bannerFile?.absolutePath ?: ""
                     bannerFile?.let { onUploadBannerFile(it) }
                 } else if (requestCode == 2) {
                     val profilePictureFile = compressImage(
                         context, imageUri,
                         "${UUID.randomUUID()}_compressed_profile_picture.png"
                     )
-//                    profilePictureFilePath = profilePictureFile?.absolutePath ?: ""
                     profilePictureFile?.let { onUploadProfilePictureFile(it) }
                 }
             } catch (e: Exception) {
@@ -469,33 +547,37 @@ private fun HeaderSection(
                     .height(height = mWidth / 3.5F)
                     .align(alignment = Alignment.TopStart)
                     .clickable {
-                        requestCode = 1
-                        galleryLauncher.launch("image/*")
+                        if (!isPreviewMode) {
+                            requestCode = 1
+                            galleryLauncher.launch("image/*")
+                        }
                     }
             )
 
             // Edit banner icon
-            Box(
-                modifier = Modifier
-                    .padding(7.dp)
-                    .align(alignment = Alignment.TopEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = stringResource(R.string.edit_icon_desc_text),
-                    tint = MaterialTheme.colorScheme.onBackground,
+            if (!isPreviewMode) {
+                Box(
                     modifier = Modifier
-                        .clickable {
-                            requestCode = 1
-                            galleryLauncher.launch("image/*")
-                        }
-                        .background(
-                            color = MaterialTheme.colorScheme.background,
-                            shape = CircleShape
-                        )
-                        .align(alignment = Alignment.Center)
-                        .padding(3.dp)
-                )
+                        .padding(7.dp)
+                        .align(alignment = Alignment.TopEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = stringResource(R.string.edit_icon_desc_text),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .clickable {
+                                requestCode = 1
+                                galleryLauncher.launch("image/*")
+                            }
+                            .background(
+                                color = MaterialTheme.colorScheme.background,
+                                shape = CircleShape
+                            )
+                            .align(alignment = Alignment.Center)
+                            .padding(3.dp)
+                    )
+                }
             }
 
             // Profile picture
@@ -514,38 +596,46 @@ private fun HeaderSection(
                     .clip(CircleShape)
                     .align(alignment = Alignment.BottomStart)
                     .clickable {
-                        requestCode = 2
-                        galleryLauncher.launch("image/*")
+                        if (!isPreviewMode) {
+                            requestCode = 2
+                            galleryLauncher.launch("image/*")
+                        }
                     }
             )
 
             // Add Icon
-            Box(
-                modifier = Modifier
-                    .padding(15.dp)
-                    .size(size = 130.dp)
-                    .align(alignment = Alignment.BottomStart)
-                    .clickable {
-                        requestCode = 2
-                        galleryLauncher.launch("image/*")
-                    }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.AddCircle,
-                    contentDescription = stringResource(R.string.edit_profile_icon_text),
-                    tint = MaterialTheme.colorScheme.primary,
+            if (!isPreviewMode) {
+                Box(
                     modifier = Modifier
-                        .size(size = 32.dp)
-                        .align(alignment = Alignment.BottomEnd)
-                        .background(
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            shape = CircleShape
-                        )
-                )
+                        .padding(15.dp)
+                        .size(size = 130.dp)
+                        .align(alignment = Alignment.BottomStart)
+                        .clickable {
+                            requestCode = 2
+                            galleryLauncher.launch("image/*")
+                        }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.AddCircle,
+                        contentDescription = stringResource(R.string.edit_profile_icon_text),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(size = 32.dp)
+                            .align(alignment = Alignment.BottomEnd)
+                            .background(
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                shape = CircleShape
+                            )
+                    )
+                }
             }
         }
 
-        Column(modifier = Modifier.clickable { onEditHeaderClicked() }) {
+        Column(modifier = Modifier.clickable {
+            if (!isPreviewMode) {
+                onEditHeaderClicked()
+            }
+        }) {
             Text(
                 text = if (profile != null && !profile.firstname.isNullOrEmpty() && !profile.lastname.isNullOrEmpty())
                     profile.name
@@ -573,7 +663,10 @@ private fun HeaderSection(
 }
 
 @Composable
-private fun AboutSection(editedAbout: String?, onEditAboutClicked: () -> Unit) {
+private fun AboutSection(
+    editedAbout: String?,
+    isPreviewMode: Boolean, onEditAboutClicked: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -597,11 +690,13 @@ private fun AboutSection(editedAbout: String?, onEditAboutClicked: () -> Unit) {
 
             Spacer(modifier = Modifier.weight(weight = 1f))
 
-            Icon(
-                imageVector = Icons.Outlined.Edit,
-                contentDescription = stringResource(R.string.edit_icon_desc_text),
-                modifier = Modifier.clickable { onEditAboutClicked() }
-            )
+            if (!isPreviewMode) {
+                Icon(
+                    imageVector = Icons.Outlined.Edit,
+                    contentDescription = stringResource(R.string.edit_icon_desc_text),
+                    modifier = Modifier.clickable { onEditAboutClicked() }
+                )
+            }
         }
 
         Text(
@@ -620,6 +715,7 @@ private fun AboutSection(editedAbout: String?, onEditAboutClicked: () -> Unit) {
 @Composable
 private fun ExperienceSection(
     experiences: Set<Experience>?,
+    isPreviewMode: Boolean,
     onAddOrEditExperienceClicked: (Experience?) -> Unit
 ) {
     Column(
@@ -645,13 +741,15 @@ private fun ExperienceSection(
 
             Spacer(modifier = Modifier.weight(weight = 1f))
 
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add_experience_icon_desc_text),
-                modifier = Modifier
-                    .size(size = 32.dp)
-                    .clickable { onAddOrEditExperienceClicked(null) }
-            )
+            if (!isPreviewMode) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_experience_icon_desc_text),
+                    modifier = Modifier
+                        .size(size = 32.dp)
+                        .clickable { onAddOrEditExperienceClicked(null) }
+                )
+            }
         }
 
         if (experiences.isNullOrEmpty()) {
@@ -668,7 +766,11 @@ private fun ExperienceSection(
             sortedExperiences.forEach { item ->
                 ExperienceItemRow(
                     experience = item,
-                    onEditExperience = { onAddOrEditExperienceClicked(it) })
+                    onEditExperience = {
+                        if (!isPreviewMode) {
+                            onAddOrEditExperienceClicked(it)
+                        }
+                    })
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
@@ -781,6 +883,7 @@ private fun ExperienceItemRow(experience: Experience, onEditExperience: (Experie
 @Composable
 private fun EducationSection(
     educations: Set<Education>?,
+    isPreviewMode: Boolean,
     onAddOrEditEducationClicked: (Education?) -> Unit
 ) {
     Column(
@@ -806,13 +909,15 @@ private fun EducationSection(
 
             Spacer(modifier = Modifier.weight(weight = 1f))
 
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add_education_icon_desc_text),
-                modifier = Modifier
-                    .size(size = 32.dp)
-                    .clickable { onAddOrEditEducationClicked(null) }
-            )
+            if (!isPreviewMode) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_education_icon_desc_text),
+                    modifier = Modifier
+                        .size(size = 32.dp)
+                        .clickable { onAddOrEditEducationClicked(null) }
+                )
+            }
         }
 
         if (educations.isNullOrEmpty()) {
@@ -829,7 +934,11 @@ private fun EducationSection(
             sortedEducations.forEach { item ->
                 EducationItemRow(
                     education = item,
-                    onEditEducation = { onAddOrEditEducationClicked(it) }
+                    onEditEducation = {
+                        if (!isPreviewMode) {
+                            onAddOrEditEducationClicked(it)
+                        }
+                    }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
             }
@@ -876,6 +985,7 @@ private fun EducationItemRow(education: Education, onEditEducation: (Education) 
 @Composable
 private fun CertificationsSection(
     certifications: Set<Certification>?,
+    isPreviewMode: Boolean,
     onAddOrEditCertificationClicked: (Certification?) -> Unit
 ) {
     Column(
@@ -901,15 +1011,17 @@ private fun CertificationsSection(
 
             Spacer(modifier = Modifier.weight(weight = 1f))
 
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add_certification_icon_desc_text),
-                modifier = Modifier
-                    .size(size = 32.dp)
-                    .clickable {
-                        onAddOrEditCertificationClicked(null) // Add new certification
-                    }
-            )
+            if (!isPreviewMode) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_certification_icon_desc_text),
+                    modifier = Modifier
+                        .size(size = 32.dp)
+                        .clickable {
+                            onAddOrEditCertificationClicked(null) // Add new certification
+                        }
+                )
+            }
         }
 
         if (certifications.isNullOrEmpty()) {
@@ -925,7 +1037,11 @@ private fun CertificationsSection(
                 certifications.toList().sortedByDescending { it.getStartDate() }.toSet()
             sortedCertifications.forEach { item ->
                 CertificationItemRow(certification = item,
-                    onEditCertification = { onAddOrEditCertificationClicked(it) })
+                    onEditCertification = {
+                        if (!isPreviewMode) {
+                            onAddOrEditCertificationClicked(it)
+                        }
+                    })
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
@@ -999,6 +1115,7 @@ private fun CertificationItemRow(
 @Composable
 private fun ProjectsSection(
     projects: Set<Project>?,
+    isPreviewMode: Boolean,
     onAddOrEditProjectClicked: (Project?) -> Unit
 ) {
     Column(
@@ -1024,13 +1141,15 @@ private fun ProjectsSection(
 
             Spacer(modifier = Modifier.weight(weight = 1f))
 
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add_project_icon_desc_text),
-                modifier = Modifier
-                    .size(size = 32.dp)
-                    .clickable { onAddOrEditProjectClicked(null) }
-            )
+            if (!isPreviewMode) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_project_icon_desc_text),
+                    modifier = Modifier
+                        .size(size = 32.dp)
+                        .clickable { onAddOrEditProjectClicked(null) }
+                )
+            }
         }
 
         if (projects.isNullOrEmpty()) {
@@ -1044,7 +1163,11 @@ private fun ProjectsSection(
         } else {
             projects.forEach { item ->
                 ProjectItemRow(project = item,
-                    onEditProject = { onAddOrEditProjectClicked(it) })
+                    onEditProject = {
+                        if (!isPreviewMode) {
+                            onAddOrEditProjectClicked(it)
+                        }
+                    })
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
@@ -1098,7 +1221,10 @@ private fun ProjectItemRow(project: Project, onEditProject: (Project) -> Unit) {
 }
 
 @Composable
-private fun SkillsSection(skills: String?, onAddOrEditSkillsClicked: (String?) -> Unit) {
+private fun SkillsSection(
+    skills: String?,
+    isPreviewMode: Boolean, onAddOrEditSkillsClicked: (String?) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1122,13 +1248,15 @@ private fun SkillsSection(skills: String?, onAddOrEditSkillsClicked: (String?) -
 
             Spacer(modifier = Modifier.weight(weight = 1f))
 
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add_skills_icon_desc_text),
-                modifier = Modifier
-                    .size(size = 32.dp)
-                    .clickable { onAddOrEditSkillsClicked(skills) }
-            )
+            if (!isPreviewMode) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_skills_icon_desc_text),
+                    modifier = Modifier
+                        .size(size = 32.dp)
+                        .clickable { onAddOrEditSkillsClicked(skills) }
+                )
+            }
         }
 
         Text(
@@ -1136,10 +1264,13 @@ private fun SkillsSection(skills: String?, onAddOrEditSkillsClicked: (String?) -
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
-                .clickable { onAddOrEditSkillsClicked(skills) }
+                .clickable {
+                    if (!isPreviewMode) {
+                        onAddOrEditSkillsClicked(skills)
+                    }
+                }
                 .padding(horizontal = 15.dp)
         )
-
 
     }
 }

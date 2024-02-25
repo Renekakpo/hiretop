@@ -89,7 +89,11 @@ fun JobOffersScreen(
             if (candidateProfile?.skills.isNullOrEmpty()) {
                 UIState.FAILURE
             } else {
-                candidateViewModel.getAllRelevantJobs(candidateProfile?.skills?.toList().orEmpty())
+                candidateViewModel.getAllRelevantJobs(
+                    candidateProfile?.skills?.toList().orEmpty(),
+                    onSuccess = {},
+                    onFailure = {}
+                )
                 UIState.SUCCESS
             }
         }
@@ -194,37 +198,25 @@ fun JobOffersScreen(
             }
 
             UIState.FAILURE -> {
-                if (candidateProfile == null) {
+                val failureText = if (candidateProfile == null) {
                     // Display text prompting user to complete profile
-                    Text(
-                        text = stringResource(R.string.update_profile_info),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        textAlign = TextAlign.Center
-                    )
+                    stringResource(R.string.update_profile_info)
                 } else if (candidateProfile?.skills.isNullOrEmpty()) {
                     // Display text prompting user to complete profile skills
-                    Text(
-                        text = stringResource(R.string.incomplet_profile_text),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        textAlign = TextAlign.Center
-                    )
+                    stringResource(R.string.incomplet_profile_text)
                 } else {
                     // No job offers found
-                    Text(
-                        text = stringResource(R.string.no_job_offers_found_text),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        textAlign = TextAlign.Center
-                    )
+                    stringResource(R.string.no_job_offers_found_text)
                 }
+
+                Text(
+                    text = failureText,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
             }
 
             UIState.SUCCESS -> {
@@ -234,7 +226,17 @@ fun JobOffersScreen(
                             JobOfferItemRow(
                                 context = mContext,
                                 jobOffer = item,
-                                onJobOfferClicked = { onJobOfferClicked(navController, it) })
+                                onJobOfferClicked = {
+                                    if (!it.jobOfferID.isNullOrEmpty()) {
+                                        candidateViewModel.incrementJobOfferViewCount(
+                                            jobOfferId = it.jobOfferID,
+                                            onSuccess = {},
+                                            onFailure = {}
+                                        )
+                                    }
+
+                                    onJobOfferClicked(navController, it)
+                                })
                         }
                     }
                 }

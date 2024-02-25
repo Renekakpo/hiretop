@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
 import com.example.hiretop.ui.screens.entreprise.EnterpriseOffersScreen
+import com.example.hiretop.ui.screens.entreprise.applications.EnterpriseApplicationsScreen
 import com.example.hiretop.ui.screens.entreprise.dashboard.EnterpriseDashboardScreen
 import com.example.hiretop.ui.screens.entreprise.presentation.EnterpriseProfileScreen
 import com.example.hiretop.ui.screens.messaging.ChatListScreen
@@ -35,11 +36,20 @@ object EnterpriseBottomNavGraph : NavDestination {
 }
 
 sealed class EnterpriseBottomNavScreen(val route: String, val label: String, val iconID: Int) {
-    object Home : EnterpriseBottomNavScreen("home", "Accueil", R.drawable.ic_home_menu_icon)
+    object Dashboard :
+        EnterpriseBottomNavScreen("dashboard", "Accueil", R.drawable.ic_home_menu_icon)
+
     object Discover :
         EnterpriseBottomNavScreen("discover", "Explorer", R.drawable.ic_discover_menu_icon)
 
-    object Tracking :
+    object Applications :
+        EnterpriseBottomNavScreen(
+            "applications",
+            "Candidature",
+            R.drawable.ic_job_applications_menu_icon
+        )
+
+    object Chats :
         EnterpriseBottomNavScreen("chat", "Discussion", R.drawable.ic_chat_menu_icon)
 
     object Profile :
@@ -49,13 +59,14 @@ sealed class EnterpriseBottomNavScreen(val route: String, val label: String, val
 @Composable
 fun EnterpriseBottomNavHost(modifier: Modifier = Modifier, navController: NavHostController) {
     val screens = listOf(
-        EnterpriseBottomNavScreen.Home,
+        EnterpriseBottomNavScreen.Dashboard,
         EnterpriseBottomNavScreen.Discover,
-        EnterpriseBottomNavScreen.Tracking,
+        EnterpriseBottomNavScreen.Applications,
+        EnterpriseBottomNavScreen.Chats,
         EnterpriseBottomNavScreen.Profile
     )
 
-    val currentRoute = remember { mutableStateOf(EnterpriseBottomNavScreen.Home.route) }
+    val currentRoute = remember { mutableStateOf(EnterpriseBottomNavScreen.Dashboard.route) }
 
     BottomNav(
         modifier = modifier,
@@ -106,20 +117,39 @@ fun BottomNav(
     ) { innerPadding ->
         // Content of the selected screen
         when (currentRoute.value) {
-            EnterpriseBottomNavScreen.Home.route -> {
+            // Done
+            EnterpriseBottomNavScreen.Dashboard.route -> {
                 EnterpriseDashboardScreen(modifier = Modifier.padding(innerPadding))
             }
 
+            // Done
             EnterpriseBottomNavScreen.Discover.route -> {
-                EnterpriseOffersScreen(modifier = Modifier.padding(innerPadding))
+                EnterpriseOffersScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController
+                )
             }
 
-            EnterpriseBottomNavScreen.Tracking.route -> {
-                ChatListScreen(modifier = Modifier.padding(innerPadding))
+            // Done
+            EnterpriseBottomNavScreen.Applications.route -> {
+                EnterpriseApplicationsScreen(navController = navController)
             }
 
+            // Done
+            EnterpriseBottomNavScreen.Chats.route -> {
+                ChatListScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController
+                )
+            }
+
+            // Done
             EnterpriseBottomNavScreen.Profile.route -> {
-                EnterpriseProfileScreen(modifier = Modifier.padding(innerPadding))
+                EnterpriseProfileScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    isPreviewMode = false,
+                    argEnterpriseProfileId = null
+                )
             }
         }
     }

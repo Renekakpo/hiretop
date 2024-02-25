@@ -16,16 +16,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.hiretop.R
 
 @Composable
 fun AnalyticsDashboard(
-    views: Int,
-    conversions: Int,
-    applications: Int,
-    hires: Int,
-    interviews: Int
+    views: Long,
+    applications: Long,
+    hires: Long,
+    interviews: Long
 ) {
     Card(
         modifier = Modifier.wrapContentSize(),
@@ -38,29 +39,25 @@ fun AnalyticsDashboard(
                 .padding(15.dp)
         ) {
             Text(
-                text = "Tableaux de Bord Analytiques",
+                text = stringResource(R.string.dahsboard_analytics_text),
                 style = MaterialTheme.typography.headlineSmall
             )
 
             Spacer(modifier = Modifier.height(height = 15.dp))
 
-            AnalyticsItem(title = "Vues d'Offres d'Emploi", value = views.toString())
+            AnalyticsItem(title = stringResource(R.string.offers_view_count_text), value = views.toString())
 
             Spacer(modifier = Modifier.height(height = 5.dp))
 
-            AnalyticsItem(title = "Taux de Conversion des Candidatures", value = "$conversions%")
+            AnalyticsItem(title = stringResource(R.string.candidatures_text), value = applications.toString())
 
             Spacer(modifier = Modifier.height(height = 5.dp))
 
-            AnalyticsItem(title = "Candidatures", value = applications.toString())
+            AnalyticsItem(title = stringResource(R.string.entretiens_planifies_text), value = interviews.toString())
 
             Spacer(modifier = Modifier.height(height = 5.dp))
 
-            AnalyticsItem(title = "Entretiens Planifiés", value = interviews.toString())
-
-            Spacer(modifier = Modifier.height(height = 5.dp))
-
-            AnalyticsItem(title = "Recrutements", value = hires.toString())
+            AnalyticsItem(title = stringResource(R.string.recrutements_text), value = hires.toString())
         }
     }
 }

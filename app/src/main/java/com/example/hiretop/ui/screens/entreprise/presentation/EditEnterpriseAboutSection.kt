@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -28,14 +27,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.ui.extras.FailurePopup
 
 @Composable
-fun EditEnterpriseAboutSection(currentAbout: String = "", onSaveClicked: () -> Unit) {
+fun EditEnterpriseAboutSection(currentAbout: String?, onSaveClicked: (String) -> Unit) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 2600
 
-    var editedAbout by remember { mutableStateOf(currentAbout) }
+    var requiredAbout by remember { mutableStateOf(currentAbout ?: "") }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -54,8 +61,8 @@ fun EditEnterpriseAboutSection(currentAbout: String = "", onSaveClicked: () -> U
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = editedAbout,
-            onValueChange = { if (it.length <= maxLength) editedAbout = it },
+            value = requiredAbout,
+            onValueChange = { if (it.length <= maxLength) requiredAbout = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_enterprise_presentation_text),
@@ -64,7 +71,7 @@ fun EditEnterpriseAboutSection(currentAbout: String = "", onSaveClicked: () -> U
             },
             supportingText = {
                 Text(
-                    text = "${editedAbout.length} / $maxLength",
+                    text = "${requiredAbout.length} / $maxLength",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -91,7 +98,13 @@ fun EditEnterpriseAboutSection(currentAbout: String = "", onSaveClicked: () -> U
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = onSaveClicked
+            onClick = {
+                if (currentAbout.isNullOrEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.enter_company_about_text)
+                } else {
+                    onSaveClicked(currentAbout)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

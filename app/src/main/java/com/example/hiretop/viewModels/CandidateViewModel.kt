@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.hiretop.R
 import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.data.datastore.HireTopDataStoreRepos
+import com.example.hiretop.di.repository.JobOfferApplicationRepository
 import com.example.hiretop.helpers.FirebaseHelper
 import com.example.hiretop.models.CandidateProfile
+import com.example.hiretop.models.EnterpriseProfile
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.utils.Constant.CANDIDATES_COLLECTION_NAME
@@ -16,6 +18,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +43,8 @@ class CandidateViewModel @Inject constructor(
     @Named(JOB_APPLICATIONS_COLLECTION_NAME)
     private val jobApplicationsCollection: CollectionReference,
     appDataStore: HireTopDataStoreRepos,
-    private val firebaseHelper: FirebaseHelper
+    private val firebaseHelper: FirebaseHelper,
+    private val applicationRepos: JobOfferApplicationRepository,
 ) : ViewModel() {
 
     // Flow to hold the candidate profile id
@@ -58,13 +62,38 @@ class CandidateViewModel @Inject constructor(
     private val _jobOffers = MutableStateFlow<List<JobOffer>?>(null)
     val jobOffers: StateFlow<List<JobOffer>?> = _jobOffers
 
-    private val _canApplyToJobOffer = MutableStateFlow<Boolean>(false)
+    // StateFlow to hold candidate's job applications
+    private val _jobApplications = MutableStateFlow<List<JobApplication>?>(null)
+    val jobApplications: StateFlow<List<JobApplication>?> = _jobApplications
+
+    // StateFlow to hold the canApply to job offers
+    private val _canApplyToJobOffer = MutableStateFlow(false)
     val canApplyToJobOffer: StateFlow<Boolean> = _canApplyToJobOffer
+
+    fun getCandidateJobApplications(
+        profileId: String,
+        onSuccess: (List<JobApplication>?) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            applicationRepos.getJobOfferApplicationsForCandidate(
+                candidateID = profileId,
+                onSuccess = { items ->
+                    _jobApplications.update { items }
+                    onSuccess(items)
+                },
+                onFailure = { message -> onFailure(message) })
+        }
+    }
 
     /**
      * Function to fetch job offers based on candidate skills
      */
-    fun getRecommendedJobs(candidateSkills: List<String>) {
+    fun getRecommendedJobs(
+        candidateSkills: List<String>,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             jobOffersCollection
                 .whereArrayContainsAny("skills", candidateSkills)
@@ -79,10 +108,15 @@ class CandidateViewModel @Inject constructor(
                             jobOffers.add(it)
                         }
                     }
-                    TODO("Handle success")
+
+                    _recommendedJobs.value = jobOffers.filter { !it.isClosed }
+
+                    onSuccess()
                 }
                 .addOnFailureListener {
-                    TODO("Handle failure")
+                    onFailure(
+                        it.message ?: appContext.getString(R.string.read_job_offers_failure_text)
+                    )
                 }
         }
     }
@@ -90,7 +124,11 @@ class CandidateViewModel @Inject constructor(
     /**
      * Function to fetch relevant job offers based on candidate skills
      */
-    fun getAllRelevantJobs(candidateSkills: List<String>) {
+    fun getAllRelevantJobs(
+        candidateSkills: List<String>,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             jobOffersCollection
                 .whereArrayContainsAny("skills", candidateSkills)
@@ -104,11 +142,13 @@ class CandidateViewModel @Inject constructor(
                             mJobOffers.add(it)
                         }
                     }
-                    _jobOffers.update { mJobOffers }
-//                    callback(mJobOffers)
+                    _jobOffers.update { mJobOffers.filter { !it.isClosed } } // Filter out closed jobs
+                    onSuccess()
                 }
                 .addOnFailureListener {
-                    TODO("Handle failure")
+                    onFailure(
+                        it.message ?: appContext.getString(R.string.read_job_offers_failure_text)
+                    )
                 }
         }
     }
@@ -142,7 +182,7 @@ class CandidateViewModel @Inject constructor(
     }
 
     /**
-     * Function to add or update candidate profile
+     * Function to update candidate profile
      */
     fun updateCandidateProfile(
         profileId: String,
@@ -152,7 +192,7 @@ class CandidateViewModel @Inject constructor(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             candidateProfilesCollection.document(profileId)
-                .set(editedProfile)
+                .set(editedProfile, SetOptions.merge())
                 .addOnSuccessListener {
                     onSuccess()
                 }
@@ -168,26 +208,33 @@ class CandidateViewModel @Inject constructor(
     /**
      * Function to get candidate profile by profile ID
      */
-    fun getCandidateProfile(profileId: String, callback: (CandidateProfile?) -> Unit) {
+    fun getCandidateProfile(
+        profileId: String,
+        onSuccess: (CandidateProfile?) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             candidateProfilesCollection.document(profileId)
                 .get()
                 .addOnSuccessListener { document ->
                     val profile = document.toObject<CandidateProfile>()
                     _candidateProfile.update { profile }
-                    callback(profile)
+                    onSuccess(profile)
                 }
                 .addOnFailureListener {
-                    callback(null)
-                    TODO("Handle failure")
+                    onFailure(
+                        it.message ?: appContext.getString(R.string.read_profile_failure_text)
+                    )
                 }
         }
     }
 
-    fun uploadFileToFirebaseStorageAndGetUrl(inputStream: InputStream,
-                                           fileName: String,
-                                           onSuccess: (String) -> Unit,
-                                           onFailure: (String) -> Unit) {
+    fun uploadFileToFirebaseStorageAndGetUrl(
+        inputStream: InputStream,
+        fileName: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             firebaseHelper.uploadFileToFirebaseStorage(
                 inputStream, fileName, onSuccess, onFailure
@@ -235,7 +282,7 @@ class CandidateViewModel @Inject constructor(
                 .addOnFailureListener {
                     onFailure(
                         it.message ?: it.localizedMessage
-                        ?: "Échec de mise à jour de la photo de profil."
+                        ?: appContext.getString(R.string.update_candidate_profile_picture_failure_text)
                     )
                 }
         }
@@ -256,7 +303,10 @@ class CandidateViewModel @Inject constructor(
                     onSuccess()
                 }
                 .addOnFailureListener {
-                    onFailure(it.message ?: "Échec d'incrémentation du nombre de vue.")
+                    onFailure(
+                        it.message
+                            ?: appContext.getString(R.string.increase_offer_view_failure_text)
+                    )
                 }
         }
     }
@@ -274,10 +324,13 @@ class CandidateViewModel @Inject constructor(
 
                     _canApplyToJobOffer.update { applicationQuery.isEmpty }
                 } catch (e: Exception) {
-                    onFailure(e.message ?: "Impossible de vérifier l'état de la candidature.")
+                    onFailure(
+                        e.message
+                            ?: appContext.getString(R.string.check_job_application_status_failure_text)
+                    )
                 }
             } else {
-                onFailure("Profil du candidat introuvable.")
+                onFailure(appContext.getString(R.string.found_candidate_profile_failure_text))
             }
         }
     }
@@ -289,12 +342,15 @@ class CandidateViewModel @Inject constructor(
     fun applyToJobOffer(jobOffer: JobOffer, onSuccess: () -> Unit, onError: (String) -> Unit) {
         val jobApplication = JobApplication(
             candidateProfileId = candidateProfileId.toString(),
+            enterpriseProfileId = jobOffer.enterpriseID,
             jobOfferId = "${jobOffer.jobOfferID}",
             jobOfferTitle = jobOffer.title,
             companyName = jobOffer.company ?: "",
+            candidateFullName = candidateProfile.value?.lastname ?: "",
+            candidatePictureUrl = candidateProfile.value?.pictureUrl,
             location = jobOffer.location ?: "",
             locationType = jobOffer.locationType ?: "",
-            status = "En attente", // Set initial status
+            status = appContext.getString(R.string.on_hold_application_status_text), // Set initial status
             stages = "", // Set initial stages
             appliedAt = System.currentTimeMillis() // Set application timestamp
         )
@@ -306,8 +362,31 @@ class CandidateViewModel @Inject constructor(
                 onSuccess.invoke()
             }
             .addOnFailureListener { exception ->
-                onError.invoke(exception.message ?: "Failed to apply to the job offer")
+                onError.invoke(
+                    exception.message
+                        ?: appContext.getString(R.string.send_job_application_failure_text)
+                )
             }
     }
 
+    fun withdrawJobApplication(
+        jobApplication: JobApplication,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            jobApplicationsCollection
+                .document("${jobApplication.jobApplicationId}")
+                .set(jobApplication, SetOptions.merge())
+                .addOnSuccessListener {
+                    onSuccess()
+                }
+                .addOnFailureListener {
+                    onFailure(
+                        it.message
+                            ?: appContext.getString(R.string.withdraw_job_application_failure_info)
+                    )
+                }
+        }
+    }
 }

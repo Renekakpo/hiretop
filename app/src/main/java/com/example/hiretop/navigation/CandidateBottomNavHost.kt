@@ -24,7 +24,7 @@ import androidx.navigation.NavHostController
 import com.example.hiretop.R
 import com.example.hiretop.ui.screens.candidate.dashboard.CandidateDashboardScreen
 import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
-import com.example.hiretop.ui.screens.candidate.tracking.JobApplicationsScreen
+import com.example.hiretop.ui.screens.candidate.tracking.CandidateJobApplicationsTrackingScreen
 import com.example.hiretop.ui.screens.messaging.ChatListScreen
 import com.example.hiretop.ui.screens.offers.JobOffersScreen
 
@@ -34,6 +34,7 @@ object CandidateBottomNavGraph : NavDestination {
 
 sealed class CandidateBottomNavScreen(val route: String, val label: String, val iconID: Int) {
     object Home : CandidateBottomNavScreen("home", "Accueil", R.drawable.ic_home_menu_icon)
+
     object Discover :
         CandidateBottomNavScreen("discover", "Explorer", R.drawable.ic_discover_menu_icon)
 
@@ -106,6 +107,7 @@ fun BottomNav(
     ) { innerPadding ->
         // Content of the selected screen
         when (currentRoute.value) {
+            // Done
             CandidateBottomNavScreen.Home.route -> {
                 CandidateDashboardScreen(
                     modifier = Modifier.padding(innerPadding),
@@ -113,6 +115,7 @@ fun BottomNav(
                 )
             }
 
+            // Done
             CandidateBottomNavScreen.Discover.route -> {
                 JobOffersScreen(
                     modifier = Modifier.padding(innerPadding),
@@ -120,16 +123,29 @@ fun BottomNav(
                 )
             }
 
+            // Done
             CandidateBottomNavScreen.Tracking.route -> {
-                JobApplicationsScreen(modifier = Modifier.padding(innerPadding))
+                CandidateJobApplicationsTrackingScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController
+                )
             }
 
+            // Done
             CandidateBottomNavScreen.Chat.route -> {
-                ChatListScreen(modifier = Modifier.padding(innerPadding))
+                ChatListScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController
+                )
             }
 
+            // Done
             CandidateBottomNavScreen.Profile.route -> {
-                CandidateProfileScreen(modifier = Modifier.padding(innerPadding))
+                CandidateProfileScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    isPreviewMode = false,
+                    argCandidateProfileId = null
+                )
             }
         }
     }

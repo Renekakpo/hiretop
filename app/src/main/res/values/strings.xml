@@ -88,8 +88,8 @@
     <string name="filter_job_offers_text">Filtrer les offres d\'emploi</string>
     <string name="on_hold_application_status_text">En attente</string>
     <string name="on_going_application_status_text">En cours</string>
-    <string name="approved_application_status_text">Approuvé</string>
-    <string name="declined_application_status_text">Refusé</string>
+    <string name="approved_application_status_text">Approuver</string>
+    <string name="declined_application_status_text">Rejeter</string>
     <string name="posted_seconds_ago_text">Publié il y a %1$d seconde(s)</string>
     <string name="posted_minutes_ago_text">Publié il y a %1$d minute(s)</string>
     <string name="posted_hours_ago_text">Publié il y a %1$d heure(s)</string>
@@ -145,7 +145,7 @@
     <string name="down_arrow_icon_desc_text">Down arrow</string>
     <string name="checked_icon_desc_text">Checked icon</string>
     <string name="application_search_icon_desc_text">Rechercher une candidature</string>
-    <string name="application_search_field_placeholder_text">Nom, étape ou titre du poste</string>
+    <string name="application_search_field_placeholder_text">Nom, statut, étape ou titre du poste</string>
     <string name="applications_management_text">Gestion des candidatures</string>
     <string name="send_icon_desc_text">Send message icon</string>
     <string name="message_field_placeholder">Entrez un message</string>
@@ -188,7 +188,7 @@
     <string name="empty_issuing_organization_title_error_text">Entrez le nom de l\'organisme émettrice.</string>
     <string name="empty_project_name_error_text">Entrez le nom du projet.</string>
     <string name="empty_skill_title_error_text">Entrez le titre de la compétence</string>
-    <string name="unkown_error_text">Unkown error</string>
+    <string name="unkown_error_text">Erreur inconnue</string>
     <string name="no_image_picked_error_text">Aucune image sélectionnée</string>
     <string name="profile_update_failed_error_text">Échec de mise à jour du profil.</string>
     <string name="no_experience_text">Aucune expérience ajoutée pour l\'instant.</string>
@@ -200,8 +200,58 @@
     <string name="fetch_job_offer_error_text">Échec de récupération de l\'offre d\'emploi.</string>
     <string name="uploaded_file_url_error_text">Échec de l\'obtention de l\'URL du fichier téléchargé.</string>
     <string name="file_upload_failed_text">Échec du téléchargement du fichier vers le stockage</string>
+    <string name="job_application_creation_failed_text">Échec de création de l\'offre d\'emploi.</string>
+    <string name="read_job_application_failed_text">Échec de mise à jour de l\'offre d\'emploi.</string>
+    <string name="update_candidate_profile_picture_failure_text">Échec de mise à jour de la photo de profil.</string>
+    <string name="increase_offer_view_failure_text">Échec d\'incrémentation du nombre de vue.</string>
+    <string name="check_job_application_status_failure_text">Impossible de vérifier l\'état de la candidature.</string>
+    <string name="found_candidate_profile_failure_text">Profil du candidat introuvable.</string>
+    <string name="send_job_application_failure_text">Échec de l\'envoi de la candidature.</string>
+    <string name="no_job_application_found_text">Vous n\'avez actuellement aucune candidature dans votre liste. Pourquoi ne pas commencer par rechercher des offres d\'emploi et postuler pour celles qui vous intéressent ? Bonne chance dans votre recherche !</string>
+    <string name="read_job_applications_failure_text">Échec de récupération de la liste de candidature.</string>
+    <string name="discussions_text">Discussions</string>
+    <string name="chat_list_creation_failure_text">Échec de création de la liste de discussions.</string>
+    <string name="fetch_received_messages_failure_text">Échec de récupération des messages reçus.</string>
+    <string name="fetch_unread_messages_failure_text">Échec de récupération des messages non lus.</string>
+    <string name="fetch_messages_failure_text">Échec de récupération des messages.</string>
+    <string name="send_message_failure_text">Échec d\'envoi du message.</string>
+    <string name="enterprise_empty_chat_list_text">Votre liste de discussions est vide pour le moment.</string>
+    <string name="candidate_empty_chat_list_text">Vous n\'avez reçu aucun message pour le moment.</string>
+    <string name="chat_item_profile_image_desc">Sender profile picture</string>
+    <string name="candidate_profile_preview">Aperçu du profil</string>
+    <string name="read_profile_failure_text">Échec de récupération des informations du profil.</string>
+    <string name="profile_not_found_text">Oops ! Profil introuvable.</string>
+    <string name="enter_company_name_text">Entrez le nom de votre entreprise.</string>
+    <string name="enter_company_industry_name_text">Entrez votre secteur d\'activité.</string>
+    <string name="enter_company_headline_text">Entrez le titre de votre entreprise.</string>
+    <string name="enter_company_location_text">Entre le nom de la ville (ou pays) où se trouve votre entreprise.</string>
+    <string name="enter_company_about_text">Entrez la présentation de votre entrprise.</string>
+    <string name="empty_cultures_and_values_text">Entrez les cultures et valeurs de votre entreprise.</string>
+    <string name="empty_enterprise_contact_details_text">Entrez les coordonnées de votre emprise.</string>
+    <string name="job_offer_management_text">Gestion des offres d\'emploi</string>
+    <string name="no_enterprise_job_offer_found">Aucune offre d\'emploi trouvée.</string>
+    <string name="kpi_text">Indicateurs de Performance Clés (KPI)</string>
+    <string name="retention_text">Retention</string>
+    <string name="conversion_text">Conversion</string>
+    <string name="productivity_text">Productivité</string>
+    <string name="dahsboard_analytics_text">Tableaux de Bord Analytiques</string>
+    <string name="offers_view_count_text">Offres d\'Emploi Vues</string>
+    <string name="candidatures_text">Candidatures</string>
+    <string name="recrutements_text">Recrutements</string>
+    <string name="entretiens_planifies_text">Entretiens Planifiés</string>
+    <string name="empty_enterprise_analytics_text">Complétez les informations de votre profilpour accéder aux statistiques.</string>
+    <string name="empty_enterprise_applications_list_info">Complétez les informations de votre profil pour obtenir la liste des candidatures.</string>
+    <string name="enterprise_no_job_application_found_info">Aucune candidature trouvée.</string>
+    <string name="applied_offer_info">Poste candidaté: %1$s</string>
+    <string name="application_status_info">Situation: %1$s</string>
+    <string name="application_stages_info">Étape: %1$s</string>
+    <string name="status_text">Statut</string>
+    <string name="make_an_offer_text">Faire une offre</string>
+    <string name="withdraw_button_text">Rappeler</string>
+    <string name="offer_received_content_text">Offre reçu: %1$s</string>
+    <string name="withdraw_job_application_failure_info">Échec de rappele de la candidature.</string>
+    <string name="application_update_failure_info">Échec de mise à jour de la candidature.</string>
     <string-array name="job_type_list">
-        <item>Veuillez sélectionner</item>
         <item>Temps plein</item>
         <item>Temps partiel</item>
         <item>Indépendant</item>
@@ -212,7 +262,6 @@
         <item>Saisonnier</item>
     </string-array>
     <string-array name="location_type_list">
-        <item>Veuillez sélectionner</item>
         <item>Sur site</item>
         <item>Hybride</item>
         <item>À distance</item>
@@ -243,5 +292,11 @@
         <item>Maitrîse</item>
         <item>Doctorat</item>
         <item>MBA</item>
+    </string-array>
+    <string-array name="job_application_status">
+        <item>En attente</item>
+        <item>En cours</item>
+        <item>Approuver</item>
+        <item>Rejeter</item>
     </string-array>
 </resources>

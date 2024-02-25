@@ -27,14 +27,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.ui.extras.FailurePopup
 
 @Composable
-fun EditEnterpriseContactDetailsSection(currentContactDetails: String = "", onSaveClicked: () -> Unit) {
+fun EditEnterpriseContactDetailsSection(
+    currentContactDetails: String?,
+    onSaveClicked: (String) -> Unit
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 700
 
-    var editedContactDetails by remember { mutableStateOf(currentContactDetails) }
+    var requiredContactDetails by remember { mutableStateOf(currentContactDetails ?: "") }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -53,8 +64,8 @@ fun EditEnterpriseContactDetailsSection(currentContactDetails: String = "", onSa
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = editedContactDetails,
-            onValueChange = { if (it.length <= maxLength) editedContactDetails = it },
+            value = requiredContactDetails,
+            onValueChange = { if (it.length <= maxLength) requiredContactDetails = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_enterprise_contact_details_text),
@@ -63,7 +74,7 @@ fun EditEnterpriseContactDetailsSection(currentContactDetails: String = "", onSa
             },
             supportingText = {
                 Text(
-                    text = "${editedContactDetails.length} / $maxLength",
+                    text = "${requiredContactDetails.length} / $maxLength",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -90,7 +101,14 @@ fun EditEnterpriseContactDetailsSection(currentContactDetails: String = "", onSa
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = onSaveClicked
+            onClick = {
+                if (requiredContactDetails.isEmpty()) {
+                    onErrorMessage =
+                        mContext.getString(R.string.empty_enterprise_contact_details_text)
+                } else {
+                    onSaveClicked(requiredContactDetails)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

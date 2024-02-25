@@ -1,5 +1,7 @@
 package com.example.hiretop.di.repository
 
+import com.example.hiretop.R
+import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.EnterpriseProfile
@@ -71,7 +73,7 @@ class ChatItemRepository @Inject constructor(
 
         // Create ChatItemUI object and return it
         return ChatItemUI(
-            chatId = chatItem.chatId,
+            chatId = chatItem.chatId ?: "",
             pictureUrl = if (!isEnterpriseAccount) candidateProfile?.pictureUrl
                 ?: "" else enterpriseProfile?.pictureUrl ?: "",
             profileName = if (!isEnterpriseAccount) candidateProfile?.name
@@ -83,56 +85,92 @@ class ChatItemRepository @Inject constructor(
 
     suspend fun getChatItemUIList(
         profileId: String,
-        isEnterpriseAccount: Boolean
-    ): List<ChatItemUI> {
-        // Query Firestore collection to get ChatItem documents
-        val chatItemDocs = chatsCollection.get().await()
+        isEnterpriseAccount: Boolean,
+        onSuccess: (List<ChatItemUI>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            // Init conditional field
+            val field = if (isEnterpriseAccount) {
+                "enterpriseId"
+            } else {
+                "profileId"
+            }
 
-        // List to hold ChatItemUI objects
-        val chatItemUIList = mutableListOf<ChatItemUI>()
+            // Query Firestore collection to get ChatItem documents
+            val chatItemDocs = chatsCollection
+                .whereEqualTo(field, profileId)
+                .get()
+                .await()
 
-        // Iterate through each ChatItem document
-        for (chatItemDoc in chatItemDocs) {
-            val chatItem = chatItemDoc.toObject(ChatItem::class.java)
+            // List to hold ChatItemUI objects
+            val chatItemUIList = mutableListOf<ChatItemUI>()
 
-            // Fetch candidate profile
-            val candidateProfileDoc =
-                candidateProfilesCollection.document(chatItem.profileId).get().await()
-            val candidateProfile = candidateProfileDoc.toObject(CandidateProfile::class.java)
+            if (chatItemDocs.isEmpty) {
+                onSuccess(emptyList())
+            } else {
+                // Iterate through each ChatItem document
+                for (chatItemDoc in chatItemDocs) {
+                    val chatItem = chatItemDoc.toObject(ChatItem::class.java)
 
-            // Fetch enterprise profile
-            val enterpriseProfileDoc =
-                enterpriseProfilesCollection.document(chatItem.enterpriseId).get().await()
-            val enterpriseProfile = enterpriseProfileDoc.toObject(EnterpriseProfile::class.java)
+                    // Fetch job offer
+                    val jobOfferDoc =
+                        jobOffersCollection.document(chatItem.jobOfferId).get().await()
+                    val jobOffer = jobOfferDoc.toObject(JobOffer::class.java)
 
-            // Fetch job offer
-            val jobOfferDoc = jobOffersCollection.document(chatItem.jobOfferId).get().await()
-            val jobOffer = jobOfferDoc.toObject(JobOffer::class.java)
+                    // Query Firestore collection to get Message documents related to this chat
+                    val messageQuery = messagesCollection
+                        .whereEqualTo("subject", chatItem.chatId)
+                        .whereEqualTo("isRead", false)
+                    val unreadMessageCount = messageQuery.get().await().size().toLong()
 
-            // Fetch job application
-            val jobApplicationDoc =
-                jobApplicationsCollection.document(chatItem.jobApplicationId).get().await()
-            val jobApplication = jobApplicationDoc.toObject(JobApplication::class.java)
+                    var chatItemUI: ChatItemUI
 
-            // Query Firestore collection to get Message documents related to this chat
-            val messageQuery = messagesCollection
-                .whereEqualTo("subject", chatItem.chatId)
-                .whereEqualTo("isRead", false)
-            val unreadMessageCount = messageQuery.get().await().size().toLong()
+                    if (isEnterpriseAccount) {
+                        // Fetch enterprise profile
+                        val enterpriseProfileDoc =
+                            enterpriseProfilesCollection.document(chatItem.enterpriseId).get()
+                                .await()
+                        val enterpriseProfile =
+                            enterpriseProfileDoc.toObject(EnterpriseProfile::class.java)
 
-            // Create ChatItemUI object and add it to the list
-            val chatItemUI = ChatItemUI(
-                chatId = chatItem.chatId,
-                pictureUrl = if (!isEnterpriseAccount) candidateProfile?.pictureUrl
-                    ?: "" else enterpriseProfile?.pictureUrl ?: "",
-                profileName = if (!isEnterpriseAccount) candidateProfile?.name
-                    ?: "" else enterpriseProfile?.name ?: "",
-                offerTitle = jobOffer?.title ?: "",
-                unreadMessageCount = unreadMessageCount
-            )
-            chatItemUIList.add(chatItemUI)
+                        // Create ChatItemUI object and add it to the list
+                        chatItemUI = ChatItemUI(
+                            chatId = chatItem.chatId ?: "",
+                            pictureUrl = enterpriseProfile?.pictureUrl ?: "",
+                            profileName = enterpriseProfile?.name ?: "",
+                            offerTitle = jobOffer?.title ?: "",
+                            unreadMessageCount = unreadMessageCount
+                        )
+                    } else {
+                        // Fetch candidate profile
+                        val candidateProfileDoc =
+                            candidateProfilesCollection.document(chatItem.profileId).get().await()
+                        val candidateProfile =
+                            candidateProfileDoc.toObject(CandidateProfile::class.java)
+
+                        // Create ChatItemUI object and add it to the list
+                        chatItemUI = ChatItemUI(
+                            chatId = chatItem.chatId ?: "",
+                            pictureUrl = candidateProfile?.pictureUrl ?: "",
+                            profileName = candidateProfile?.name ?: "",
+                            offerTitle = jobOffer?.title ?: "",
+                            unreadMessageCount = unreadMessageCount
+                        )
+                    }
+
+                    // Fetch job application
+//                val jobApplicationDoc =
+//                    jobApplicationsCollection.document(chatItem.jobApplicationId).get().await()
+//                val jobApplication = jobApplicationDoc.toObject(JobApplication::class.java)
+
+                    chatItemUIList.add(chatItemUI)
+                }
+
+                onSuccess(chatItemUIList)
+            }
+        } catch (e: Exception) {
+            onFailure(e.message ?: appContext.getString(R.string.chat_list_creation_failure_text))
         }
-
-        return chatItemUIList
     }
 }

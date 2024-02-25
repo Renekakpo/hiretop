@@ -3,7 +3,6 @@ package com.example.hiretop.ui.screens.entreprise.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,20 +23,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.ui.extras.FailurePopup
 
 @Composable
-fun EditProfileHeaderSection(onSaveClicked: () -> Unit) {
+fun EditProfileHeaderSection(
+    currentName: String?,
+    currentHeadline: String?,
+    currentIndustry: String?,
+    currentLocation: String?,
+    onSaveClicked: (String, String, String, String) -> Unit
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
-    var name by remember { mutableStateOf("") }
-    var headline by remember { mutableStateOf("") }
-    var industry by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
+    var requiredName by remember { mutableStateOf(currentName ?: "") }
+    var requiredHeadline by remember { mutableStateOf(currentHeadline ?: "") }
+    var requiredIndustry by remember { mutableStateOf(currentIndustry ?: "") }
+    var requiredLocation by remember { mutableStateOf(currentLocation ?: "") }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -54,8 +66,8 @@ fun EditProfileHeaderSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
+            value = requiredName,
+            onValueChange = { requiredName = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_enterprise_name_text),
@@ -69,8 +81,8 @@ fun EditProfileHeaderSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = headline,
-            onValueChange = { headline = it },
+            value = requiredHeadline,
+            onValueChange = { requiredHeadline = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_enterprise_headline_text),
@@ -84,8 +96,8 @@ fun EditProfileHeaderSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = industry,
-            onValueChange = { industry = it },
+            value = requiredIndustry,
+            onValueChange = { requiredIndustry = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_industry_text),
@@ -100,8 +112,8 @@ fun EditProfileHeaderSection(onSaveClicked: () -> Unit) {
         Spacer(modifier = Modifier.height(height = 25.dp))
 
         OutlinedTextField(
-            value = location,
-            onValueChange = { location = it },
+            value = requiredLocation,
+            onValueChange = { requiredLocation = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_location_text),
@@ -125,7 +137,24 @@ fun EditProfileHeaderSection(onSaveClicked: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSaveClicked() }
+            onClick = {
+                if (requiredName.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.enter_company_name_text)
+                } else if (requiredIndustry.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.enter_company_industry_name_text)
+                } else if (requiredHeadline.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.enter_company_headline_text)
+                } else if (requiredLocation.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.enter_company_location_text)
+                } else {
+                    onSaveClicked(
+                        requiredName,
+                        requiredIndustry,
+                        requiredHeadline,
+                        requiredLocation
+                    )
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

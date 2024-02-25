@@ -5,19 +5,28 @@ import androidx.lifecycle.viewModelScope
 import com.example.hiretop.R
 import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.data.datastore.HireTopDataStoreRepos
+import com.example.hiretop.di.repository.JobOfferApplicationRepository
+import com.example.hiretop.helpers.FirebaseHelper
+import com.example.hiretop.models.CandidateProfile
 import com.example.hiretop.models.EnterpriseProfile
+import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.utils.Constant.ENTERPRISES_COLLECTION_NAME
+import com.example.hiretop.utils.Constant.JOB_APPLICATIONS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.JOB_OFFERS_COLLECTION_NAME
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -28,8 +37,15 @@ class EnterpriseViewModel @Inject constructor(
     private val jobOffersCollection: CollectionReference,
     @Named(ENTERPRISES_COLLECTION_NAME)
     private val enterprisesCollection: CollectionReference,
-    private val appDataStore: HireTopDataStoreRepos
+    @Named(JOB_APPLICATIONS_COLLECTION_NAME)
+    private val jobApplicationsCollection: CollectionReference,
+    private val appDataStore: HireTopDataStoreRepos,
+    private val firebaseHelper: FirebaseHelper,
+    private val jobOfferApplicationRepository: JobOfferApplicationRepository,
 ) : ViewModel() {
+
+    // Flow to hold the enterprise profile id
+    val enterpriseProfileId: Flow<String?> = appDataStore.enterpriseProfileId
 
     private val _jobOffersList = MutableStateFlow<List<JobOffer>?>(null)
     val jobOffersList: StateFlow<List<JobOffer>?> = _jobOffersList
@@ -39,6 +55,30 @@ class EnterpriseViewModel @Inject constructor(
 
     private val _enterpriseProfile = MutableStateFlow<EnterpriseProfile?>(null)
     val enterpriseProfile: StateFlow<EnterpriseProfile?> = _enterpriseProfile
+
+    private val _retention = MutableStateFlow<Double>(0.0)
+    val retention: StateFlow<Double> = _retention
+
+    private val _conversion = MutableStateFlow<Double>(0.0)
+    val conversion: StateFlow<Double> = _conversion
+
+    private val _productivity = MutableStateFlow<Double>(0.0)
+    val productivity: StateFlow<Double> = _productivity
+
+    private val _views = MutableStateFlow<Long>(0)
+    val views: StateFlow<Long> = _views
+
+    private val _applications = MutableStateFlow<Long>(0)
+    val applications: StateFlow<Long> = _applications
+
+    private val _hired = MutableStateFlow<Long>(0)
+    val hired: StateFlow<Long> = _hired
+
+    private val _interviews = MutableStateFlow<Long>(0)
+    val interviews: StateFlow<Long> = _interviews
+
+    private val _jobApplications = MutableStateFlow<List<JobApplication>?>(null)
+    val jobApplications: StateFlow<List<JobApplication>?> = _jobApplications
 
     fun addJobOffer(jobOffer: JobOffer, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -74,7 +114,7 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
-    fun deleteJobOffer(jobOfferID: String) {
+    fun deleteJobOffer(jobOfferID: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             jobOffersCollection.document(jobOfferID).delete()
                 .addOnSuccessListener {
@@ -86,7 +126,11 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
-    fun getAllJobOffersForEnterprise(enterpriseID: String, onFailure: (String) -> Unit) {
+    fun getAllJobOffersForEnterprise(
+        enterpriseID: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             jobOffersCollection
                 .whereEqualTo("enterpriseID", enterpriseID)
@@ -120,6 +164,7 @@ class EnterpriseViewModel @Inject constructor(
                 .add(profile)
                 .addOnSuccessListener { documentReference ->
                     saveEnterpriseProfileId(profileId = documentReference.id)
+                    _enterpriseProfile.update { it?.copy(enterpriseID = documentReference.id) }
                     onSuccess(documentReference.id)
                 }
                 .addOnFailureListener {
@@ -137,52 +182,81 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
-    fun addOrUpdateEnterpriseProfile(enterpriseId: String, profile: EnterpriseProfile) {
+    fun updateEnterpriseProfile(
+        enterpriseId: String,
+        updatedProfile: EnterpriseProfile,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val enterpriseRef = enterprisesCollection.document(enterpriseId)
-            if (profile.enterpriseID == null) {
-                enterpriseRef.set(profile)
-                    .addOnSuccessListener {
-                        TODO("Handle success")
-                    }
-                    .addOnFailureListener {
-                        TODO("Handle failure")
-                    }
-            } else {
-                enterpriseRef.set(profile.copy(enterpriseID = null))
-                    .addOnSuccessListener {
-                        TODO("Handle success")
-                    }
-                    .addOnFailureListener {
-                        TODO("Handle failure")
-                    }
-            }
+            enterprisesCollection
+                .document(enterpriseId)
+                .set(updatedProfile, SetOptions.merge())
+                .addOnSuccessListener {
+                    onSuccess()
+                }
+                .addOnFailureListener {
+                    onFailure(
+                        it.message
+                            ?: appContext.getString(R.string.profile_update_failed_error_text)
+                    )
+                }
         }
     }
 
-    fun getEnterpriseProfile(enterpriseId: String, callback: (EnterpriseProfile?) -> Unit) {
+    fun getEnterpriseProfile(
+        enterpriseId: String,
+        onSuccess: (EnterpriseProfile) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             enterprisesCollection.document(enterpriseId)
                 .get()
                 .addOnSuccessListener { document ->
                     val profile = document.toObject<EnterpriseProfile>()
-                    callback(profile)
+                    if (profile == null) {
+                        onFailure(appContext.getString(R.string.profile_not_found_text))
+                    } else {
+                        _enterpriseProfile.update { profile }
+                        onSuccess(profile)
+                    }
                 }
                 .addOnFailureListener {
-                    callback(null)
+                    onFailure(
+                        it.message ?: appContext.getString(R.string.read_profile_failure_text)
+                    )
                 }
         }
     }
 
-    fun addOrEditBannerImage(enterpriseId: String, bannerUrl: String, callback: (String?) -> Unit) {
+    fun uploadFileToFirebaseStorageAndGetUrl(
+        inputStream: InputStream,
+        fileName: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            firebaseHelper.uploadFileToFirebaseStorage(
+                inputStream, fileName, onSuccess, onFailure
+            )
+        }
+
+    }
+
+    fun addOrEditBannerImage(
+        enterpriseId: String,
+        bannerUrl: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             enterprisesCollection.document(enterpriseId)
                 .update("bannerUrl", bannerUrl)
                 .addOnSuccessListener {
-                    callback("success")
+                    onSuccess()
                 }
                 .addOnFailureListener {
-                    callback(it.message ?: "no error message")
+                    onFailure(it.message ?: "Échec de modification de la bannière.")
                 }
         }
     }
@@ -190,17 +264,244 @@ class EnterpriseViewModel @Inject constructor(
     fun addOrEditProfilePicture(
         enterpriseId: String,
         pictureUrl: String,
-        callback: (String?) -> Unit
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             enterprisesCollection.document(enterpriseId)
                 .update("pictureUrl", pictureUrl)
                 .addOnSuccessListener {
-                    callback("success")
+                    onSuccess()
                 }
                 .addOnFailureListener {
-                    callback(it.message ?: it.localizedMessage ?: "no error message")
+                    onFailure(
+                        it.message ?: it.localizedMessage
+                        ?: "Échec de modification de la photo de profil."
+                    )
                 }
         }
     }
+
+    fun calculateRetention(
+        enterpriseId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Count the number of active applications
+                val activeApplicationsSnapshot = jobApplicationsCollection
+                    .whereEqualTo("enterpriseProfileId", enterpriseId)
+                    .whereEqualTo("withdrawn", false)
+                    .get().await()
+                val activeApplicationsCount = activeApplicationsSnapshot.size()
+
+                // Count the total number of applications
+                val totalApplicationsSnapshot = jobApplicationsCollection
+                    .whereEqualTo("enterpriseProfileId", enterpriseId)
+                    .get().await()
+                val totalApplicationsCount = totalApplicationsSnapshot.size()
+
+                // Calculate retention
+                _retention.value = if (totalApplicationsCount > 0) {
+                    (activeApplicationsCount.toDouble() / totalApplicationsCount.toDouble()) * 100
+                } else {
+                    0.0
+                }
+
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+            }
+        }
+    }
+
+    fun calculateConversion(
+        enterpriseId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Count the number of applications with offer received
+                val offerReceivedApplicationsSnapshot = jobApplicationsCollection
+                    .whereEqualTo("enterpriseProfileId", enterpriseId)
+                    .whereEqualTo("offerReceived", true)
+                    .get().await()
+                val offerReceivedApplicationsCount = offerReceivedApplicationsSnapshot.size()
+
+                // Count the total number of applications
+                val totalApplicationsSnapshot = jobApplicationsCollection
+                    .whereEqualTo("enterpriseProfileId", enterpriseId)
+                    .get().await()
+                val totalApplicationsCount = totalApplicationsSnapshot.size()
+
+                // Calculate conversion
+                _conversion.value = if (totalApplicationsCount > 0) {
+                    (offerReceivedApplicationsCount.toDouble() / totalApplicationsCount.toDouble()) * 100
+                } else {
+                    0.0
+                }
+
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+            }
+        }
+    }
+
+    suspend fun calculateProductivity(
+        enterpriseId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ): Double {
+        // Fetch all job offers for the enterprise
+        val offersSnapshot = jobOffersCollection
+            .whereEqualTo("enterpriseID", enterpriseId)
+            .get().await()
+
+        // Count the number of hires
+        val totalHiresCount = offersSnapshot.sumBy { document ->
+            document.toObject<JobOffer>().hireCount.toInt()
+        }
+
+        // Calculate productivity
+        return totalHiresCount.toDouble()
+    }
+
+    fun calculateViews(
+        enterpriseId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                // Fetch all job offers for the enterprise
+                val offersSnapshot = jobOffersCollection
+                    .whereEqualTo("enterpriseID", enterpriseId)
+                    .get().await()
+
+                // Sum the view counts of all job offers
+                _views.value = offersSnapshot.sumOf { document ->
+                    document.toObject<JobOffer>().viewCount
+                }
+
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+            }
+        }
+    }
+
+    fun calculateApplications(
+        enterpriseId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                // Count the total number of applications for the enterprise
+                val applicationsSnapshot = jobApplicationsCollection
+                    .whereEqualTo("enterpriseProfileId", enterpriseId)
+                    .get().await()
+
+                _applications.value = applicationsSnapshot.size().toLong()
+
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+            }
+        }
+    }
+
+    suspend fun calculateHires(
+        enterpriseId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                // Fetch all job offers for the enterprise
+                val offersSnapshot = jobOffersCollection
+                    .whereEqualTo("enterpriseID", enterpriseId)
+                    .get().await()
+
+                // Sum the hire counts of all job offers
+                _hired.value = offersSnapshot.sumOf { document ->
+                    document.toObject<JobOffer>().hireCount
+                }
+
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+            }
+        }
+    }
+
+    fun calculateInterviews(
+        enterpriseId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                // Fetch all job applications for the enterprise
+                val applicationsSnapshot = jobApplicationsCollection
+                    .whereEqualTo("enterpriseProfileId", enterpriseId)
+                    .get().await()
+
+                // Count the number of applications with interview scheduled
+                _interviews.value = applicationsSnapshot.count { document ->
+                    document.toObject<JobApplication>().interviewDate != null
+                }.toLong()
+
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+            }
+        }
+    }
+
+    fun getJobApplicationsList(
+        enterpriseProfileId: String,
+        companyName: String,
+        onSuccess: (List<JobApplication>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            jobOfferApplicationRepository.getJobOfferApplicationsForCompany(
+                enterpriseProfileId = enterpriseProfileId,
+                companyName = companyName,
+                onSuccess = { applications ->
+                    _jobApplications.value = applications
+                    onSuccess(applications)
+                },
+                onFailure = {
+                    onFailure(it)
+                }
+            )
+        }
+    }
+
+    fun editJobApplication(
+        jobApplication: JobApplication,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            jobApplicationsCollection
+                .document("${jobApplication.jobApplicationId}")
+                .set(jobApplication, SetOptions.merge())
+                .addOnSuccessListener {
+                    onSuccess()
+                }
+                .addOnFailureListener {
+                    onFailure(
+                        it.message
+                            ?: appContext.getString(R.string.application_update_failure_info)
+                    )
+                }
+        }
+    }
+
 }

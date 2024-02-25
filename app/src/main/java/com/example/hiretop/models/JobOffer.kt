@@ -19,7 +19,8 @@ data class JobOffer(
     val isClosed: Boolean = false,
     val updatedAt: Long,
     val closedAt: Long? = null,
-    val postedAt: Long
+    val postedAt: Long,
+    val hireCount: Long = 0
 )
 
 fun generateFakeJobOffers(count: Int): List<JobOffer> {

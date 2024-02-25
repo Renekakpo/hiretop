@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +31,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,21 +47,63 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
+import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.Message
-import com.example.hiretop.models.mockMessages
 import com.example.hiretop.navigation.NavDestination
+import com.example.hiretop.ui.extras.FailurePopup
+import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
 import com.example.hiretop.utils.toHourMinuteString
+import com.example.hiretop.viewModels.ChatViewModel
 
-object CandidateInteractionScreen : NavDestination {
-    override val route: String = "candidate_interaction_screen"
+object ChatScreen : NavDestination {
+    override val route: String = "chat_screen"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CandidateInteractionScreen() {
+fun ChatScreen(
+    navController: NavController,
+    chatItemUI: ChatItemUI,
+    chatViewModel: ChatViewModel = hiltViewModel()
+) {
+    val isEnterpriseAccount by chatViewModel.isEnterpriseAccount.collectAsState(initial = null)
+    val enterpriseProfileId by chatViewModel.enterpriseProfileId.collectAsState(initial = null)
+    val candidateProfileId by chatViewModel.candidateProfileId.collectAsState(initial = null)
+    val messages by chatViewModel.messages.collectAsState()
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+            if (messages.isNullOrEmpty()) {
+                // Navigate back
+                navController.navigateUp()
+            }
+        })
+    }
+
+    LaunchedEffect(chatViewModel) {
+        chatViewModel.getListOfMessages(
+            chatId = chatItemUI.chatId,
+            onSuccess = { },
+            onFailure = {
+                onErrorMessage = it
+            }
+        )
+
+        // Observe new messages
+        chatViewModel.observeNewMessageByChatId(
+            chatId = chatItemUI.chatId,
+            onSuccess = {},
+            onFailure = { onErrorMessage = it }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,11 +117,17 @@ fun CandidateInteractionScreen() {
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = stringResource(id = R.string.back_arrow_icon_desc_text),
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.clickable { TODO("Navigate back to previous screen") }
+                        modifier = Modifier.clickable { navController.navigateUp() }
                     )
                 },
                 title = {
-                    TopBarContent()
+                    TopBarContent(
+                        chatItemUI = chatItemUI,
+                        onTopBarClicked = {
+                            navController.navigate(route = CandidateProfileScreen.route)
+                            TODO("Navigate to sender profile in preview mode.")
+                        }
+                    )
                 }
             )
         },
@@ -90,11 +139,24 @@ fun CandidateInteractionScreen() {
                 .padding(innerPadding)
         ) {
 
-            MessageList(messages = mockMessages)
+            messages?.let {
+                MessageList(
+                    messages = it,
+                    currentProfileId = "${if (isEnterpriseAccount != null && isEnterpriseAccount == true) enterpriseProfileId else candidateProfileId}"
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            NewMessageForm()
+            NewMessageForm(onSendMessageClicked = { input ->
+                chatViewModel.sendMessage(
+                    input = input,
+                    onSuccess = {},
+                    onFailure = {
+                        onErrorMessage = it
+                    }
+                )
+            })
 
             Spacer(modifier = Modifier.height(height = 10.dp))
         }
@@ -102,20 +164,20 @@ fun CandidateInteractionScreen() {
 }
 
 @Composable
-fun TopBarContent() {
+fun TopBarContent(chatItemUI: ChatItemUI, onTopBarClicked: (ChatItemUI) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
-            .clickable { TODO("Navigate to CandidateInteractionScreen") },
+            .clickable { onTopBarClicked(chatItemUI) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context = LocalContext.current)
-                .data("")
+                .data(chatItemUI.pictureUrl)
                 .crossfade(true)
                 .build(),
-            contentDescription = "Sender profile picture",
+            contentDescription = stringResource(id = R.string.user_profile_picture_desc_text),
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ai_profile_picture),
             placeholder = painterResource(id = R.drawable.ai_profile_picture),
@@ -129,7 +191,7 @@ fun TopBarContent() {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Nom du destinataire",
+                text = chatItemUI.profileName,
                 style = MaterialTheme.typography.headlineSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -137,7 +199,7 @@ fun TopBarContent() {
             )
 
             Text(
-                text = "Titre de l'emploi",
+                text = chatItemUI.offerTitle,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -148,7 +210,7 @@ fun TopBarContent() {
 }
 
 @Composable
-fun NewMessageForm() {
+fun NewMessageForm(onSendMessageClicked: (String) -> Unit) {
     val mHeight = LocalConfiguration.current.screenHeightDp.dp
     var messageText by remember { mutableStateOf("") }
 
@@ -175,7 +237,7 @@ fun NewMessageForm() {
                     imageVector = Icons.AutoMirrored.Outlined.Send,
                     contentDescription = stringResource(R.string.send_icon_desc_text),
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { TODO("Send message") }
+                    modifier = Modifier.clickable { onSendMessageClicked(messageText) }
                 )
             },
             colors = OutlinedTextFieldDefaults.colors(
@@ -188,14 +250,14 @@ fun NewMessageForm() {
 }
 
 @Composable
-fun MessageList(messages: List<Message>) {
+fun MessageList(messages: List<Message>, currentProfileId: String) {
     LazyColumn(
         modifier = Modifier
             .wrapContentSize()
             .padding(16.dp)
     ) {
         items(messages) { message ->
-            MessageItem(message = message)
+            MessageItem(message = message, currentProfileId = currentProfileId)
 
             Spacer(modifier = Modifier.height(20.dp))
         }
@@ -203,12 +265,12 @@ fun MessageList(messages: List<Message>) {
 }
 
 @Composable
-fun MessageItem(message: Message) {
+fun MessageItem(message: Message, currentProfileId: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
-        horizontalArrangement = if (message.to.lowercase()
-                .contains("sender_id_1")
+        horizontalArrangement = if (message.from.lowercase()
+                .contains(currentProfileId.lowercase())
         ) Arrangement.End else Arrangement.Start
     ) {
         Column(

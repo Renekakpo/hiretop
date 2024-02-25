@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -32,26 +32,53 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
+import com.example.hiretop.app.HireTop.Companion.appContext
+import com.example.hiretop.models.JobApplication
+import com.example.hiretop.models.jobApplicationsLists
 import com.example.hiretop.navigation.NavDestination
+import com.example.hiretop.ui.extras.DropdownListWords
+import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.utils.Utils
+import com.example.hiretop.viewModels.CandidateViewModel
+import com.example.hiretop.viewModels.EnterpriseViewModel
 
 object EditApplicationsDetailsScreen : NavDestination {
     override val route: String = "edit_applications_details_screen"
 }
 
 @Composable
-fun EditApplicationsDetailsScreen() {
+fun EditApplicationsDetailsScreen(
+    navController: NavController,
+    jobApplication: JobApplication,
+    isPreviewMode: Boolean,
+    candidateViewModel: CandidateViewModel = hiltViewModel(),
+    enterpriseViewModel: EnterpriseViewModel = hiltViewModel(),
+) {
     val context = LocalContext.current
-    var stages by remember { mutableStateOf("") }
+
+    var canWithdraw by remember { mutableStateOf(true) }
+    var canReject by remember { mutableStateOf(true) }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -62,7 +89,9 @@ fun EditApplicationsDetailsScreen() {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = stringResource(R.string.back_arrow_icon_desc_text),
-            modifier = Modifier.clickable { TODO("Navigate back to previous screen") }
+            modifier = Modifier.clickable {
+                navController.navigateUp()
+            }
         )
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -71,58 +100,45 @@ fun EditApplicationsDetailsScreen() {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = MaterialTheme.colorScheme.background),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data("")
+                    .data(jobApplication.candidatePictureUrl)
                     .crossfade(true)
                     .build(),
-                contentDescription = "Sender profile picture",
+                contentDescription = stringResource(id = R.string.user_profile_picture_desc_text),
                 contentScale = ContentScale.Crop,
-                error = painterResource(id = R.drawable.ai_profile_picture),
-                placeholder = painterResource(id = R.drawable.ai_profile_picture),
+                error = painterResource(id = R.drawable.user_profile_placeholder),
+                placeholder = painterResource(id = R.drawable.user_profile_placeholder),
                 modifier = Modifier
                     .size(80.dp)
                     .padding(4.dp)
                     .clip(CircleShape)
-                    .clickable { TODO("Navigate to user profile in view mode") }
             )
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Nom du candidat",
-                    style = MaterialTheme.typography.headlineSmall,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.wrapContentWidth()
-                )
-
-                Spacer(modifier = Modifier.height(height = 5.dp))
-
-                Text(
-                    text = "Titre du profil du candidat",
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
+            Text(
+                text = jobApplication.candidateFullName,
+                style = MaterialTheme.typography.headlineSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "Poste candidaté: Designer UI/UX Sénior",
+            text = context.getString(R.string.applied_offer_info, jobApplication.jobOfferTitle),
             style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = Utils.getAppliedTimeAgo(context, System.currentTimeMillis()),
@@ -133,11 +149,80 @@ fun EditApplicationsDetailsScreen() {
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(height = 15.dp))
+
+        if (isPreviewMode) {
+            PreviewModeView(
+                jobApplication = jobApplication,
+                canWithdraw = canWithdraw,
+                onWithdrawJobApplication = { jobApplication ->
+                    candidateViewModel.withdrawJobApplication(
+                        jobApplication = jobApplication,
+                        onSuccess = {
+                            canWithdraw = false
+                        },
+                        onFailure = { errorMessage ->
+                            onErrorMessage = errorMessage
+                        }
+                    )
+                })
+        } else {
+            EditModeView(
+                jobApplication = jobApplication,
+                canReject = canReject,
+                onRejectApplicationClicked = { jobApplication ->
+                    enterpriseViewModel.editJobApplication(
+                        jobApplication = jobApplication,
+                        onSuccess = {
+                            canReject = false
+                        },
+                        onFailure = { message ->
+                            onErrorMessage = message
+                        }
+                    )
+                },
+                onUpdateJobApplicationClicked = { jobApplication ->
+                    enterpriseViewModel.editJobApplication(
+                        jobApplication = jobApplication,
+                        onSuccess = {},
+                        onFailure = { message ->
+                            onErrorMessage = message
+                        }
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun EditModeView(
+    jobApplication: JobApplication,
+    canReject: Boolean,
+    onRejectApplicationClicked: (JobApplication) -> Unit,
+    onUpdateJobApplicationClicked: (JobApplication) -> Unit
+) {
+    val mWidth = LocalConfiguration.current.screenWidthDp.dp
+    val maxLength = 1500
+
+    var selectedStatus by remember { mutableStateOf(jobApplication.status ?: "") }
+    var requiredStages by remember { mutableStateOf(jobApplication.stages ?: "") }
+    var makeAnOffer by remember { mutableStateOf(jobApplication.offerContent ?: "") }
+
+    Column(
+        modifier = Modifier.wrapContentSize()
+    ) {
+        DropdownListWords(
+            title = stringResource(R.string.status_text),
+            items = stringArrayResource(id = R.array.job_application_status),
+            onItemSelected = { selectedStatus = it }
+        )
+
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = stages,
-            onValueChange = { stages = it },
+            value = requiredStages,
+            onValueChange = { requiredStages = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_stages_text),
@@ -146,6 +231,33 @@ fun EditApplicationsDetailsScreen() {
             },
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(height = 25.dp))
+
+        OutlinedTextField(
+            value = makeAnOffer,
+            onValueChange = { makeAnOffer = it },
+            label = {
+                Text(
+                    text = stringResource(R.string.make_an_offer_text),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            },
+            supportingText = {
+                Text(
+                    text = "${makeAnOffer.length} / $maxLength",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            },
+            singleLine = false,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height = mWidth * 0.4f),
         )
 
         Spacer(modifier = Modifier.height(height = 25.dp))
@@ -159,9 +271,18 @@ fun EditApplicationsDetailsScreen() {
                     containerColor = MaterialTheme.colorScheme.background,
                     contentColor = MaterialTheme.colorScheme.error
                 ),
+                enabled = canReject,
                 border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.error),
                 shape = MaterialTheme.shapes.large,
-                onClick = { TODO("Reject application") }
+                onClick = {
+                    onRejectApplicationClicked(
+                        jobApplication.copy(
+                            status = appContext.getString(
+                                R.string.reject_text
+                            )
+                        )
+                    )
+                }
             ) {
                 Text(
                     text = stringResource(R.string.reject_text),
@@ -180,7 +301,16 @@ fun EditApplicationsDetailsScreen() {
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 shape = MaterialTheme.shapes.large,
-                onClick = { TODO("Modify applications") }
+                onClick = {
+                    onUpdateJobApplicationClicked(
+                        jobApplication.copy(
+                            status = selectedStatus,
+                            stages = requiredStages,
+                            offerContent = makeAnOffer,
+                            offerReceived = makeAnOffer.isEmpty()
+                        )
+                    )
+                }
             ) {
                 Text(
                     text = stringResource(R.string.modify_text),
@@ -188,5 +318,73 @@ fun EditApplicationsDetailsScreen() {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun PreviewModeView(
+    jobApplication: JobApplication,
+    canWithdraw: Boolean,
+    onWithdrawJobApplication: (JobApplication) -> Unit
+) {
+    Column(modifier = Modifier.wrapContentSize()) {
+        Text(
+            text = stringResource(
+                R.string.application_status_info, jobApplication.status ?: "-"
+            ),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+            maxLines = 4,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = stringResource(
+                R.string.application_stages_info,
+                jobApplication.stages ?: "-"
+            ),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+            maxLines = 4,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = stringResource(
+                R.string.offer_received_content_text,
+                jobApplication.offerContent ?: ""
+            ),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+            maxLines = 6,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(25.dp))
+
+        OutlinedButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            enabled = canWithdraw,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.error
+            ),
+            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.error),
+            shape = MaterialTheme.shapes.large,
+            onClick = { onWithdrawJobApplication(jobApplication.copy(withdraw = true)) }
+        ) {
+            Text(
+                text = stringResource(R.string.withdraw_button_text),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
     }
 }

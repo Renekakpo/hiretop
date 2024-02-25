@@ -3,6 +3,7 @@ package com.example.hiretop.ui.screens.entreprise.applications
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
@@ -24,6 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,23 +40,75 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
+import com.example.hiretop.models.ChatItem
+import com.example.hiretop.models.JobApplication
+import com.example.hiretop.models.UIState
 import com.example.hiretop.navigation.NavDestination
+import com.example.hiretop.ui.extras.FailurePopup
+import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
+import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
+import com.example.hiretop.ui.screens.messaging.ChatScreen
 import com.example.hiretop.utils.Utils
+import com.example.hiretop.viewModels.EnterpriseViewModel
+import com.google.gson.Gson
 
 object EnterpriseApplicationsScreen : NavDestination {
     override val route: String = "enterprise_applications_Screen"
 }
 
 @Composable
-fun EnterpriseApplicationsScreen() {
+fun EnterpriseApplicationsScreen(
+    navController: NavController,
+    enterpriseViewModel: EnterpriseViewModel = hiltViewModel()
+) {
     val mContext = LocalContext.current
+
     var searchInput by remember { mutableStateOf("") }
+
+    val enterpriseProfileId by enterpriseViewModel.enterpriseProfileId.collectAsState(initial = null)
+    val enterpriseProfile by enterpriseViewModel.enterpriseProfile.collectAsState(initial = null)
+    val jobApplicationsList by enterpriseViewModel.jobApplications.collectAsState()
+    var filteredJobApplicationsList by remember { mutableStateOf(jobApplicationsList) }
+    var uiState by remember { mutableStateOf(UIState.LOADING) }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(
+            errorMessage = "$onErrorMessage",
+            onDismiss = { onErrorMessage = null }
+        )
+    }
+
+    LaunchedEffect(enterpriseViewModel) {
+        if (enterpriseProfileId == null || enterpriseProfile == null) {
+            uiState = UIState.FAILURE
+        } else {
+            enterpriseViewModel.getJobApplicationsList(
+                enterpriseProfileId = "$enterpriseProfileId",
+                companyName = "${enterpriseProfile?.name}",
+                onSuccess = { applications ->
+                    uiState = if (applications.isEmpty()) {
+                        UIState.FAILURE
+                    } else {
+                        UIState.SUCCESS
+                    }
+                },
+                onFailure = {
+                    onErrorMessage = it
+                    UIState.FAILURE
+                }
+            )
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -68,15 +125,33 @@ fun EnterpriseApplicationsScreen() {
             modifier = Modifier.fillMaxWidth(1f)
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Divider()
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
         OutlinedTextField(
             value = searchInput,
-            onValueChange = { searchInput = it },
+            onValueChange = {
+                searchInput = it
+                if (searchInput.length >= 3) {
+                    filteredJobApplicationsList = jobApplicationsList?.filter { item ->
+                        item.candidateFullName.lowercase()
+                            .contains(searchInput.lowercase(), ignoreCase = true) ||
+                                item.status?.lowercase()?.contains(
+                                    searchInput.lowercase(),
+                                    ignoreCase = true
+                                ) == true ||
+                                item.stages?.lowercase()?.contains(
+                                    searchInput.lowercase(),
+                                    ignoreCase = true
+                                ) == true ||
+                                item.jobOfferTitle.lowercase()
+                                    .contains(searchInput.lowercase(), ignoreCase = true)
+                    }
+                }
+            },
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
             placeholder = {
                 Text(
@@ -100,63 +175,134 @@ fun EnterpriseApplicationsScreen() {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        ApplicationItemRow(context = mContext)
+        when (uiState) {
+            UIState.LOADING -> {
+                // Display loader while fetching data
+                HireTopCircularProgressIndicator()
+            }
 
-//        TODO("Implement LazyColumn here to display the list of application for this offer")
+            UIState.FAILURE -> {
+                val failureText = if (enterpriseProfileId == null || enterpriseProfile == null) {
+                    // Display text prompting user to complete profile
+                    stringResource(R.string.empty_enterprise_applications_list_info)
+                } else {
+                    // No job applications found
+                    stringResource(R.string.enterprise_no_job_application_found_info)
+                }
+
+                Text(
+                    text = failureText,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            UIState.SUCCESS -> {
+                filteredJobApplicationsList?.let {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
+                        itemsIndexed(it) { _, item ->
+                            ApplicationItemRow(
+                                context = mContext,
+                                jobApplication = item,
+                                onNavigateToJobApplicationDetailsScreen = {
+                                    navigateToApplicationDetails(navController, it)
+                                },
+                                onPreviewCandidateProfile = {
+                                    navigateToCandidateProfile(navController, it)
+                                },
+                                onChatIconClicked = {
+                                    val chatItem = ChatItem(
+                                        profileId = it.candidateProfileId,
+                                        enterpriseId = it.enterpriseProfileId,
+                                        jobOfferId = it.jobOfferId,
+                                        jobApplicationId = "${it.jobApplicationId}",
+                                    )
+                                    navigateToChatScreen(navController, chatItem)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun ApplicationItemRow(context: Context) {
+fun ApplicationItemRow(
+    context: Context,
+    jobApplication: JobApplication,
+    onNavigateToJobApplicationDetailsScreen: (JobApplication) -> Unit,
+    onPreviewCandidateProfile: (String) -> Unit,
+    onChatIconClicked: (JobApplication) -> Unit
+) {
     Card(
         modifier = Modifier
             .wrapContentSize()
             .clickable {
-                TODO("Navigate to candidate profile in view mode")
+                onNavigateToJobApplicationDetailsScreen(jobApplication)
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        )
     ) {
-        Column(modifier = Modifier.padding(15.dp)) {
+        Column(
+            modifier = Modifier
+                .background(color = MaterialTheme.colorScheme.background)
+                .padding(15.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(context = LocalContext.current)
-                        .data("")
+                        .data(jobApplication.candidatePictureUrl)
                         .crossfade(true)
                         .build(),
                     contentDescription = stringResource(R.string.user_profile_picture_desc_text),
                     contentScale = ContentScale.Crop,
-                    error = painterResource(id = R.drawable.ai_profile_picture),
-                    placeholder = painterResource(id = R.drawable.ai_profile_picture),
+                    error = painterResource(id = R.drawable.user_profile_placeholder),
+                    placeholder = painterResource(id = R.drawable.user_profile_placeholder),
                     modifier = Modifier
                         .size(50.dp)
                         .padding(4.dp)
                         .clip(CircleShape)
+                        .clickable {
+                            onPreviewCandidateProfile(jobApplication.candidateProfileId)
+                        }
                 )
 
                 Spacer(modifier = Modifier.width(15.dp))
 
                 Text(
-                    text = "Nom du candidat",
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = jobApplication.candidateFullName,
+                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_chat_menu_icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable {
+                            onChatIconClicked(jobApplication)
+                        }
                 )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Étape: Entretien RH",
+                text = stringResource(R.string.applied_offer_info, jobApplication.jobOfferTitle),
                 style = MaterialTheme.typography.bodyMedium,
-                maxLines = 4,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -164,9 +310,26 @@ fun ApplicationItemRow(context: Context) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Poste candidaté: Designer UI/UX Sénior",
+                text = stringResource(
+                    R.string.application_status_info,
+                    jobApplication.status ?: "-"
+                ),
                 style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = stringResource(
+                    R.string.application_stages_info,
+                    jobApplication.stages ?: "-"
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -185,4 +348,21 @@ fun ApplicationItemRow(context: Context) {
             Spacer(modifier = Modifier.height(5.dp))
         }
     }
+}
+
+fun navigateToChatScreen(navController: NavController, chatItem: ChatItem) {
+    val chatItemJSON = Gson().toJson(chatItem)
+    navController.navigate(route = "${ChatScreen.route}/$chatItemJSON")
+}
+
+private fun navigateToCandidateProfile(navController: NavController, candidateProfileId: String) {
+    navController.navigate(route = "${CandidateProfileScreen.route}/${true}/$candidateProfileId")
+}
+
+private fun navigateToApplicationDetails(
+    navController: NavController,
+    jobApplication: JobApplication
+) {
+    val jobApplicationJSON = Gson().toJson(jobApplication)
+    navController.navigate(route = "${EditApplicationsDetailsScreen.route}/$jobApplicationJSON/${false}")
 }

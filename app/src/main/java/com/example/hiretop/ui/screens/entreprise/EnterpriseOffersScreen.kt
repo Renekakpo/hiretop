@@ -29,6 +29,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,20 +39,59 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.hiretop.R
 import com.example.hiretop.models.JobOffer
-import com.example.hiretop.models.generateFakeJobOffers
+import com.example.hiretop.models.UIState
+import com.example.hiretop.ui.extras.FailurePopup
+import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
+import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
 import com.example.hiretop.utils.Utils
+import com.example.hiretop.viewModels.EnterpriseViewModel
+import com.google.gson.Gson
 
 @Composable
-fun EnterpriseOffersScreen(modifier: Modifier = Modifier) {
+fun EnterpriseOffersScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    enterpriseViewModel: EnterpriseViewModel = hiltViewModel()
+) {
     val mContext = LocalContext.current
-    val jobOffers = generateFakeJobOffers(5)
+
+    // Observe candidate profile and recommended jobs states
+    val enterpriseProfileId by enterpriseViewModel.enterpriseProfileId.collectAsState(initial = null)
+    val jobOffers by enterpriseViewModel.jobOffersList.collectAsState(null)
+    var uiState by remember { mutableStateOf(UIState.LOADING) }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
 
     var searchInput by remember { mutableStateOf("") }
+    var filteredJobOffers by remember { mutableStateOf(jobOffers) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
+
+    LaunchedEffect(enterpriseViewModel) {
+        if (enterpriseProfileId == null) {
+            uiState = UIState.FAILURE
+        } else {
+            enterpriseViewModel.getAllJobOffersForEnterprise(
+                enterpriseID = "$enterpriseProfileId",
+                onSuccess = {},
+                onFailure = {
+                    onErrorMessage = it
+                }
+            )
+        }
+    }
+
 
     Column(
         modifier = modifier
@@ -59,7 +100,7 @@ fun EnterpriseOffersScreen(modifier: Modifier = Modifier) {
             .padding(top = 15.dp, start = 15.dp, end = 15.dp)
     ) {
         Text(
-            text = "Gestion des offres",
+            text = stringResource(R.string.job_offer_management_text),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -75,7 +116,15 @@ fun EnterpriseOffersScreen(modifier: Modifier = Modifier) {
 
         OutlinedTextField(
             value = searchInput,
-            onValueChange = { searchInput = it },
+            onValueChange = {
+                searchInput = it
+                if (searchInput.length >= 3) {
+                    filteredJobOffers = jobOffers?.filter { jobOffer ->
+                        jobOffer.title.lowercase()
+                            .contains(searchInput.lowercase(), ignoreCase = true)
+                    }
+                }
+            },
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
             placeholder = {
                 Text(
@@ -100,12 +149,43 @@ fun EnterpriseOffersScreen(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-            itemsIndexed(jobOffers) { _, item ->
-                OfferItemRow(
-                    context = mContext,
-                    jobOffer = item,
-                    onJobOfferClicked = { /* TODO: Navigate to applications screen with jobOffer as param to see the list of applications */ })
+        when (uiState) {
+            UIState.LOADING -> {
+                // Display loader while fetching data
+                HireTopCircularProgressIndicator()
+            }
+            UIState.FAILURE -> {
+                val failureText = if (enterpriseProfileId == null) {
+                    // Display text prompting user to complete profile
+                    stringResource(R.string.update_profile_info)
+                } else {
+                    // No job offers found
+                    stringResource(R.string.no_enterprise_job_offer_found)
+                }
+
+                Text(
+                    text = failureText,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            UIState.SUCCESS -> {
+                filteredJobOffers?.let {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
+                        itemsIndexed(it) { _, filteredJob ->
+                            OfferItemRow(
+                                context = mContext,
+                                jobOffer = filteredJob,
+                                onJobOfferClicked = {
+                                    onEnterpriseJobOfferClicked(navController, it)
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -113,7 +193,11 @@ fun EnterpriseOffersScreen(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun OfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked: (JobOffer) -> Unit) {
+private fun OfferItemRow(
+    context: Context,
+    jobOffer: JobOffer,
+    onJobOfferClicked: (JobOffer) -> Unit
+) {
     val counter by remember { mutableStateOf((1..200).random()) }
 
     Column(
@@ -200,4 +284,8 @@ private fun OfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClicked
 
         Spacer(modifier = Modifier.height(10.dp))
     }
+}
+
+private fun onEnterpriseJobOfferClicked(navController: NavController, jobOffer: JobOffer) {
+    navController.navigate(route = "${JobOfferDetailsScreen.route}/${Gson().toJson(jobOffer)}/${true}")
 }

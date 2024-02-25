@@ -18,7 +18,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.hiretop.R
 
 @Composable
 fun KeyPerformanceIndicators(
@@ -35,7 +37,7 @@ fun KeyPerformanceIndicators(
                 .padding(15.dp)
         ) {
             Text(
-                text = "Indicateurs de Performance Clés (KPI)",
+                text = stringResource(R.string.kpi_text),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 8.dp)
             )

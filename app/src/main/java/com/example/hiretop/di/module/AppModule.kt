@@ -5,6 +5,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.hiretop.data.datastore.HireTopDataStoreRepos
+import com.example.hiretop.di.repository.ChatItemRepository
+import com.example.hiretop.di.repository.JobOfferApplicationRepository
+import com.example.hiretop.di.repository.MessageRepository
 import com.example.hiretop.helpers.FirebaseHelper
 import com.example.hiretop.helpers.PermissionsHelper
 import com.example.hiretop.utils.Constant
@@ -41,7 +44,7 @@ object AppModule {
     @Singleton
     @Provides
     fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
-       return  context.dataStore
+        return context.dataStore
     }
 
     /**
@@ -66,6 +69,56 @@ object AppModule {
     }
 
     /**
+     * Annotation to tell Hilt this method provides an instance of JobOfferApplicationRepository
+     */
+    @Provides
+    @Singleton
+    fun provideJobOfferApplicationRepository(
+        db: FirebaseFirestore,
+        @Named(JOB_APPLICATIONS_COLLECTION_NAME) jobApplicationsCollection: CollectionReference,
+        @Named(CANDIDATES_COLLECTION_NAME) candidateProfilesCollection: CollectionReference,
+    ): JobOfferApplicationRepository {
+        return JobOfferApplicationRepository(db, jobApplicationsCollection, candidateProfilesCollection)
+    }
+
+    /**
+     * Annotation to tell Hilt this method provides an instance of ChatItemRepository
+     */
+    @Provides
+    @Singleton
+    fun provideChatItemRepository(
+        db: FirebaseFirestore,
+        @Named(MESSAGES_COLLECTION_NAME) messagesCollection: CollectionReference,
+        @Named(CHATS_COLLECTION_NAME) chatsCollection: CollectionReference,
+        @Named(CANDIDATES_COLLECTION_NAME) candidateProfilesCollection: CollectionReference,
+        @Named(ENTERPRISES_COLLECTION_NAME) enterpriseProfilesCollection: CollectionReference,
+        @Named(JOB_OFFERS_COLLECTION_NAME) jobOffersCollection: CollectionReference,
+        @Named(JOB_APPLICATIONS_COLLECTION_NAME) jobApplicationsCollection: CollectionReference,
+    ): ChatItemRepository {
+        return ChatItemRepository(
+            db,
+            messagesCollection,
+            chatsCollection,
+            candidateProfilesCollection,
+            enterpriseProfilesCollection,
+            jobOffersCollection,
+            jobApplicationsCollection
+        )
+    }
+
+    /**
+     * Annotation to tell Hilt this method provides an instance of MessageRepository
+     */
+    @Provides
+    @Singleton
+    fun provideMessageRepository(
+        db: FirebaseFirestore,
+        @Named(MESSAGES_COLLECTION_NAME) messagesCollection: CollectionReference,
+    ): MessageRepository {
+        return MessageRepository(db, messagesCollection,)
+    }
+
+    /**
      * Method to provide CollectionReference for messages collection
      */
     @Singleton
@@ -82,7 +135,7 @@ object AppModule {
     @Provides
     @Named(JOB_APPLICATIONS_COLLECTION_NAME)
     fun provideJobApplicationsCollection(db: FirebaseFirestore): CollectionReference {
-        return db.collection(Constant.JOB_APPLICATIONS_COLLECTION_NAME)
+        return db.collection(JOB_APPLICATIONS_COLLECTION_NAME)
     }
 
     /**
@@ -92,7 +145,7 @@ object AppModule {
     @Provides
     @Named(JOB_OFFERS_COLLECTION_NAME)
     fun provideJobOffersCollection(db: FirebaseFirestore): CollectionReference {
-        return db.collection(Constant.JOB_OFFERS_COLLECTION_NAME)
+        return db.collection(JOB_OFFERS_COLLECTION_NAME)
     }
 
     /**
@@ -102,7 +155,7 @@ object AppModule {
     @Provides
     @Named(CANDIDATES_COLLECTION_NAME)
     fun provideCandidateProfilesCollection(db: FirebaseFirestore): CollectionReference {
-        return db.collection(Constant.CANDIDATES_COLLECTION_NAME)
+        return db.collection(CANDIDATES_COLLECTION_NAME)
     }
 
     /**
@@ -112,7 +165,7 @@ object AppModule {
     @Provides
     @Named(ENTERPRISES_COLLECTION_NAME)
     fun provideEnterpriseProfilesCollection(db: FirebaseFirestore): CollectionReference {
-        return db.collection(Constant.ENTERPRISES_COLLECTION_NAME)
+        return db.collection(ENTERPRISES_COLLECTION_NAME)
     }
 
     /**
@@ -122,7 +175,7 @@ object AppModule {
     @Provides
     @Named(CHATS_COLLECTION_NAME)
     fun provideChatsCollection(db: FirebaseFirestore): CollectionReference {
-        return db.collection(Constant.CHATS_COLLECTION_NAME)
+        return db.collection(CHATS_COLLECTION_NAME)
     }
 
     /**

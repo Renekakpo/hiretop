@@ -27,14 +27,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hiretop.R
+import com.example.hiretop.ui.extras.FailurePopup
 
 @Composable
-fun EditEnterpriseCultureAndValuesSection(currentValues: String = "", onSaveClicked: () -> Unit) {
+fun EditEnterpriseCultureAndValuesSection(
+    currentCultureAndValues: String?,
+    onSaveClicked: (String) -> Unit
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 1500
 
-    var editedValues by remember { mutableStateOf(currentValues) }
+    var requiredCultureAndValues by remember { mutableStateOf(currentCultureAndValues ?: "") }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
@@ -53,8 +64,8 @@ fun EditEnterpriseCultureAndValuesSection(currentValues: String = "", onSaveClic
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = editedValues,
-            onValueChange = { if (it.length <= maxLength) editedValues = it },
+            value = requiredCultureAndValues,
+            onValueChange = { if (it.length <= maxLength) requiredCultureAndValues = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_enterprise_culture_values_text),
@@ -63,7 +74,7 @@ fun EditEnterpriseCultureAndValuesSection(currentValues: String = "", onSaveClic
             },
             supportingText = {
                 Text(
-                    text = "${editedValues.length} / $maxLength",
+                    text = "${requiredCultureAndValues.length} / $maxLength",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -90,7 +101,13 @@ fun EditEnterpriseCultureAndValuesSection(currentValues: String = "", onSaveClic
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = onSaveClicked
+            onClick = {
+                if (requiredCultureAndValues.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.empty_cultures_and_values_text)
+                } else {
+                    onSaveClicked(requiredCultureAndValues)
+                }
+            }
         ) {
             Text(
                 text = stringResource(R.string.save_button_text),

@@ -53,6 +53,7 @@ import com.example.hiretop.R
 import com.example.hiretop.models.CandidateProfile
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.models.UIState
+import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
 import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
 import com.example.hiretop.utils.Utils
@@ -72,21 +73,39 @@ fun CandidateDashboardScreen(
     val candidateProfile by candidateViewModel.candidateProfile.collectAsState(null)
     val recommendedJobs by candidateViewModel.recommendedJobs.collectAsState(null)
     var uiState by remember { mutableStateOf(UIState.LOADING) }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(
+            errorMessage = "$onErrorMessage",
+            onDismiss = { onErrorMessage = null }
+        )
+    }
 
     LaunchedEffect(candidateViewModel) {
         if (candidateProfileId == null) {
             uiState = UIState.FAILURE
         } else {
-            candidateViewModel.getCandidateProfile(profileId = "$candidateProfileId") { profile ->
-                uiState = if (profile == null) {
-                    UIState.FAILURE
-                } else {
-                    if (!profile.skills.isNullOrEmpty()) {
-                        candidateViewModel.getRecommendedJobs(profile.skills.toList())
+            candidateViewModel.getCandidateProfile(
+                profileId = "$candidateProfileId",
+                onSuccess = { profile ->
+                    uiState = if (profile == null) {
+                        UIState.FAILURE
+                    } else {
+                        if (!profile.skills.isNullOrEmpty()) {
+                            candidateViewModel.getRecommendedJobs(
+                                profile.skills.toList(),
+                                onSuccess = {},
+                                onFailure = { onErrorMessage = it }
+                            )
+                        }
+                        UIState.SUCCESS
                     }
-                    UIState.SUCCESS
+                },
+                onFailure = {
+                    onErrorMessage = it
                 }
-            }
+            )
         }
     }
 

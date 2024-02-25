@@ -1,17 +1,13 @@
 package com.example.hiretop.helpers
 
-import androidx.lifecycle.viewModelScope
 import com.example.hiretop.R
 import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.utils.Constant.JOB_OFFERS_COLLECTION_NAME
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Named

@@ -31,10 +31,6 @@ import com.example.hiretop.R
 import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.ui.extras.FailurePopup
 
-object EditHeaderSection : NavDestination {
-    override val route: String = "edit_header_section"
-}
-
 @Composable
 fun EditHeaderSection(
     currentFirstname: String?,
@@ -45,9 +41,9 @@ fun EditHeaderSection(
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
-    var firstname by remember { mutableStateOf(currentFirstname ?: "") }
-    var lastname by remember { mutableStateOf(currentLastname ?: "") }
-    var headline by remember { mutableStateOf(currentHeadline ?: "") }
+    var requiredFirstname by remember { mutableStateOf(currentFirstname ?: "") }
+    var requiredLastname by remember { mutableStateOf(currentLastname ?: "") }
+    var requiredHeadline by remember { mutableStateOf(currentHeadline ?: "") }
 
     var onErrorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -73,8 +69,8 @@ fun EditHeaderSection(
         Spacer(modifier = Modifier.height(height = 20.dp))
 
         OutlinedTextField(
-            value = firstname,
-            onValueChange = { firstname = it },
+            value = requiredFirstname,
+            onValueChange = { requiredFirstname = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_firstname_text),
@@ -88,8 +84,8 @@ fun EditHeaderSection(
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = lastname,
-            onValueChange = { lastname = it },
+            value = requiredLastname,
+            onValueChange = { requiredLastname = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_lastname_text),
@@ -104,8 +100,8 @@ fun EditHeaderSection(
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = headline,
-            onValueChange = { headline = it },
+            value = requiredHeadline,
+            onValueChange = { requiredHeadline = it },
             label = {
                 Text(
                     text = stringResource(R.string.required_headline_text),
@@ -130,17 +126,17 @@ fun EditHeaderSection(
             ),
             shape = MaterialTheme.shapes.small,
             onClick = {
-                if (firstname.isEmpty()) {
+                if (requiredFirstname.isEmpty()) {
                     onErrorMessage =
                         mContext.getString(R.string.empty_candidate_firstname_error_text)
-                } else if (lastname.isEmpty()) {
+                } else if (requiredLastname.isEmpty()) {
                     onErrorMessage =
                         mContext.getString(R.string.empty_candidate_lastname_error_text)
-                } else if (headline.isEmpty()) {
+                } else if (requiredHeadline.isEmpty()) {
                     onErrorMessage =
                         mContext.getString(R.string.empty_candidate_headline_error_text)
                 } else {
-                    onSaveClicked(firstname, lastname, headline)
+                    onSaveClicked(requiredFirstname, requiredLastname, requiredHeadline)
                 }
             }
         ) {

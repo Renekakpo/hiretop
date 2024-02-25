@@ -3,7 +3,9 @@ package com.example.hiretop.helpers
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.generateFakeJobOffers
+import com.example.hiretop.models.jobApplicationsLists
 import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
 import com.example.hiretop.ui.screens.auth.LoginScreen
@@ -16,7 +18,7 @@ import com.example.hiretop.ui.screens.candidate.profile.EditOrAddProjectSection
 import com.example.hiretop.ui.screens.candidate.profile.EditOrAddSkillSection
 import com.example.hiretop.ui.screens.candidate.profile.EditProfileAboutSection
 import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
-import com.example.hiretop.ui.screens.candidate.tracking.JobApplicationsScreen
+import com.example.hiretop.ui.screens.candidate.tracking.CandidateJobApplicationsTrackingScreen
 import com.example.hiretop.ui.screens.entreprise.CreateOrEditJobOfferScreen
 import com.example.hiretop.ui.screens.entreprise.EnterpriseOffersScreen
 import com.example.hiretop.ui.screens.entreprise.applications.EditApplicationsDetailsScreen
@@ -24,7 +26,7 @@ import com.example.hiretop.ui.screens.entreprise.applications.EnterpriseApplicat
 import com.example.hiretop.ui.screens.entreprise.dashboard.EnterpriseDashboardScreen
 import com.example.hiretop.ui.screens.entreprise.presentation.EditProfileHeaderSection
 import com.example.hiretop.ui.screens.entreprise.presentation.EnterpriseProfileScreen
-import com.example.hiretop.ui.screens.messaging.CandidateInteractionScreen
+import com.example.hiretop.ui.screens.messaging.ChatScreen
 import com.example.hiretop.ui.screens.messaging.ChatListScreen
 import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
 import com.example.hiretop.ui.screens.offers.JobOffersScreen
@@ -67,7 +69,7 @@ fun AccountTypeScreenPreview() {
 @Composable
 fun TalentProfileScreenPreview() {
     HiretopTheme {
-        CandidateProfileScreen()
+        CandidateProfileScreen(isPreviewMode = true, argCandidateProfileId = "")
     }
 }
 
@@ -75,7 +77,10 @@ fun TalentProfileScreenPreview() {
 @Composable
 fun EditProfileHeaderSectionPreview() {
     HiretopTheme {
-        EditProfileHeaderSection(onSaveClicked = {})
+        EditProfileHeaderSection(
+            null, null, null, null,
+            onSaveClicked = { _, _, _, _ -> }
+        )
     }
 }
 
@@ -107,7 +112,7 @@ fun EditOrAddEducationSectionPreview() {
 @Composable
 fun EditOrAddCertificationSectionPreview() {
     HiretopTheme {
-        EditOrAddCertificationSection(currentValue = null, ) {}
+        EditOrAddCertificationSection(currentValue = null) {}
     }
 }
 
@@ -115,7 +120,7 @@ fun EditOrAddCertificationSectionPreview() {
 @Composable
 fun EditOrAddProjectSectionPreview() {
     HiretopTheme {
-        EditOrAddProjectSection(currentValue = null, ) {}
+        EditOrAddProjectSection(currentValue = null) {}
     }
 }
 
@@ -123,7 +128,7 @@ fun EditOrAddProjectSectionPreview() {
 @Composable
 fun EditOrAddSkillSectionPreview() {
     HiretopTheme {
-        EditOrAddSkillSection(currentValue = null, ) {}
+        EditOrAddSkillSection(currentValue = null) {}
     }
 }
 
@@ -152,7 +157,9 @@ fun JobOfferDetailsScreenPreview() {
 @Composable
 fun JobApplicationsScreenPreview() {
     HiretopTheme {
-        JobApplicationsScreen()
+        CandidateJobApplicationsTrackingScreen(
+            navController = rememberNavController()
+        )
     }
 }
 
@@ -170,7 +177,7 @@ fun CandidateDashboardScreenScreenPreview() {
 @Composable
 fun EnterprisePresentationScreenPreview() {
     HiretopTheme {
-        EnterpriseProfileScreen()
+        EnterpriseProfileScreen(isPreviewMode = true, argEnterpriseProfileId = "")
     }
 }
 
@@ -192,7 +199,7 @@ fun CreateOrEditJobOfferScreenPreview() {
 @Composable
 fun EnterpriseOffersScreenPreview() {
     HiretopTheme {
-        EnterpriseOffersScreen()
+        EnterpriseOffersScreen(navController = rememberNavController())
     }
 }
 
@@ -200,7 +207,7 @@ fun EnterpriseOffersScreenPreview() {
 @Composable
 fun EnterpriseApplicationsScreenPreview() {
     HiretopTheme {
-        EnterpriseApplicationsScreen()
+        EnterpriseApplicationsScreen(navController = rememberNavController())
     }
 }
 
@@ -208,7 +215,10 @@ fun EnterpriseApplicationsScreenPreview() {
 @Composable
 fun CandidateInteractionScreenPreview() {
     HiretopTheme {
-        CandidateInteractionScreen()
+        ChatScreen(
+            chatItemUI = ChatItemUI("", "", "", "", 0L),
+            navController = rememberNavController()
+        )
     }
 }
 
@@ -216,7 +226,7 @@ fun CandidateInteractionScreenPreview() {
 @Composable
 fun ChatListScreenPreview() {
     HiretopTheme {
-        ChatListScreen()
+        ChatListScreen(navController = rememberNavController())
     }
 }
 
@@ -232,7 +242,11 @@ fun EnterpriseDashboardScreenPreview() {
 @Composable
 fun ApplicationsDetailsScreenPreview() {
     HiretopTheme {
-        EditApplicationsDetailsScreen()
+        EditApplicationsDetailsScreen(
+            navController = rememberNavController(),
+            jobApplication = jobApplicationsLists[1],
+            isPreviewMode = false
+        )
     }
 }
 
@@ -250,7 +264,7 @@ fun FailurePopupPreview() {
     HiretopTheme {
         FailurePopup(
             errorMessage = "Error message goes here.",
-            onDismiss= {}
+            onDismiss = {}
         )
     }
 }

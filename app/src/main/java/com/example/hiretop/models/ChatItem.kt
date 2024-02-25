@@ -12,7 +12,7 @@ data class ChatItemUI(
 
 data class ChatItem(
     @DocumentId
-    val chatId: String,
+    val chatId: String? = null,
     val profileId: String,
     val enterpriseId: String,
     val jobOfferId: String,
