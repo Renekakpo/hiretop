@@ -166,7 +166,7 @@ class EnterpriseViewModel @Inject constructor(
                 .add(profile)
                 .addOnSuccessListener { documentReference ->
                     saveEnterpriseProfileId(profileId = documentReference.id)
-                    _enterpriseProfile.update { it?.copy(enterpriseID = documentReference.id) }
+                    _enterpriseProfile.value = profile.copy(enterpriseID = documentReference.id)
                     onSuccess(documentReference.id)
                 }
                 .addOnFailureListener {
@@ -195,6 +195,7 @@ class EnterpriseViewModel @Inject constructor(
                 .document(enterpriseId)
                 .set(updatedProfile, SetOptions.merge())
                 .addOnSuccessListener {
+                    _enterpriseProfile.value = updatedProfile
                     onSuccess()
                 }
                 .addOnFailureListener {
