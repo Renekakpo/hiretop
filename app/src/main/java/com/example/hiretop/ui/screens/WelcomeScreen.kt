@@ -53,6 +53,15 @@ fun WelcomeScreen(
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val mHeight = LocalConfiguration.current.screenHeightDp.dp
 
+    LaunchedEffect(isEnterpriseAccount) {
+        if (isEnterpriseAccount != null) {
+            if (isEnterpriseAccount == true) {
+                onNavigateToNextScreen(navController, EnterpriseBottomNavGraph.route)
+            } else {
+                onNavigateToNextScreen(navController, CandidateBottomNavGraph.route)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -93,56 +102,47 @@ fun WelcomeScreen(
 
         Spacer(modifier = Modifier.height(height = 25.dp))
 
-        Button(
-            modifier = Modifier
-                .width(width = mWidth * 0.6F)
-                .height(45.dp)
-                .padding(horizontal = 5.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onPrimary,
-                contentColor = MaterialTheme.colorScheme.primary
-            ),
-            shape = MaterialTheme.shapes.small,
-            onClick = {
-                onNavigateToNextScreen(
-                    navController = navController,
-                    destination = LoginScreen.route
-                )
-            }
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+        if (isEnterpriseAccount == null) {
+            Button(
+                modifier = Modifier
+                    .width(width = mWidth * 0.6F)
+                    .height(45.dp)
+                    .padding(horizontal = 5.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onPrimary,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = MaterialTheme.shapes.small,
+                onClick = {
+                    onNavigateToNextScreen(
+                        navController = navController,
+                        destination = LoginScreen.route
+                    )
+                }
             ) {
-                Text(
-                    text = stringResource(R.string.let_get_started_text),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.let_get_started_text),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
 
-                Spacer(modifier = Modifier.width(width = 15.dp))
+                    Spacer(modifier = Modifier.width(width = 15.dp))
 
-                if (isEnterpriseAccount == null) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
                         contentDescription = stringResource(R.string.started_button_icon_des),
                         modifier = Modifier.size(size = 35.dp)
                     )
-                } else {
-                    HireTopCircularProgressIndicator()
                 }
             }
+        } else {
+            HireTopCircularProgressIndicator()
         }
-        Spacer(modifier = Modifier.weight(weight = 1F))
-    }
 
-    LaunchedEffect(isEnterpriseAccount) {
-        if (isEnterpriseAccount != null) {
-            if (isEnterpriseAccount == true) {
-                onNavigateToNextScreen(navController, EnterpriseBottomNavGraph.route)
-            } else {
-                onNavigateToNextScreen(navController, CandidateBottomNavGraph.route)
-            }
-        }
+        Spacer(modifier = Modifier.weight(weight = 1F))
     }
 }
 

@@ -251,6 +251,10 @@
     <string name="offer_received_content_text">Offre reçu: %1$s</string>
     <string name="withdraw_job_application_failure_info">Échec de rappele de la candidature.</string>
     <string name="application_update_failure_info">Échec de mise à jour de la candidature.</string>
+    <string name="no_skills_added_text">Aucune compétence ajoutée pour l\'instant.</string>
+    <string name="delete_button_text">Supprimer</string>
+    <string name="year_text">Année</string>
+    <string name="media_permission_alert_message">Cette permission est nécessaire pour définir la photo et la bannière de votre profil.</string>
     <string-array name="job_type_list">
         <item>Temps plein</item>
         <item>Temps partiel</item>

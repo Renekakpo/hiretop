@@ -128,7 +128,7 @@ class EnterpriseViewModel @Inject constructor(
 
     fun getAllJobOffersForEnterprise(
         enterpriseID: String,
-        onSuccess: () -> Unit,
+        onSuccess: (List<JobOffer>) -> Unit,
         onFailure: (String) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -142,6 +142,8 @@ class EnterpriseViewModel @Inject constructor(
                         offersList.add(jobOffer)
                     }
                     _jobOffersList.value = offersList
+
+                    onSuccess(offersList)
                 }
                 .addOnFailureListener {
                     onFailure(
@@ -210,14 +212,15 @@ class EnterpriseViewModel @Inject constructor(
         onFailure: (String) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            enterprisesCollection.document(enterpriseId)
+            enterprisesCollection
+                .document(enterpriseId)
                 .get()
                 .addOnSuccessListener { document ->
-                    val profile = document.toObject<EnterpriseProfile>()
+                    val profile = document.toObject(EnterpriseProfile::class.java)
                     if (profile == null) {
                         onFailure(appContext.getString(R.string.profile_not_found_text))
                     } else {
-                        _enterpriseProfile.update { profile }
+                        _enterpriseProfile.value = profile
                         onSuccess(profile)
                     }
                 }

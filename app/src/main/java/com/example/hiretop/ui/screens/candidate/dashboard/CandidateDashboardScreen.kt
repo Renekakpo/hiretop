@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -111,20 +112,24 @@ fun CandidateDashboardScreen(
 
     when (uiState) {
         UIState.LOADING -> {
-            // Display loader while fetching data
-            HireTopCircularProgressIndicator()
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                // Display loader while fetching data
+                HireTopCircularProgressIndicator()
+            }
         }
 
         UIState.FAILURE -> {
-            // Display text prompting user to complete profile
-            Text(
-                text = stringResource(R.string.complete_profile_info),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                textAlign = TextAlign.Center
-            )
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                // Display text prompting user to complete profile
+                Text(
+                    text = stringResource(R.string.complete_profile_info),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         UIState.SUCCESS -> {
@@ -305,7 +310,7 @@ fun RecommendationsItemRow(
             .clickable { onJobOfferClicked(jobOffer) }
     ) {
         Text(
-            text = jobOffer.title,
+            text = jobOffer.title ?: "",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 3,
@@ -348,13 +353,15 @@ fun RecommendationsItemRow(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = Utils.getPostedTimeAgo(context, jobOffer.postedAt),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-            maxLines = 4,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (jobOffer.postedAt != null) {
+            Text(
+                text = Utils.getPostedTimeAgo(context, jobOffer.postedAt),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }

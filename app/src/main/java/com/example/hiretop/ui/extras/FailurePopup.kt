@@ -18,6 +18,7 @@ import com.example.hiretop.R
 
 @Composable
 fun FailurePopup(
+    title: String = stringResource(R.string.erreur_text),
     errorMessage: String,
     onDismiss: (() -> Unit)? = null
 ) {
@@ -30,7 +31,7 @@ fun FailurePopup(
                 onDismiss?.invoke()
             },
             title = {
-                Text(text = stringResource(R.string.erreur_text))
+                Text(text = title)
             },
             text = {
                 Text(text = errorMessage)

@@ -192,7 +192,7 @@ object AppModule {
      */
     @Singleton
     @Provides
-    fun providePermissionsHelper(context: Context): PermissionsHelper {
+    fun providePermissionsHelper(@ApplicationContext context: Context): PermissionsHelper {
         return PermissionsHelper(context)
     }
 

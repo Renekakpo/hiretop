@@ -104,7 +104,7 @@ fun CreateOrEditJobOfferScreen(
         Spacer(modifier = Modifier.height(15.dp))
 
         OutlinedTextField(
-            value = offerName,
+            value = offerName ?: "",
             onValueChange = {
                 offerName = it
             },
@@ -124,6 +124,7 @@ fun CreateOrEditJobOfferScreen(
         DropdownListWords(
             title = stringResource(R.string.location_type_text),
             items = stringArrayResource(id = R.array.location_type_list),
+            currentItemIndex = 0,
             onItemSelected = { selectedLocationType = it }
         )
 
@@ -132,6 +133,7 @@ fun CreateOrEditJobOfferScreen(
         DropdownListWords(
             title = stringResource(R.string.employment_type_text),
             items = stringArrayResource(id = R.array.job_type_list),
+            currentItemIndex = 0,
             onItemSelected = { selectedJobType = it }
         )
 
@@ -241,7 +243,7 @@ fun CreateOrEditJobOfferScreen(
                 ),
                 shape = MaterialTheme.shapes.large,
                 onClick = {
-                    if (offerName.isEmpty()) {
+                    if (offerName.isNullOrEmpty()) {
                         onErrorMessage = mContext.getString(R.string.empty_job_offer_title_text)
                     } else if (requiredSkills.isEmpty()) {
                         onErrorMessage = mContext.getString(R.string.empty_job_offer_skills_text)

@@ -1,6 +1,7 @@
 package com.example.hiretop.models
 
 import com.google.firebase.firestore.DocumentId
+import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -17,30 +18,33 @@ data class CandidateProfile(
     val name: String = "$firstname $lastname",
     val headline: String? = null,
     val about: String? = null,
-    val experiences: Set<Experience>? = null,
-    val educations: Set<Education>? = null,
-    val certifications: Set<Certification>? = null,
-    val projects: Set<Project>? = null,
-    val skills: Set<String>? = null,
+    val experiences: List<Experience>? = null,
+    val educations: List<Education>? = null,
+    val certifications: List<Certification>? = null,
+    val projects: List<Project>? = null,
+    val skills: List<String>? = null,
     val createdAt: Long? = null,
     val updatedAt: Long? = null
 )
 
 data class Experience(
-    val title: String,
+    val title: String? = null,
     val employmentType: String? = null,
-    val companyName: String,
-    val location: String,
-    val locationType: String,
+    val companyName: String? = null,
+    val location: String? = null,
+    val locationType: String? = null,
     val isCurrentWork: Boolean,
-    val startMonth: String,
-    val startYear: String,
-    val endMonth: String,
-    val endYear: String,
-    val industry: String,
+    val startMonth: String? = null,
+    val startYear: String? = null,
+    val endMonth: String? = null,
+    val endYear: String? = null,
+    val industry: String? = null,
     val description: String? = null,
-    val skills: Set<String>? = null
+    val skills: List<String>? = null
 ) {
+
+    constructor() : this(null, null, null, null, null, false, null, null, null, null, null, null)
+
     private val dateFormatter: SimpleDateFormat = SimpleDateFormat("MMMM yyyy", Locale.FRENCH)
 
     fun getStartDate(): Date? {
@@ -58,7 +62,7 @@ data class Experience(
 }
 
 data class Education(
-    val school: String,
+    val school: String? = null,
     val degree: String? = null,
     val fieldOfStudy: String? = null,
     val grade: String? = null,
@@ -69,6 +73,8 @@ data class Education(
     val activities: String? = null,
     val description: String? = null
 ) {
+    constructor() : this("")
+
     private val dateFormatter: SimpleDateFormat = SimpleDateFormat("MMMM yyyy", Locale.FRENCH)
 
     fun getStartDate(): Date? {
@@ -81,17 +87,20 @@ data class Education(
         return dateFormatter.parse(dateString)
     }
 }
+
 data class Certification(
-    val name: String,
-    val issuingOrganization: String,
+    val name: String? = null,
+    val issuingOrganization: String? = null,
     val issueMonth: String? = null,
     val issueYear: String? = null,
     val expireMonth: String? = null,
     val expireYear: String? = null,
     val credentialID: String? = null,
     val credentialURL: String? = null,
-    val skills: Set<String>? = null,
+    val skills: List<String>? = null,
 ) {
+    constructor() : this(null, null, null, null, null, null, null, null, null)
+
     private val dateFormatter: SimpleDateFormat = SimpleDateFormat("MMMM yyyy", Locale.FRENCH)
 
     fun getStartDate(): Date? {
@@ -99,11 +108,14 @@ data class Certification(
         return dateFormatter.parse(dateString)
     }
 }
+
 data class Project(
-    val name: String,
+    val name: String? = null,
     val description: String? = null,
     val skills: List<String>? = null
-)
+) {
+    constructor() : this(null, null, null)
+}
 
 val mockCandidateProfile = CandidateProfile(
     bannerUrl = "https://example.com/banner.jpg",
@@ -112,7 +124,7 @@ val mockCandidateProfile = CandidateProfile(
     lastname = "Dupont",
     headline = "Développeur Full Stack",
     about = "Passionné par la programmation et les nouvelles technologies.",
-    experiences = setOf(
+    experiences = listOf(
         Experience(
             title = "Développeur Full Stack",
             employmentType = "Temps plein",
@@ -126,7 +138,7 @@ val mockCandidateProfile = CandidateProfile(
             endYear = "",
             industry = "Technologie",
             description = "Développement et maintenance d'applications web et mobiles.",
-            skills = setOf("Kotlin", "Java", "HTML", "CSS", "JavaScript", "React", "Node.js")
+            skills = listOf("Kotlin", "Java", "HTML", "CSS", "JavaScript", "React", "Node.js")
         ),
         Experience(
             title = "Stagiaire Développeur Web",
@@ -141,10 +153,10 @@ val mockCandidateProfile = CandidateProfile(
             endYear = "2017",
             industry = "Technologie",
             description = "Développement d'une application web de gestion des tâches.",
-            skills = setOf("HTML", "CSS", "JavaScript", "Angular")
+            skills = listOf("HTML", "CSS", "JavaScript", "Angular")
         )
     ),
-    educations = setOf(
+    educations = listOf(
         Education(
             school = "Université Paris-Saclay",
             degree = "Master en Informatique",
@@ -168,7 +180,7 @@ val mockCandidateProfile = CandidateProfile(
             description = ""
         )
     ),
-    certifications = setOf(
+    certifications = listOf(
         Certification(
             name = "Certification Kotlin Developer",
             issuingOrganization = "JetBrains",
@@ -178,7 +190,7 @@ val mockCandidateProfile = CandidateProfile(
             expireYear = "",
             credentialID = "ABC123",
             credentialURL = "https://example.com/certification",
-            skills = setOf("Kotlin")
+            skills = listOf("Kotlin")
         ),
         Certification(
             name = "Certification React Developer",
@@ -189,10 +201,10 @@ val mockCandidateProfile = CandidateProfile(
             expireYear = "",
             credentialID = "DEF456",
             credentialURL = "https://example.com/certification",
-            skills = setOf("React", "JavaScript")
+            skills = listOf("React", "JavaScript")
         )
     ),
-    projects = setOf(
+    projects = listOf(
         Project(
             name = "Application de Gestion de Projet",
             description = "Application web permettant de gérer les projets et les tâches.",
@@ -204,7 +216,7 @@ val mockCandidateProfile = CandidateProfile(
             skills = listOf("Kotlin", "Android", "Firebase"),
         )
     ),
-    skills = setOf("Kotlin", "Java", "HTML", "CSS", "JavaScript", "React", "Node.js", "Angular"),
+    skills = listOf("Kotlin", "Java", "HTML", "CSS", "JavaScript", "React", "Node.js", "Angular"),
     createdAt = System.currentTimeMillis(),
     updatedAt = System.currentTimeMillis()
 )

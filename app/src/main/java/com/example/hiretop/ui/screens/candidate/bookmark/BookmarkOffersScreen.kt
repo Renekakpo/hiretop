@@ -166,7 +166,7 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
             .padding(15.dp)
     ) {
         Text(
-            text = jobOffer.title,
+            text = jobOffer.title ?: "",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 3,
@@ -209,14 +209,16 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = getPostedTimeAgo(context, jobOffer.postedAt),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-            maxLines = 4,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (jobOffer.postedAt != null) {
+            Text(
+                text = getPostedTimeAgo(context, jobOffer.postedAt),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
     }

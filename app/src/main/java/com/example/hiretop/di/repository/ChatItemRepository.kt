@@ -2,13 +2,12 @@ package com.example.hiretop.di.repository
 
 import com.example.hiretop.R
 import com.example.hiretop.app.HireTop.Companion.appContext
+import com.example.hiretop.models.CandidateProfile
 import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.EnterpriseProfile
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
-import com.example.hiretop.models.CandidateProfile
-import com.example.hiretop.utils.Constant
 import com.example.hiretop.utils.Constant.CANDIDATES_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.CHATS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.ENTERPRISES_COLLECTION_NAME
@@ -48,22 +47,23 @@ class ChatItemRepository @Inject constructor(
 
         // Fetch candidate profile
         val candidateProfileDoc =
-            candidateProfilesCollection.document(chatItem.profileId).get().await()
-        val candidateProfile = candidateProfileDoc.toObject(CandidateProfile::class.java)
+            chatItem.profileId?.let { candidateProfilesCollection.document(it).get().await() }
+        val candidateProfile = candidateProfileDoc?.toObject(CandidateProfile::class.java)
 
         // Fetch enterprise profile
         val enterpriseProfileDoc =
-            enterpriseProfilesCollection.document(chatItem.enterpriseId).get().await()
-        val enterpriseProfile = enterpriseProfileDoc.toObject(EnterpriseProfile::class.java)
+            chatItem.enterpriseId?.let { enterpriseProfilesCollection.document(it).get().await() }
+        val enterpriseProfile = enterpriseProfileDoc?.toObject(EnterpriseProfile::class.java)
 
         // Fetch job offer
-        val jobOfferDoc = jobOffersCollection.document(chatItem.jobOfferId).get().await()
-        val jobOffer = jobOfferDoc.toObject(JobOffer::class.java)
+        val jobOfferDoc =
+            chatItem.jobOfferId?.let { jobOffersCollection.document(it).get().await() }
+        val jobOffer = jobOfferDoc?.toObject(JobOffer::class.java)
 
         // Fetch job application
         val jobApplicationDoc =
-            jobApplicationsCollection.document(chatItem.jobApplicationId).get().await()
-        val jobApplication = jobApplicationDoc.toObject(JobApplication::class.java)
+            chatItem.jobApplicationId?.let { jobApplicationsCollection.document(it).get().await() }
+        val jobApplication = jobApplicationDoc?.toObject(JobApplication::class.java)
 
         // Query Firestore collection to get Message documents related to this chat
         val messageQuery = messagesCollection
@@ -115,8 +115,8 @@ class ChatItemRepository @Inject constructor(
 
                     // Fetch job offer
                     val jobOfferDoc =
-                        jobOffersCollection.document(chatItem.jobOfferId).get().await()
-                    val jobOffer = jobOfferDoc.toObject(JobOffer::class.java)
+                        chatItem.jobOfferId?.let { jobOffersCollection.document(it).get().await() }
+                    val jobOffer = jobOfferDoc?.toObject(JobOffer::class.java)
 
                     // Query Firestore collection to get Message documents related to this chat
                     val messageQuery = messagesCollection
@@ -129,10 +129,12 @@ class ChatItemRepository @Inject constructor(
                     if (isEnterpriseAccount) {
                         // Fetch enterprise profile
                         val enterpriseProfileDoc =
-                            enterpriseProfilesCollection.document(chatItem.enterpriseId).get()
-                                .await()
+                            chatItem.enterpriseId?.let {
+                                enterpriseProfilesCollection.document(it).get()
+                                    .await()
+                            }
                         val enterpriseProfile =
-                            enterpriseProfileDoc.toObject(EnterpriseProfile::class.java)
+                            enterpriseProfileDoc?.toObject(EnterpriseProfile::class.java)
 
                         // Create ChatItemUI object and add it to the list
                         chatItemUI = ChatItemUI(
@@ -145,9 +147,11 @@ class ChatItemRepository @Inject constructor(
                     } else {
                         // Fetch candidate profile
                         val candidateProfileDoc =
-                            candidateProfilesCollection.document(chatItem.profileId).get().await()
+                            chatItem.profileId?.let {
+                                candidateProfilesCollection.document(it).get().await()
+                            }
                         val candidateProfile =
-                            candidateProfileDoc.toObject(CandidateProfile::class.java)
+                            candidateProfileDoc?.toObject(CandidateProfile::class.java)
 
                         // Create ChatItemUI object and add it to the list
                         chatItemUI = ChatItemUI(

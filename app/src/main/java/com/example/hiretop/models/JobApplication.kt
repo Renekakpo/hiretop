@@ -5,23 +5,42 @@ import com.google.firebase.firestore.DocumentId
 data class JobApplication(
     @DocumentId
     val jobApplicationId: String? = null,
-    val candidateProfileId: String,
-    val enterpriseProfileId: String,
-    val jobOfferId: String,
-    val jobOfferTitle: String,
-    val candidateFullName: String,
+    val candidateProfileId: String? = null,
+    val enterpriseProfileId: String? = null,
+    val jobOfferId: String? = null,
+    val jobOfferTitle: String? = null,
+    val candidateFullName: String? = null,
     val candidatePictureUrl: String? = null,
-    val companyName: String,
-    val location: String,
-    val locationType: String,
-    val status: String?,
-    val stages: String?,
-    val appliedAt: Long,
+    val companyName: String? = null,
+    val location: String? = null,
+    val locationType: String? = null,
+    val status: String? = null,
+    val stages: String? = null,
+    val appliedAt: Long? = null,
     val interviewDate: Long? = null,
     val offerReceived: Boolean = false,
     val offerContent: String? = null,
     val withdraw: Boolean = false,
-)
+) {
+    constructor() : this(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        null,
+    )
+}
 
 val jobApplicationsLists = listOf(
     JobApplication(

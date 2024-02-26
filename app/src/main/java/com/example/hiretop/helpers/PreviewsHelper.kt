@@ -96,7 +96,7 @@ fun EditProfileAboutSectionPreview() {
 @Composable
 fun EditOrAddExperienceSectionPreview() {
     HiretopTheme {
-        EditOrAddExperienceSection(currentValue = null, onSaveClicked = {})
+        EditOrAddExperienceSection(currentValue = null, onSaveClicked = {}, onDeleteClicked = {})
     }
 }
 
@@ -104,7 +104,7 @@ fun EditOrAddExperienceSectionPreview() {
 @Composable
 fun EditOrAddEducationSectionPreview() {
     HiretopTheme {
-        EditOrAddEducationSection(currentValue = null, onSaveClicked = {})
+        EditOrAddEducationSection(currentValue = null, onSaveClicked = {}, onDeleteClicked = {})
     }
 }
 
@@ -112,7 +112,7 @@ fun EditOrAddEducationSectionPreview() {
 @Composable
 fun EditOrAddCertificationSectionPreview() {
     HiretopTheme {
-        EditOrAddCertificationSection(currentValue = null) {}
+        EditOrAddCertificationSection(currentValue = null, onSaveClicked = {}, onDeleteClicked = {})
     }
 }
 
@@ -120,7 +120,7 @@ fun EditOrAddCertificationSectionPreview() {
 @Composable
 fun EditOrAddProjectSectionPreview() {
     HiretopTheme {
-        EditOrAddProjectSection(currentValue = null) {}
+        EditOrAddProjectSection(currentValue = null, onSaveClicked = {}, onDeleteClicked = {})
     }
 }
 

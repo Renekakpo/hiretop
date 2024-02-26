@@ -99,10 +99,10 @@ fun EditEnterpriseAboutSection(currentAbout: String?, onSaveClicked: (String) ->
             ),
             shape = MaterialTheme.shapes.small,
             onClick = {
-                if (currentAbout.isNullOrEmpty()) {
+                if (requiredAbout.isEmpty()) {
                     onErrorMessage = mContext.getString(R.string.enter_company_about_text)
                 } else {
-                    onSaveClicked(currentAbout)
+                    onSaveClicked(requiredAbout)
                 }
             }
         ) {

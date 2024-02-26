@@ -13,8 +13,10 @@ data class ChatItemUI(
 data class ChatItem(
     @DocumentId
     val chatId: String? = null,
-    val profileId: String,
-    val enterpriseId: String,
-    val jobOfferId: String,
-    val jobApplicationId: String,
-)
+    val profileId: String? = null,
+    val enterpriseId: String? = null,
+    val jobOfferId: String? = null,
+    val jobApplicationId: String? = null,
+) {
+    constructor() : this(null, null, null, null, null)
+}

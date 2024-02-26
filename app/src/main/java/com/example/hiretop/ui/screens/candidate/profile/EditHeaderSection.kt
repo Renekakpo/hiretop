@@ -145,5 +145,7 @@ fun EditHeaderSection(
                 style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
             )
         }
+
+        Spacer(modifier = Modifier.height(height = 30.dp))
     }
 }

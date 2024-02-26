@@ -120,7 +120,7 @@ fun EditApplicationsDetailsScreen(
             Spacer(modifier = Modifier.width(10.dp))
 
             Text(
-                text = jobApplication.candidateFullName,
+                text = jobApplication.candidateFullName ?: "",
                 style = MaterialTheme.typography.headlineSmall,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -215,6 +215,7 @@ fun EditModeView(
         DropdownListWords(
             title = stringResource(R.string.status_text),
             items = stringArrayResource(id = R.array.job_application_status),
+            currentItemIndex = 0,
             onItemSelected = { selectedStatus = it }
         )
 

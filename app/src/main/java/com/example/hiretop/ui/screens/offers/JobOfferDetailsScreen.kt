@@ -175,7 +175,7 @@ fun JobOfferDetailsScreen(
                 .padding(15.dp)
         ) {
             Text(
-                text = jobOffer.title,
+                text = jobOffer.title ?: "",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 3,
@@ -294,14 +294,16 @@ fun JobOfferDetailsScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    if (!jobOffer.skills.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                    LazyRow(
-                        state = rememberLazyListState(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        itemsIndexed(jobOffer.skills) { _, item ->
-                            JobSkillOrEducationItemRow(item = item)
+                        LazyRow(
+                            state = rememberLazyListState(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            itemsIndexed(jobOffer.skills) { _, item ->
+                                JobSkillOrEducationItemRow(item = item)
+                            }
                         }
                     }
                 }
@@ -332,14 +334,16 @@ fun JobOfferDetailsScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    if (!jobOffer.education.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                    LazyRow(
-                        state = rememberLazyListState(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        itemsIndexed(jobOffer.education) { _, item ->
-                            JobSkillOrEducationItemRow(item = item)
+                        LazyRow(
+                            state = rememberLazyListState(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            itemsIndexed(jobOffer.education) { _, item ->
+                                JobSkillOrEducationItemRow(item = item)
+                            }
                         }
                     }
                 }

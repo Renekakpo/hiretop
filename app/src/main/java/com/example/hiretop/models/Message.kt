@@ -5,14 +5,16 @@ import com.google.firebase.firestore.DocumentId
 data class Message(
     @DocumentId
     val messageId: String? = null,
-    val subject: String, // Chat ID
-    val to: String, // Receiver ID
-    val from: String, // Sender ID
-    val content: String,
+    val subject: String? = null, // Chat ID
+    val to: String? = null, // Receiver ID
+    val from: String? = null, // Sender ID
+    val content: String? = null,
     val received: Boolean = false,
     val isRead: Boolean = false,
-    val createdAt: Long
-)
+    val createdAt: Long? = null
+) {
+    constructor() : this(null, null, null, null, null, false, false, null)
+}
 
 // Mock data
 val mockMessages = listOf(

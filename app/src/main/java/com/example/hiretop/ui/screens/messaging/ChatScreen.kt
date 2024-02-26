@@ -269,7 +269,7 @@ fun MessageItem(message: Message, currentProfileId: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
-        horizontalArrangement = if (message.from.lowercase()
+        horizontalArrangement = if ("${message.from}".lowercase()
                 .contains(currentProfileId.lowercase())
         ) Arrangement.End else Arrangement.Start
     ) {
@@ -283,17 +283,19 @@ fun MessageItem(message: Message, currentProfileId: String) {
                 .padding(8.dp)
         ) {
             Text(
-                text = message.content,
+                text = message.content ?: "",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            Text(
-                text = message.createdAt.toHourMinuteString(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.align(alignment = Alignment.End)
-            )
+            if (message.createdAt != null) {
+                Text(
+                    text = message.createdAt.toHourMinuteString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.align(alignment = Alignment.End)
+                )
+            }
         }
     }
 }

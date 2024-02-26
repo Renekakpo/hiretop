@@ -84,9 +84,16 @@ fun EnterpriseOffersScreen(
         } else {
             enterpriseViewModel.getAllJobOffersForEnterprise(
                 enterpriseID = "$enterpriseProfileId",
-                onSuccess = {},
+                onSuccess = {
+                    uiState = if (it.isEmpty()) {
+                        UIState.FAILURE
+                    } else {
+                        UIState.SUCCESS
+                    }
+                },
                 onFailure = {
                     onErrorMessage = it
+                    uiState = UIState.FAILURE
                 }
             )
         }
@@ -120,7 +127,7 @@ fun EnterpriseOffersScreen(
                 searchInput = it
                 if (searchInput.length >= 3) {
                     filteredJobOffers = jobOffers?.filter { jobOffer ->
-                        jobOffer.title.lowercase()
+                        "${jobOffer.title}".lowercase()
                             .contains(searchInput.lowercase(), ignoreCase = true)
                     }
                 }
@@ -154,6 +161,7 @@ fun EnterpriseOffersScreen(
                 // Display loader while fetching data
                 HireTopCircularProgressIndicator()
             }
+
             UIState.FAILURE -> {
                 val failureText = if (enterpriseProfileId == null) {
                     // Display text prompting user to complete profile
@@ -172,6 +180,7 @@ fun EnterpriseOffersScreen(
                     textAlign = TextAlign.Center
                 )
             }
+
             UIState.SUCCESS -> {
                 filteredJobOffers?.let {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
@@ -215,7 +224,7 @@ private fun OfferItemRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = jobOffer.title,
+                text = jobOffer.title ?: "",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 3,
@@ -273,14 +282,16 @@ private fun OfferItemRow(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = Utils.getPostedTimeAgo(context, jobOffer.postedAt),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-            maxLines = 4,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (jobOffer.postedAt != null) {
+            Text(
+                text = Utils.getPostedTimeAgo(context, jobOffer.postedAt),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
     }

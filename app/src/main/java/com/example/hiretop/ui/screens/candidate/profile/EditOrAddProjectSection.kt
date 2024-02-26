@@ -2,6 +2,7 @@ package com.example.hiretop.ui.screens.candidate.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +34,11 @@ import com.example.hiretop.models.Project
 import com.example.hiretop.ui.extras.FailurePopup
 
 @Composable
-fun EditOrAddProjectSection(currentValue: Project?, onSaveClicked: (Project) -> Unit) {
+fun EditOrAddProjectSection(
+    currentValue: Project?,
+    onSaveClicked: (Project) -> Unit,
+    onDeleteClicked: (Project) -> Unit
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 2000
@@ -121,35 +126,63 @@ fun EditOrAddProjectSection(currentValue: Project?, onSaveClicked: (Project) -> 
 
         Spacer(modifier = Modifier.height(height = 25.dp))
 
-        Button(
-            modifier = Modifier
-                .width(width = mWidth * 0.7F)
-                .height(50.dp)
-                .padding(horizontal = 15.dp)
-                .align(alignment = Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            shape = MaterialTheme.shapes.small,
-            onClick = {
-                if (requiredProjectName.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.empty_project_name_error_text)
-                } else {
-                    val project = Project(
-                        name = requiredProjectName,
-                        description = description,
-                        skills = skills.split(",")
-                    )
-
-                    onSaveClicked(project)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp)
+                    .padding(horizontal = 15.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                enabled = currentValue != null,
+                shape = MaterialTheme.shapes.small,
+                onClick = {
+                    if (currentValue != null) {
+                        onDeleteClicked(currentValue)
+                    }
                 }
+            ) {
+                Text(
+                    text = stringResource(R.string.delete_button_text),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
+                )
             }
-        ) {
-            Text(
-                text = stringResource(R.string.save_button_text),
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
-            )
+
+            Spacer(modifier = Modifier.width(15.dp))
+
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp)
+                    .padding(horizontal = 15.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = MaterialTheme.shapes.small,
+                onClick = {
+                    if (requiredProjectName.isEmpty()) {
+                        onErrorMessage = mContext.getString(R.string.empty_project_name_error_text)
+                    } else {
+                        val project = Project(
+                            name = requiredProjectName,
+                            description = description,
+                            skills = skills.split(",")
+                        )
+
+                        onSaveClicked(project)
+                    }
+                }
+            ) {
+                Text(
+                    text = stringResource(R.string.save_button_text),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
+                )
+            }
         }
     }
 }

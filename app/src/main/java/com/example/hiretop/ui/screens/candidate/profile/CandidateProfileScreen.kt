@@ -129,21 +129,25 @@ fun CandidateProfileScreen(
 
     LaunchedEffect(candidateViewModel) {
         if (isPreviewMode) {
-            candidateViewModel.getCandidateProfile(
-                profileId = "$argCandidateProfileId",
-                onSuccess = {},
-                onFailure = {
-                    onErrorMessage = it
-                }
-            )
+            if (!profileId.isNullOrEmpty()) {
+                candidateViewModel.getCandidateProfile(
+                    profileId = "$argCandidateProfileId",
+                    onSuccess = {},
+                    onFailure = {
+                        onErrorMessage = it
+                    }
+                )
+            }
         } else {
-            candidateViewModel.getCandidateProfile(
-                profileId = "$profileId",
-                onSuccess = {},
-                onFailure = {
-                    onErrorMessage = it
-                }
-            )
+            if (!profileId.isNullOrEmpty()) {
+                candidateViewModel.getCandidateProfile(
+                    profileId = "$profileId",
+                    onSuccess = {},
+                    onFailure = {
+                        onErrorMessage = it
+                    }
+                )
+            }
         }
     }
 
@@ -307,6 +311,22 @@ fun CandidateProfileScreen(
                     bottomSheetContent = {
                         EditOrAddExperienceSection(
                             currentValue = currentExperience,
+                            onDeleteClicked = { itemToRemove ->
+                                val profileCopy = candidateProfile?.copy(
+                                    experiences = candidateProfile?.experiences?.filter { it != itemToRemove }
+                                )
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    if (profileCopy != null) {
+                                        updateFunction(
+                                            profileId,
+                                            profileCopy
+                                        )
+                                    }
+                                }
+
+                                showBottomSheet = false
+                            },
                             onSaveClicked = { experience ->
                                 val editedExperiences = if (currentExperience == null) {
                                     candidateProfile?.experiences.orEmpty() + setOf(experience) // Add new experience
@@ -317,9 +337,9 @@ fun CandidateProfileScreen(
                                 }
 
                                 val profileCopy = candidateProfile?.copy(
-                                    experiences = editedExperiences
+                                    experiences = editedExperiences.toList()
                                 ) ?: CandidateProfile(
-                                    experiences = editedExperiences
+                                    experiences = editedExperiences.toList()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -345,6 +365,22 @@ fun CandidateProfileScreen(
                     bottomSheetContent = {
                         EditOrAddEducationSection(
                             currentValue = currentEducation,
+                            onDeleteClicked = { itemToRemove ->
+                                val profileCopy = candidateProfile?.copy(
+                                    educations = candidateProfile?.educations?.filter { it != itemToRemove }
+                                )
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    if (profileCopy != null) {
+                                        updateFunction(
+                                            profileId,
+                                            profileCopy
+                                        )
+                                    }
+                                }
+
+                                showBottomSheet = false
+                            },
                             onSaveClicked = { education ->
                                 val updatedEducations = if (currentEducation == null) {
                                     candidateProfile?.educations.orEmpty() + setOf(education) // Add new experience
@@ -355,9 +391,9 @@ fun CandidateProfileScreen(
                                 }
 
                                 val profileCopy = candidateProfile?.copy(
-                                    educations = updatedEducations
+                                    educations = updatedEducations.toList()
                                 ) ?: CandidateProfile(
-                                    educations = updatedEducations
+                                    educations = updatedEducations.toList()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -383,6 +419,22 @@ fun CandidateProfileScreen(
                     bottomSheetContent = {
                         EditOrAddCertificationSection(
                             currentValue = currentCertification,
+                            onDeleteClicked = { itemToRemove ->
+                                val profileCopy = candidateProfile?.copy(
+                                    certifications = candidateProfile?.certifications?.filter { it != itemToRemove }
+                                )
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    if (profileCopy != null) {
+                                        updateFunction(
+                                            profileId,
+                                            profileCopy
+                                        )
+                                    }
+                                }
+
+                                showBottomSheet = false
+                            },
                             onSaveClicked = { certification ->
                                 val updatedCertifications = if (currentCertification == null) {
                                     candidateProfile?.certifications.orEmpty() + setOf(certification) // Add new experience
@@ -394,9 +446,9 @@ fun CandidateProfileScreen(
                                 }
 
                                 val profileCopy = candidateProfile?.copy(
-                                    certifications = updatedCertifications
+                                    certifications = updatedCertifications.toList()
                                 ) ?: CandidateProfile(
-                                    certifications = updatedCertifications
+                                    certifications = updatedCertifications.toList()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -422,6 +474,22 @@ fun CandidateProfileScreen(
                     bottomSheetContent = {
                         EditOrAddProjectSection(
                             currentValue = currentProject,
+                            onDeleteClicked = { itemToRemove ->
+                                val profileCopy = candidateProfile?.copy(
+                                    projects = candidateProfile?.projects?.filter { it != itemToRemove }
+                                )
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    if (profileCopy != null) {
+                                        updateFunction(
+                                            profileId,
+                                            profileCopy
+                                        )
+                                    }
+                                }
+
+                                showBottomSheet = false
+                            },
                             onSaveClicked = { project ->
                                 val updatedProjects = if (currentProject == null) {
                                     candidateProfile?.projects.orEmpty() + setOf(project) // Add new experience
@@ -432,9 +500,9 @@ fun CandidateProfileScreen(
                                 }
 
                                 val profileCopy = candidateProfile?.copy(
-                                    projects = updatedProjects
+                                    projects = updatedProjects.toList()
                                 ) ?: CandidateProfile(
-                                    projects = updatedProjects
+                                    projects = updatedProjects.toList()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -453,7 +521,7 @@ fun CandidateProfileScreen(
             Spacer(modifier = Modifier.height(height = 15.dp))
 
             SkillsSection(
-                skills = candidateProfile?.skills?.joinToString { ", " },
+                skills = candidateProfile?.skills?.joinToString(separator = ","),
                 isPreviewMode = isPreviewMode,
                 onAddOrEditSkillsClicked = { currentSkills ->
                     sheetTitle = mContext.getString(R.string.optional_skills_text)
@@ -462,9 +530,9 @@ fun CandidateProfileScreen(
                             currentValue = currentSkills,
                             onSaveClicked = { skills ->
                                 val profileCopy = candidateProfile?.copy(
-                                    skills = skills.toSet(),
+                                    skills = skills.toList(),
                                 ) ?: CandidateProfile(
-                                    skills = skills.toSet()
+                                    skills = skills.toList()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -714,7 +782,7 @@ private fun AboutSection(
 
 @Composable
 private fun ExperienceSection(
-    experiences: Set<Experience>?,
+    experiences: List<Experience>?,
     isPreviewMode: Boolean,
     onAddOrEditExperienceClicked: (Experience?) -> Unit
 ) {
@@ -755,10 +823,13 @@ private fun ExperienceSection(
         if (experiences.isNullOrEmpty()) {
             Text(
                 text = stringResource(R.string.no_experience_text),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Normal),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp)
             )
         } else {
             val sortedExperiences =
@@ -786,7 +857,7 @@ private fun ExperienceItemRow(experience: Experience, onEditExperience: (Experie
             .padding(horizontal = 15.dp)
     ) {
         Text(
-            text = experience.companyName,
+            text = experience.companyName ?: "•",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -813,7 +884,7 @@ private fun ExperienceItemRow(experience: Experience, onEditExperience: (Experie
                 Spacer(modifier = Modifier.width(15.dp))
 
                 Text(
-                    text = experience.title,
+                    text = experience.title ?: "•",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
@@ -832,9 +903,9 @@ private fun ExperienceItemRow(experience: Experience, onEditExperience: (Experie
                 Spacer(modifier = Modifier.height(height = 3.dp))
                 Text(
                     text = "${
-                        experience.startMonth.lowercase().subSequence(0, 2)
+                        experience.startMonth?.lowercase()
                     } ${experience.startYear} - ${
-                        experience.endMonth.lowercase().subSequence(0, 2)
+                        experience.endMonth?.lowercase()
                     } ${experience.endYear}",
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
@@ -858,22 +929,24 @@ private fun ExperienceItemRow(experience: Experience, onEditExperience: (Experie
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(height = 15.dp))
+                if (!experience.skills.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(height = 15.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_skills_icon),
-                        contentDescription = stringResource(R.string.skills_icon_desc_text),
-                        modifier = Modifier.size(size = 14.dp)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_skills_icon),
+                            contentDescription = stringResource(R.string.skills_icon_desc_text),
+                            modifier = Modifier.size(size = 14.dp)
+                        )
 
-                    Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
 
-                    Text(
-                        text = experience.skills?.let { it.joinToString { ", " } } ?: "•",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                        Text(
+                            text = experience.skills.joinToString(separator = "|"),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
                 }
             }
         }
@@ -882,7 +955,7 @@ private fun ExperienceItemRow(experience: Experience, onEditExperience: (Experie
 
 @Composable
 private fun EducationSection(
-    educations: Set<Education>?,
+    educations: List<Education>?,
     isPreviewMode: Boolean,
     onAddOrEditEducationClicked: (Education?) -> Unit
 ) {
@@ -923,10 +996,13 @@ private fun EducationSection(
         if (educations.isNullOrEmpty()) {
             Text(
                 text = stringResource(R.string.no_education_text),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Normal),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp)
             )
         } else {
             val sortedEducations =
@@ -955,7 +1031,7 @@ private fun EducationItemRow(education: Education, onEditEducation: (Education) 
             .padding(horizontal = 15.dp)
     ) {
         Text(
-            text = education.school,
+            text = education.school ?: "•",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -984,7 +1060,7 @@ private fun EducationItemRow(education: Education, onEditEducation: (Education) 
 
 @Composable
 private fun CertificationsSection(
-    certifications: Set<Certification>?,
+    certifications: List<Certification>?,
     isPreviewMode: Boolean,
     onAddOrEditCertificationClicked: (Certification?) -> Unit
 ) {
@@ -1027,10 +1103,13 @@ private fun CertificationsSection(
         if (certifications.isNullOrEmpty()) {
             Text(
                 text = stringResource(R.string.no_certification_text),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Normal),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp)
             )
         } else {
             val sortedCertifications =
@@ -1060,7 +1139,7 @@ private fun CertificationItemRow(
             .padding(horizontal = 15.dp)
     ) {
         Text(
-            text = certification.name,
+            text = certification.name ?: "•",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -1068,7 +1147,7 @@ private fun CertificationItemRow(
         )
 
         Text(
-            text = certification.issuingOrganization,
+            text = certification.issuingOrganization ?: "•",
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 3,
@@ -1085,9 +1164,9 @@ private fun CertificationItemRow(
         if (!certification.expireMonth.isNullOrEmpty() && !certification.expireYear.isNullOrEmpty()) {
             certificationDate = stringResource(
                 R.string.certification_issued_and_expired_date_text,
-                certification.issueMonth?.lowercase()?.substring(0, 3).toString(),
+                certification.issueMonth?.lowercase().toString(),
                 certification.issueYear.toString(),
-                certification.expireMonth.lowercase().substring(0, 3),
+                certification.expireMonth,
                 certification.expireYear
             )
         }
@@ -1102,19 +1181,24 @@ private fun CertificationItemRow(
 
         Spacer(modifier = Modifier.height(height = 3.dp))
 
-        Text(
-            text = stringResource(R.string.certification_id_text, "${certification.credentialID}"),
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        if (!certification.credentialID.isNullOrEmpty()) {
+            Text(
+                text = stringResource(
+                    R.string.certification_id_text,
+                    "${certification.credentialID}"
+                ),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
 @Composable
 private fun ProjectsSection(
-    projects: Set<Project>?,
+    projects: List<Project>?,
     isPreviewMode: Boolean,
     onAddOrEditProjectClicked: (Project?) -> Unit
 ) {
@@ -1155,10 +1239,13 @@ private fun ProjectsSection(
         if (projects.isNullOrEmpty()) {
             Text(
                 text = stringResource(R.string.no_project_text),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Normal),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp)
             )
         } else {
             projects.forEach { item ->
@@ -1183,7 +1270,7 @@ private fun ProjectItemRow(project: Project, onEditProject: (Project) -> Unit) {
             .padding(horizontal = 15.dp)
     ) {
         Text(
-            text = project.name,
+            text = project.name ?: "•",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
@@ -1202,20 +1289,22 @@ private fun ProjectItemRow(project: Project, onEditProject: (Project) -> Unit) {
 
         Spacer(modifier = Modifier.height(height = 10.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_skills_icon),
-                contentDescription = stringResource(id = R.string.skills_icon_desc_text),
-                modifier = Modifier.size(size = 14.dp)
-            )
+        if (!project.skills.isNullOrEmpty()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_skills_icon),
+                    contentDescription = stringResource(id = R.string.skills_icon_desc_text),
+                    modifier = Modifier.size(size = 14.dp)
+                )
 
-            Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(5.dp))
 
-            Text(
-                text = project.skills?.joinToString { ", " } ?: "•",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+                Text(
+                    text = project.skills.joinToString(separator = ","),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
         }
     }
 }
@@ -1260,7 +1349,7 @@ private fun SkillsSection(
         }
 
         Text(
-            text = "${skills?.split(",")}",
+            text = if (!skills.isNullOrEmpty()) skills else stringResource(R.string.no_skills_added_text),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier

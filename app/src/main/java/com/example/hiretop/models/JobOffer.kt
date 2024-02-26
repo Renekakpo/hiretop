@@ -6,22 +6,38 @@ import kotlin.random.Random
 data class JobOffer(
     @DocumentId
     val jobOfferID: String? = null,
-    val title: String,
-    val company: String?,
-    val enterpriseID: String,
-    val jobType: String?,
-    val description: String?,
-    val location: String?,
-    val locationType: String?,
-    val skills: List<String>,
-    val education: List<String>,
+    val title: String? = null,
+    val company: String? = null,
+    val enterpriseID: String? = null,
+    val jobType: String? = null,
+    val description: String? = null,
+    val location: String? = null,
+    val locationType: String? = null,
+    val skills: List<String>? = null,
+    val education: List<String>? = null,
     val viewCount: Long = 0,
     val isClosed: Boolean = false,
-    val updatedAt: Long,
+    val updatedAt: Long? = null,
     val closedAt: Long? = null,
-    val postedAt: Long,
+    val postedAt: Long? = null,
     val hireCount: Long = 0
-)
+) {
+    constructor() : this(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        0,
+        false,
+        null,
+    )
+}
 
 fun generateFakeJobOffers(count: Int): List<JobOffer> {
     val jobTitles = listOf(

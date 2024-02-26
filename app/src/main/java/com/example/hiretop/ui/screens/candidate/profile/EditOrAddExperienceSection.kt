@@ -38,7 +38,11 @@ import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.utils.Utils.getYearsList
 
 @Composable
-fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experience) -> Unit) {
+fun EditOrAddExperienceSection(
+    currentValue: Experience?,
+    onSaveClicked: (Experience) -> Unit,
+    onDeleteClicked: (Experience) -> Unit
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val maxLength = 300
@@ -54,8 +58,8 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
     var selectedEndYear by remember { mutableStateOf(currentValue?.endYear ?: "") }
     var requiredIndustry by remember { mutableStateOf(currentValue?.industry ?: "") }
     var description by remember { mutableStateOf(currentValue?.description ?: "") }
-    var skills by remember { mutableStateOf(currentValue?.skills?.joinToString { "," } ?: "") }
-    var isCurrentPosition by remember { mutableStateOf(false) }
+    var skills by remember { mutableStateOf(currentValue?.skills?.joinToString(separator = ",")) }
+    var isCurrentPosition by remember { mutableStateOf(currentValue?.isCurrentWork ?: false) }
 
     var onErrorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -98,6 +102,7 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
         DropdownListWords(
             title = stringResource(R.string.employment_type_text),
             items = stringArrayResource(id = R.array.job_type_list),
+            currentItemIndex = if (selectedJobType.isNotEmpty()) stringArrayResource(id = R.array.job_type_list).indexOf(selectedJobType) else 0,
             onItemSelected = { selectedJobType = it }
         )
 
@@ -136,6 +141,7 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
         DropdownListWords(
             title = stringResource(R.string.location_type_text),
             items = stringArrayResource(id = R.array.location_type_list),
+            currentItemIndex = if (selectedLocationType.isNotEmpty()) stringArrayResource(id = R.array.location_type_list).indexOf(selectedLocationType) else 0,
             onItemSelected = { selectedLocationType = it }
         )
 
@@ -151,6 +157,7 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
+                    currentItemIndex = if (selectedStartMonth.isNotEmpty()) stringArrayResource(id = R.array.months_array).indexOf(selectedStartMonth) else 0,
                     onItemSelected = { selectedStartMonth = it }
                 )
 
@@ -160,6 +167,7 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = getYearsList().toTypedArray(),
+                    currentItemIndex = if (selectedStartYear.isNotEmpty()) getYearsList().indexOf(selectedStartYear) else 0,
                     onItemSelected = { selectedStartYear = it }
                 )
             }
@@ -177,6 +185,7 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
+                    currentItemIndex = if (selectedEndMonth.isNotEmpty()) stringArrayResource(id = R.array.months_array).indexOf(selectedEndMonth) else 0,
                     onItemSelected = { selectedEndMonth = it }
                 )
 
@@ -186,6 +195,7 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = getYearsList().toTypedArray(),
+                    currentItemIndex = if (selectedEndYear.isNotEmpty()) getYearsList().indexOf(selectedEndYear) else 0,
                     onItemSelected = { selectedEndYear = it }
                 )
             }
@@ -236,7 +246,7 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
         Spacer(modifier = Modifier.height(height = 15.dp))
 
         OutlinedTextField(
-            value = skills,
+            value = skills ?: "",
             onValueChange = { skills = it },
             label = {
                 Text(
@@ -264,57 +274,89 @@ fun EditOrAddExperienceSection(currentValue: Experience?, onSaveClicked: (Experi
 
         Spacer(modifier = Modifier.height(height = 25.dp))
 
-        Button(
-            modifier = Modifier
-                .width(width = mWidth * 0.7F)
-                .height(50.dp)
-                .padding(horizontal = 15.dp)
-                .align(alignment = Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            shape = MaterialTheme.shapes.small,
-            onClick = {
-                val experience: Experience?
-                if (requiredJobTitle.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.experience_title_error_text)
-                } else if (requiredCompanyName.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.experience_company_name_error_text)
-                } else if (requiredIndustry.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.experience_industry_title_error_text)
-                } else if (selectedStartMonth.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.experience_start_month_error_text)
-                } else if (selectedStartYear.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.experience_start_year_error_text)
-                } else if (selectedEndMonth.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.experience_end_month_error_text)
-                } else if (selectedEndYear.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.experience_end_year_error_text)
-                } else {
-                    experience = Experience(
-                        title = requiredJobTitle,
-                        employmentType = selectedJobType,
-                        companyName = requiredCompanyName,
-                        location = location,
-                        locationType = selectedLocationType,
-                        isCurrentWork = isCurrentPosition,
-                        startMonth = selectedStartMonth,
-                        startYear = selectedStartYear,
-                        endMonth = selectedEndMonth,
-                        endYear = selectedEndYear,
-                        industry = requiredIndustry,
-                        description = description,
-                        skills = skills.split(",").toSet()
-                    )
-                    onSaveClicked(experience)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp)
+                    .padding(horizontal = 5.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                enabled = currentValue != null,
+                shape = MaterialTheme.shapes.small,
+                onClick = {
+                    if (currentValue != null) {
+                        onDeleteClicked(currentValue)
+                    }
                 }
+            ) {
+                Text(
+                    text = stringResource(R.string.delete_button_text),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
+                )
             }
-        ) {
-            Text(
-                text = stringResource(R.string.save_button_text),
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
-            )
+
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp)
+                    .padding(horizontal = 5.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = MaterialTheme.shapes.small,
+                onClick = {
+                    val experience: Experience?
+                    if (requiredJobTitle.isEmpty()) {
+                        onErrorMessage = mContext.getString(R.string.experience_title_error_text)
+                    } else if (requiredCompanyName.isEmpty()) {
+                        onErrorMessage =
+                            mContext.getString(R.string.experience_company_name_error_text)
+                    } else if (requiredIndustry.isEmpty()) {
+                        onErrorMessage =
+                            mContext.getString(R.string.experience_industry_title_error_text)
+                    } else if (selectedStartMonth.isEmpty()) {
+                        onErrorMessage =
+                            mContext.getString(R.string.experience_start_month_error_text)
+                    } else if (selectedStartYear.isEmpty()) {
+                        onErrorMessage =
+                            mContext.getString(R.string.experience_start_year_error_text)
+                    } else if (selectedEndMonth.isEmpty()) {
+                        onErrorMessage =
+                            mContext.getString(R.string.experience_end_month_error_text)
+                    } else if (selectedEndYear.isEmpty()) {
+                        onErrorMessage = mContext.getString(R.string.experience_end_year_error_text)
+                    } else {
+                        experience = Experience(
+                            title = requiredJobTitle,
+                            employmentType = selectedJobType,
+                            companyName = requiredCompanyName,
+                            location = location,
+                            locationType = selectedLocationType,
+                            isCurrentWork = isCurrentPosition,
+                            startMonth = selectedStartMonth,
+                            startYear = selectedStartYear,
+                            endMonth = selectedEndMonth,
+                            endYear = selectedEndYear,
+                            industry = requiredIndustry,
+                            description = description,
+                            skills = if (skills.isNullOrEmpty()) null else skills?.split(",")
+                        )
+                        onSaveClicked(experience)
+                    }
+                }
+            ) {
+                Text(
+                    text = stringResource(R.string.save_button_text),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+            }
         }
     }
 }

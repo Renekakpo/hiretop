@@ -112,7 +112,7 @@ fun JobOffersScreen(
                     searchInput = it
                     if (searchInput.length >= 3) {
                         filteredJobOffers = jobOffers?.filter { jobOffer ->
-                            jobOffer.title.lowercase()
+                            "${jobOffer.title}".lowercase()
                                 .contains(searchInput.lowercase(), ignoreCase = true)
                         }
                     }
@@ -159,7 +159,7 @@ fun JobOffersScreen(
                                         filteredJobOffers = jobOffers?.filter { jobOffer ->
                                             // Apply filter based on job types, educations, location types
                                             jobTypes.isEmpty() || jobOffer.jobType in jobTypes &&
-                                                    educations.isEmpty() || jobOffer.education.any { it in educations } &&
+                                                    educations.isEmpty() || jobOffer.education?.any { it in educations } == true &&
                                                     locationTypes.isEmpty() || jobOffer.locationType in locationTypes
                                         }
                                         showBottomSheet = false
@@ -265,7 +265,7 @@ private fun JobOfferItemRow(
             .padding(15.dp)
     ) {
         Text(
-            text = jobOffer.title,
+            text = jobOffer.title ?: "",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 3,
@@ -306,16 +306,18 @@ private fun JobOfferItemRow(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        if (jobOffer.postedAt != null) {
+            Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = getPostedTimeAgo(context, jobOffer.postedAt),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-            maxLines = 4,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
-        )
+            Text(
+                text = getPostedTimeAgo(context, jobOffer.postedAt),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
     }

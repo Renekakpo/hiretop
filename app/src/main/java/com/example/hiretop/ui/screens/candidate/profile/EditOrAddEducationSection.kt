@@ -34,10 +34,14 @@ import com.example.hiretop.R
 import com.example.hiretop.models.Education
 import com.example.hiretop.ui.extras.DropdownListWords
 import com.example.hiretop.ui.extras.FailurePopup
-import com.example.hiretop.utils.Utils
+import com.example.hiretop.utils.Utils.getYearsList
 
 @Composable
-fun EditOrAddEducationSection(currentValue: Education?,onSaveClicked: (Education) -> Unit) {
+fun EditOrAddEducationSection(
+    currentValue: Education?,
+    onSaveClicked: (Education) -> Unit,
+    onDeleteClicked: (Education) -> Unit
+) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val descMaxLength = 1000
@@ -46,7 +50,7 @@ fun EditOrAddEducationSection(currentValue: Education?,onSaveClicked: (Education
     var requiredSchoolName by remember { mutableStateOf(currentValue?.school ?: "") }
     var degree by remember { mutableStateOf(currentValue?.degree ?: "") }
     var fieldOfStudy by remember { mutableStateOf(currentValue?.fieldOfStudy ?: "") }
-    var grade by remember { mutableStateOf(currentValue?.grade?: "") }
+    var grade by remember { mutableStateOf(currentValue?.grade ?: "") }
     var activities by remember { mutableStateOf(currentValue?.activities ?: "") }
     var description by remember { mutableStateOf(currentValue?.description ?: "") }
     var startMonth by remember { mutableStateOf(currentValue?.startMonth ?: "") }
@@ -131,6 +135,9 @@ fun EditOrAddEducationSection(currentValue: Education?,onSaveClicked: (Education
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
+                    currentItemIndex = if (startMonth.isNotEmpty()) stringArrayResource(id = R.array.months_array).indexOf(
+                        startMonth
+                    ) else 0,
                     onItemSelected = { startMonth = it }
                 )
 
@@ -139,7 +146,10 @@ fun EditOrAddEducationSection(currentValue: Education?,onSaveClicked: (Education
                 DropdownListWords(
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
-                    items = Utils.getYearsList().toTypedArray(),
+                    items = getYearsList().toTypedArray(),
+                    currentItemIndex = if (startYear.isNotEmpty()) getYearsList().indexOf(
+                        startYear
+                    ) else 0,
                     onItemSelected = { startYear = it }
                 )
             }
@@ -157,6 +167,9 @@ fun EditOrAddEducationSection(currentValue: Education?,onSaveClicked: (Education
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
                     items = stringArrayResource(id = R.array.months_array),
+                    currentItemIndex = if (endMonth.isNotEmpty()) stringArrayResource(id = R.array.months_array).indexOf(
+                        endMonth
+                    ) else 0,
                     onItemSelected = { endMonth = it }
                 )
 
@@ -165,7 +178,8 @@ fun EditOrAddEducationSection(currentValue: Education?,onSaveClicked: (Education
                 DropdownListWords(
                     modifier = Modifier.width(width = mWidth * 0.45f),
                     title = "",
-                    items = Utils.getYearsList().toTypedArray(),
+                    items = getYearsList().toTypedArray(),
+                    currentItemIndex = if (endYear.isNotEmpty()) getYearsList().indexOf(endYear) else 0,
                     onItemSelected = { endYear = it }
                 )
             }
@@ -242,42 +256,68 @@ fun EditOrAddEducationSection(currentValue: Education?,onSaveClicked: (Education
 
         Spacer(modifier = Modifier.height(height = 25.dp))
 
-        Button(
-            modifier = Modifier
-                .width(width = mWidth * 0.7F)
-                .height(50.dp)
-                .padding(horizontal = 15.dp)
-                .align(alignment = Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            shape = MaterialTheme.shapes.small,
-            onClick = {
-                if (requiredSchoolName.isEmpty()) {
-                    onErrorMessage = mContext.getString(R.string.empty_school_name_error_text)
-                } else {
-                    val education = Education(
-                        school = requiredSchoolName,
-                        degree = degree,
-                        fieldOfStudy = fieldOfStudy,
-                        grade = grade,
-                        startMonth = startMonth,
-                        startYear = startYear,
-                        endMonth = endMonth,
-                        endYear = endYear,
-                        activities = activities,
-                        description = description
-                    )
-
-                    onSaveClicked(education)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .height(50.dp)
+                    .padding(horizontal = 15.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                enabled = currentValue != null,
+                shape = MaterialTheme.shapes.small,
+                onClick = {
+                    if (currentValue != null) {
+                        onDeleteClicked(currentValue)
+                    }
                 }
+            ) {
+                Text(
+                    text = stringResource(R.string.delete_button_text),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
+                )
             }
-        ) {
-            Text(
-                text = stringResource(R.string.save_button_text),
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
-            )
+
+            Spacer(modifier = Modifier.width(15.dp))
+
+            Button(
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .height(50.dp)
+                    .padding(horizontal = 15.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = MaterialTheme.shapes.small,
+                onClick = {
+                    if (requiredSchoolName.isEmpty()) {
+                        onErrorMessage = mContext.getString(R.string.empty_school_name_error_text)
+                    } else {
+                        val education = Education(
+                            school = requiredSchoolName,
+                            degree = degree,
+                            fieldOfStudy = fieldOfStudy,
+                            grade = grade,
+                            startMonth = startMonth,
+                            startYear = startYear,
+                            endMonth = endMonth,
+                            endYear = endYear,
+                            activities = activities,
+                            description = description
+                        )
+
+                        onSaveClicked(education)
+                    }
+                }
+            ) {
+                Text(
+                    text = stringResource(R.string.save_button_text),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
+                )
+            }
         }
     }
 }

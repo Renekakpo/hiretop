@@ -42,7 +42,7 @@ class CandidateViewModel @Inject constructor(
     private val candidateProfilesCollection: CollectionReference,
     @Named(JOB_APPLICATIONS_COLLECTION_NAME)
     private val jobApplicationsCollection: CollectionReference,
-    appDataStore: HireTopDataStoreRepos,
+    private val appDataStore: HireTopDataStoreRepos,
     private val firebaseHelper: FirebaseHelper,
     private val applicationRepos: JobOfferApplicationRepository,
 ) : ViewModel() {
@@ -69,6 +69,12 @@ class CandidateViewModel @Inject constructor(
     // StateFlow to hold the canApply to job offers
     private val _canApplyToJobOffer = MutableStateFlow(false)
     val canApplyToJobOffer: StateFlow<Boolean> = _canApplyToJobOffer
+
+    private fun updateCandidateProfileId(id: String) {
+        viewModelScope.launch {
+            appDataStore.saveCandidateProfileIdState(newValue = id)
+        }
+    }
 
     fun getCandidateJobApplications(
         profileId: String,
@@ -98,7 +104,6 @@ class CandidateViewModel @Inject constructor(
             jobOffersCollection
                 .whereArrayContainsAny("skills", candidateSkills)
                 .orderBy("postedAt", Query.Direction.DESCENDING)
-                .limit(3)
                 .get()
                 .addOnSuccessListener { snapshot ->
                     val jobOffers = mutableListOf<JobOffer>()
@@ -109,7 +114,7 @@ class CandidateViewModel @Inject constructor(
                         }
                     }
 
-                    _recommendedJobs.value = jobOffers.filter { !it.isClosed }
+                    _recommendedJobs.value = jobOffers.filter { !it.isClosed }.take(3)
 
                     onSuccess()
                 }
@@ -165,11 +170,10 @@ class CandidateViewModel @Inject constructor(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             candidateProfilesCollection
-                .add(candidateProfile)
+                .add(candidateProfile.copy(createdAt = System.currentTimeMillis()))
                 .addOnSuccessListener { doc ->
-                    _candidateProfile.update { currentValue ->
-                        currentValue?.copy(profileId = doc.id)
-                    }
+                    _candidateProfile.value = candidateProfile.copy(profileId = doc.id)
+                    updateCandidateProfileId(id = doc.id)
                     onSuccess()
                 }
                 .addOnFailureListener {
@@ -191,9 +195,11 @@ class CandidateViewModel @Inject constructor(
         onFailure: (String) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            candidateProfilesCollection.document(profileId)
-                .set(editedProfile, SetOptions.merge())
+            candidateProfilesCollection
+                .document(profileId)
+                .set(editedProfile.copy(updatedAt = System.currentTimeMillis()), SetOptions.merge())
                 .addOnSuccessListener {
+                    _candidateProfile.value = editedProfile.copy(profileId = profileId)
                     onSuccess()
                 }
                 .addOnFailureListener {
@@ -217,8 +223,8 @@ class CandidateViewModel @Inject constructor(
             candidateProfilesCollection.document(profileId)
                 .get()
                 .addOnSuccessListener { document ->
-                    val profile = document.toObject<CandidateProfile>()
-                    _candidateProfile.update { profile }
+                    val profile = document.toObject(CandidateProfile::class.java)
+                    _candidateProfile.value = profile
                     onSuccess(profile)
                 }
                 .addOnFailureListener {

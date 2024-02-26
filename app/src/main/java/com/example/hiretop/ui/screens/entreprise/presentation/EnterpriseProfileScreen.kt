@@ -123,15 +123,19 @@ fun EnterpriseProfileScreen(
 
     LaunchedEffect(enterpriseViewModel) {
         if (isPreviewMode) {
-            enterpriseViewModel.getEnterpriseProfile(
-                enterpriseId = "$argEnterpriseProfileId",
-                onSuccess = {},
-                onFailure = {})
+            if (!argEnterpriseProfileId.isNullOrEmpty()) {
+                enterpriseViewModel.getEnterpriseProfile(
+                    enterpriseId = "$argEnterpriseProfileId",
+                    onSuccess = {},
+                    onFailure = {})
+            }
         } else {
-            enterpriseViewModel.getEnterpriseProfile(
-                enterpriseId = "$profileId",
-                onSuccess = {},
-                onFailure = {})
+            if (!profileId.isNullOrEmpty()) {
+                enterpriseViewModel.getEnterpriseProfile(
+                    enterpriseId = "$profileId",
+                    onSuccess = {},
+                    onFailure = {})
+            }
         }
     }
 
@@ -405,8 +409,8 @@ private fun HeaderSection(
                     .build(),
                 contentDescription = stringResource(R.string.profile_banner_desc_text),
                 contentScale = ContentScale.FillBounds,
-                error = painterResource(id = R.drawable.user_profile_banner),
-                placeholder = painterResource(id = R.drawable.user_profile_banner),
+                error = painterResource(id = R.drawable.banner_placeholder),
+                placeholder = painterResource(id = R.drawable.banner_placeholder),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(height = mWidth / 3.5F)
@@ -453,8 +457,8 @@ private fun HeaderSection(
                     .build(),
                 contentDescription = stringResource(R.string.user_profile_picture_desc_text),
                 contentScale = ContentScale.Crop,
-                error = painterResource(id = R.drawable.ai_profile_picture),
-                placeholder = painterResource(id = R.drawable.ai_profile_picture),
+                error = painterResource(id = R.drawable.user_profile_placeholder),
+                placeholder = painterResource(id = R.drawable.user_profile_placeholder),
                 modifier = Modifier
                     .size(150.dp)
                     .padding(4.dp)

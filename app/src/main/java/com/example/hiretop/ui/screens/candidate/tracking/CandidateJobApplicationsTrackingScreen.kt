@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -98,8 +99,10 @@ fun CandidateJobApplicationsTrackingScreen(
 
     when (uiState) {
         UIState.LOADING -> {
-            // Display loader while fetching data
-            HireTopCircularProgressIndicator()
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                // Display loader while fetching data
+                HireTopCircularProgressIndicator()
+            }
         }
 
         UIState.FAILURE -> {
@@ -113,14 +116,16 @@ fun CandidateJobApplicationsTrackingScreen(
                 stringResource(id = R.string.read_job_applications_failure_text)
             }
 
-            Text(
-                text = infoText,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                textAlign = TextAlign.Center
-            )
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = infoText,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
 
         }
 
@@ -210,7 +215,7 @@ fun JobApplicationItem(
             .padding(15.dp)
     ) {
         Text(
-            text = jobApplication.jobOfferTitle,
+            text = jobApplication.jobOfferTitle ?: "",
             color = statusContentColor,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.fillMaxWidth()
@@ -219,7 +224,7 @@ fun JobApplicationItem(
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = jobApplication.companyName,
+            text = jobApplication.companyName ?: "",
             color = statusContentColor,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.fillMaxWidth()
@@ -261,12 +266,14 @@ fun JobApplicationItem(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
-            text = getAppliedTimeAgo(context, jobApplication.appliedAt),
-            color = statusContentColor,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (jobApplication.appliedAt != null) {
+            Text(
+                text = getAppliedTimeAgo(context, jobApplication.appliedAt),
+                color = statusContentColor,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 

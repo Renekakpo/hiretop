@@ -137,7 +137,7 @@ fun EnterpriseApplicationsScreen(
                 searchInput = it
                 if (searchInput.length >= 3) {
                     filteredJobApplicationsList = jobApplicationsList?.filter { item ->
-                        item.candidateFullName.lowercase()
+                        "${item.candidateFullName}".lowercase()
                             .contains(searchInput.lowercase(), ignoreCase = true) ||
                                 item.status?.lowercase()?.contains(
                                     searchInput.lowercase(),
@@ -147,7 +147,7 @@ fun EnterpriseApplicationsScreen(
                                     searchInput.lowercase(),
                                     ignoreCase = true
                                 ) == true ||
-                                item.jobOfferTitle.lowercase()
+                                "${item.jobOfferTitle}".lowercase()
                                     .contains(searchInput.lowercase(), ignoreCase = true)
                     }
                 }
@@ -270,14 +270,14 @@ fun ApplicationItemRow(
                         .padding(4.dp)
                         .clip(CircleShape)
                         .clickable {
-                            onPreviewCandidateProfile(jobApplication.candidateProfileId)
+                            jobApplication.candidateProfileId?.let { onPreviewCandidateProfile(it) }
                         }
                 )
 
                 Spacer(modifier = Modifier.width(15.dp))
 
                 Text(
-                    text = jobApplication.candidateFullName,
+                    text = jobApplication.candidateFullName ?: "",
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -297,15 +297,20 @@ fun ApplicationItemRow(
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            if (!jobApplication.jobOfferTitle.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(10.dp))
 
-            Text(
-                text = stringResource(R.string.applied_offer_info, jobApplication.jobOfferTitle),
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
-            )
+                Text(
+                    text = stringResource(
+                        R.string.applied_offer_info,
+                        jobApplication.jobOfferTitle
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 

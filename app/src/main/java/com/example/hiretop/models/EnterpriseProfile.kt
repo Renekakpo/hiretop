@@ -16,4 +16,6 @@ data class EnterpriseProfile(
     val contactDetails: String? = null,
     val createdAt: Long? = null,
     val updatedAt: Long? = null,
-)
+) {
+    constructor() : this(null, null, null, null, null, null, null, null, null, null, null, null)
+}
