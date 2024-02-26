@@ -255,6 +255,7 @@
     <string name="delete_button_text">Supprimer</string>
     <string name="year_text">Année</string>
     <string name="media_permission_alert_message">Cette permission est nécessaire pour définir la photo et la bannière de votre profil.</string>
+    <string name="required_job_offer_location_info">Entrez le lieu de l\'offre d\'emploi</string>
     <string-array name="job_type_list">
         <item>Temps plein</item>
         <item>Temps partiel</item>

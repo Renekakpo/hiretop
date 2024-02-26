@@ -1,5 +1,6 @@
 package com.example.hiretop.ui.screens.entreprise.presentation
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -59,6 +60,7 @@ import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopBottomSheet
 import com.example.hiretop.utils.Utils
+import com.example.hiretop.utils.Utils.extractStringFromLink
 import com.example.hiretop.viewModels.CandidateViewModel
 import com.example.hiretop.viewModels.EnterpriseViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -295,7 +297,7 @@ fun EnterpriseProfileScreen(
             Spacer(modifier = Modifier.height(height = 20.dp))
 
             CultureAndValuesSection(
-                updatedCultureAndValues = enterpriseProfile?.about,
+                updatedCultureAndValues = enterpriseProfile?.cultureAndValues,
                 isPreviewMode = isPreviewMode,
                 onEditCultureAndValuesClicked = { updatedCultureAndValues ->
                     sheetTitle = mContext.getString(R.string.enterprise_culture_values_text)
@@ -368,6 +370,7 @@ private fun HeaderSection(
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val bannerFilePath by remember { mutableStateOf(profile?.bannerUrl ?: "") }
     val profilePictureFilePath by remember { mutableStateOf(profile?.pictureUrl ?: "") }
+
     // Activity result launcher for picking an image from gallery
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -377,14 +380,18 @@ private fun HeaderSection(
                 // Load and set the compressed image to the appropriate AsyncImage
                 if (requestCode == 1) {
                     val bannerFile = Utils.compressImage(
-                        context, imageUri,
-                        "${UUID.randomUUID()}_compressed_banner.png"
+                        context = context, uri = imageUri,
+                        filename = extractStringFromLink("${profile?.bannerUrl}")
+                            ?: "${UUID.randomUUID()}_compressed_banner.png",
+                        callback = { onImageLoadingFailed(it) }
                     )
                     bannerFile?.let { onUploadBannerFile(it) }
                 } else if (requestCode == 2) {
                     val profilePictureFile = Utils.compressImage(
-                        context, imageUri,
-                        "${UUID.randomUUID()}_compressed_profile_picture.png"
+                        context = context, uri = imageUri,
+                        filename = extractStringFromLink("${profile?.pictureUrl}")
+                            ?: "${UUID.randomUUID()}_compressed_profile_picture.png",
+                        callback = { onImageLoadingFailed(it) }
                     )
                     profilePictureFile?.let { onUploadProfilePictureFile(it) }
                 }
@@ -392,7 +399,7 @@ private fun HeaderSection(
                 onImageLoadingFailed(e.message ?: context.getString(R.string.unkown_error_text))
             }
         } else {
-            onImageLoadingFailed(context.getString(R.string.no_image_picked_error_text))
+//            onImageLoadingFailed(context.getString(R.string.no_image_picked_error_text))
         }
     }
 
@@ -411,6 +418,9 @@ private fun HeaderSection(
                 contentScale = ContentScale.FillBounds,
                 error = painterResource(id = R.drawable.banner_placeholder),
                 placeholder = painterResource(id = R.drawable.banner_placeholder),
+                onError = {
+                    Log.e("onError-Profile_Picture", it.result.toString())
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(height = mWidth / 3.5F)

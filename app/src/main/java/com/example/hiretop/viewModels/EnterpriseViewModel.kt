@@ -84,9 +84,7 @@ class EnterpriseViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             jobOffersCollection.add(jobOffer)
                 .addOnSuccessListener { doc ->
-                    _mJobOffer.update {
-                        it?.copy(jobOfferID = doc.id)
-                    }
+                    _mJobOffer.value = jobOffer.copy(jobOfferID = doc.id)
                     onSuccess(doc.id)
                 }
                 .addOnFailureListener {

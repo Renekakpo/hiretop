@@ -83,18 +83,26 @@ fun JobOffersScreen(
     }
 
     LaunchedEffect(Unit) {
-        uiState = if (candidateProfile == null) {
-            UIState.FAILURE
+        if (candidateProfile == null) {
+            uiState = UIState.FAILURE
         } else {
             if (candidateProfile?.skills.isNullOrEmpty()) {
-                UIState.FAILURE
+                uiState = UIState.FAILURE
             } else {
                 candidateViewModel.getAllRelevantJobs(
-                    candidateProfile?.skills?.toList().orEmpty(),
-                    onSuccess = {},
-                    onFailure = {}
+                    candidateSkills = candidateProfile?.skills?.toList().orEmpty(),
+                    onSuccess = {
+                        if (it.isNotEmpty()) {
+                            filteredJobOffers = it
+                            uiState = UIState.SUCCESS
+                        } else {
+                            uiState = UIState.FAILURE
+                        }
+                    },
+                    onFailure = {
+                        uiState = UIState.FAILURE
+                    }
                 )
-                UIState.SUCCESS
             }
         }
     }

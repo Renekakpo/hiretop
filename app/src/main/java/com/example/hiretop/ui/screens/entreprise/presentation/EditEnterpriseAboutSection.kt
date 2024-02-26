@@ -82,7 +82,7 @@ fun EditEnterpriseAboutSection(currentAbout: String?, onSaveClicked: (String) ->
             shape = MaterialTheme.shapes.small,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(height = mWidth * 0.8f)
+                .height(height = mWidth * 0.4f)
         )
 
         Spacer(modifier = Modifier.height(height = 25.dp))
@@ -112,6 +112,6 @@ fun EditEnterpriseAboutSection(currentAbout: String?, onSaveClicked: (String) ->
             )
         }
 
-        Spacer(modifier = Modifier.height(height = 25.dp))
+        Spacer(modifier = Modifier.height(height = 45.dp))
     }
 }

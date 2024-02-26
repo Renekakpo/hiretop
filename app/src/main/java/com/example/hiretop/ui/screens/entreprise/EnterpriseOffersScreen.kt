@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Divider
@@ -49,6 +51,7 @@ import com.example.hiretop.R
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.models.UIState
 import com.example.hiretop.ui.extras.FailurePopup
+import com.example.hiretop.ui.extras.HireTopBottomSheet
 import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
 import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
 import com.example.hiretop.utils.Utils
@@ -70,7 +73,19 @@ fun EnterpriseOffersScreen(
     var onErrorMessage by remember { mutableStateOf<String?>(null) }
 
     var searchInput by remember { mutableStateOf("") }
-    var filteredJobOffers by remember { mutableStateOf(jobOffers) }
+    var filteredJobOffers by remember { mutableStateOf(jobOffers ?: emptyList()) }
+
+    var sheetTitle by remember { mutableStateOf("") }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var bottomSheetContent by remember { mutableStateOf<@Composable (() -> Unit)?>(null) }
+
+    if (showBottomSheet && bottomSheetContent != null) {
+        HireTopBottomSheet(
+            title = sheetTitle,
+            onDismiss = { showBottomSheet = false }) {
+            bottomSheetContent?.invoke()
+        }
+    }
 
     if (!onErrorMessage.isNullOrEmpty()) {
         FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
@@ -88,6 +103,7 @@ fun EnterpriseOffersScreen(
                     uiState = if (it.isEmpty()) {
                         UIState.FAILURE
                     } else {
+                        filteredJobOffers = it
                         UIState.SUCCESS
                     }
                 },
@@ -99,23 +115,48 @@ fun EnterpriseOffersScreen(
         }
     }
 
-
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
             .padding(top = 15.dp, start = 15.dp, end = 15.dp)
     ) {
-        Text(
-            text = stringResource(R.string.job_offer_management_text),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth(1f)
-        )
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.job_offer_management_text),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
 
-        Spacer(modifier = Modifier.height(20.dp))
+            Icon(
+                imageVector = Icons.Outlined.AddCircle,
+                contentDescription = stringResource(R.string.search_offer_icon_desc_text),
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .size(45.dp)
+                    .padding(3.dp)
+                    .clickable {
+                        sheetTitle = mContext.getString(R.string.create_job_offer_text)
+                        bottomSheetContent = {
+                            CreateOrEditJobOfferScreen(
+                                isEditing = false,
+                                jobOffer = null,
+                                onCancelClicked = { },
+                                onSaveClicked = {
+                                    showBottomSheet = false
+                                },
+                                onCloseClicked = { }
+                            )
+                        }
+                        showBottomSheet = true
+                    }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         Divider()
 
@@ -129,7 +170,7 @@ fun EnterpriseOffersScreen(
                     filteredJobOffers = jobOffers?.filter { jobOffer ->
                         "${jobOffer.title}".lowercase()
                             .contains(searchInput.lowercase(), ignoreCase = true)
-                    }
+                    } ?: emptyList()
                 }
             },
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
@@ -150,16 +191,17 @@ fun EnterpriseOffersScreen(
             shape = MaterialTheme.shapes.extraLarge,
             singleLine = true,
             maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         when (uiState) {
             UIState.LOADING -> {
-                // Display loader while fetching data
-                HireTopCircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    // Display loader while fetching data
+                    HireTopCircularProgressIndicator()
+                }
             }
 
             UIState.FAILURE -> {
@@ -171,20 +213,22 @@ fun EnterpriseOffersScreen(
                     stringResource(R.string.no_enterprise_job_offer_found)
                 }
 
-                Text(
-                    text = failureText,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = failureText,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             UIState.SUCCESS -> {
-                filteredJobOffers?.let {
+                if (filteredJobOffers.isNotEmpty()) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-                        itemsIndexed(it) { _, filteredJob ->
+                        itemsIndexed(filteredJobOffers) { _, filteredJob ->
                             OfferItemRow(
                                 context = mContext,
                                 jobOffer = filteredJob,
@@ -193,6 +237,17 @@ fun EnterpriseOffersScreen(
                                 }
                             )
                         }
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stringResource(R.string.no_enterprise_job_offer_found),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
@@ -207,8 +262,6 @@ private fun OfferItemRow(
     jobOffer: JobOffer,
     onJobOfferClicked: (JobOffer) -> Unit
 ) {
-    val counter by remember { mutableStateOf((1..200).random()) }
-
     Column(
         modifier = Modifier
             .wrapContentSize()
@@ -234,16 +287,18 @@ private fun OfferItemRow(
 
             Spacer(modifier = Modifier.weight(0.1f))
 
-            Badge(
-                modifier = Modifier.size(33.dp),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-                Text(
-                    text = if (counter > 99) "+99" else "$counter",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                )
+            if (jobOffer.viewCount > 0) {
+                Badge(
+                    modifier = Modifier.size(33.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    Text(
+                        text = if (jobOffer.viewCount > 99) "+99" else "${jobOffer.viewCount}",
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
             }
         }
 

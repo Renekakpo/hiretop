@@ -161,5 +161,7 @@ fun EditProfileHeaderSection(
                 style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
             )
         }
+
+        Spacer(modifier = Modifier.height(height = 45.dp))
     }
 }

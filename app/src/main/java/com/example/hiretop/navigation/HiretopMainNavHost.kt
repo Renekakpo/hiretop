@@ -15,6 +15,7 @@ import com.example.hiretop.ui.screens.WelcomeScreen
 import com.example.hiretop.ui.screens.auth.LoginScreen
 import com.example.hiretop.ui.screens.auth.SignupScreen
 import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
+import com.example.hiretop.ui.screens.entreprise.CreateOrEditJobOfferScreen
 import com.example.hiretop.ui.screens.entreprise.applications.EditApplicationsDetailsScreen
 import com.example.hiretop.ui.screens.entreprise.applications.EnterpriseApplicationsScreen
 import com.example.hiretop.ui.screens.entreprise.presentation.EnterpriseProfileScreen

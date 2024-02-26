@@ -131,7 +131,7 @@ class CandidateViewModel @Inject constructor(
      */
     fun getAllRelevantJobs(
         candidateSkills: List<String>,
-        onSuccess: () -> Unit,
+        onSuccess: (List<JobOffer>) -> Unit,
         onFailure: (String) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -148,7 +148,7 @@ class CandidateViewModel @Inject constructor(
                         }
                     }
                     _jobOffers.update { mJobOffers.filter { !it.isClosed } } // Filter out closed jobs
-                    onSuccess()
+                    onSuccess(mJobOffers)
                 }
                 .addOnFailureListener {
                     onFailure(

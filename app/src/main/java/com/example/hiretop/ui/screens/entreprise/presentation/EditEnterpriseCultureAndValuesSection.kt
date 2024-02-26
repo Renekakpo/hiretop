@@ -85,7 +85,7 @@ fun EditEnterpriseCultureAndValuesSection(
             shape = MaterialTheme.shapes.small,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(height = mWidth * 0.60f)
+                .height(height = mWidth * 0.4f)
         )
 
         Spacer(modifier = Modifier.height(height = 25.dp))
@@ -115,6 +115,6 @@ fun EditEnterpriseCultureAndValuesSection(
             )
         }
 
-        Spacer(modifier = Modifier.height(height = 25.dp))
+        Spacer(modifier = Modifier.height(height = 45.dp))
     }
 }

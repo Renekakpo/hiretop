@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import com.example.hiretop.R
+import com.example.hiretop.app.HireTop.Companion.appContext
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -29,7 +30,12 @@ object Utils {
         return yearsList
     }
 
-    fun compressImage(context: Context, uri: Uri, filename: String): File? {
+    fun compressImage(
+        context: Context,
+        uri: Uri,
+        filename: String,
+        callback: (String) -> Unit
+    ): File? {
         try {
             val inputStream = context.contentResolver.openInputStream(uri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -44,7 +50,7 @@ object Utils {
 
             return file
         } catch (e: Exception) {
-            // TODO: Handle exception
+            callback(e.message ?: appContext.getString(R.string.unkown_error_text))
             return null
         }
     }
@@ -113,6 +119,7 @@ object Utils {
                 val hourMinuteFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                 hourMinuteFormat.format(calendar.time)
             }
+
             calendar.after(yesterday) -> "Hier"
             else -> {
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -140,5 +147,15 @@ object Utils {
             "décembre" -> "12"
             else -> "00" // Default to 00 for invalid months
         }
+    }
+
+    fun extractStringFromLink(link: String): String? {
+        if (link.isEmpty()) {
+            return link
+        }
+
+        val regex = Regex("""/images%2F([\w-]+)\?""")
+        val matchResult = regex.find(link)
+        return matchResult?.groupValues?.getOrNull(1)
     }
 }

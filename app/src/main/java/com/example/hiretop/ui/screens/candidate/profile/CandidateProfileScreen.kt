@@ -65,6 +65,7 @@ import com.example.hiretop.models.UIState
 import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopBottomSheet
+import com.example.hiretop.utils.Utils
 import com.example.hiretop.utils.Utils.compressImage
 import com.example.hiretop.viewModels.CandidateViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -576,14 +577,22 @@ private fun HeaderSection(
                 // Load and set the compressed image to the appropriate AsyncImage
                 if (requestCode == 1) {
                     val bannerFile = compressImage(
-                        context, imageUri,
-                        "${UUID.randomUUID()}_compressed_banner.png"
+                        context = context, uri = imageUri,
+                        filename = Utils.extractStringFromLink("${profile?.bannerUrl}")
+                            ?: "${UUID.randomUUID()}_compressed_banner.png",
+                        callback = {
+                            onImageLoadingFailed(it)
+                        }
                     )
                     bannerFile?.let { onUploadBannerFile(it) }
                 } else if (requestCode == 2) {
                     val profilePictureFile = compressImage(
-                        context, imageUri,
-                        "${UUID.randomUUID()}_compressed_profile_picture.png"
+                        context = context, uri = imageUri,
+                        filename = Utils.extractStringFromLink("${profile?.pictureUrl}")
+                            ?: "${UUID.randomUUID()}_compressed_profile_picture.png",
+                        callback = {
+                            onImageLoadingFailed(it)
+                        }
                     )
                     profilePictureFile?.let { onUploadProfilePictureFile(it) }
                 }
@@ -591,7 +600,7 @@ private fun HeaderSection(
                 onImageLoadingFailed(e.message ?: context.getString(R.string.unkown_error_text))
             }
         } else {
-            onImageLoadingFailed(context.getString(R.string.no_image_picked_error_text))
+//            onImageLoadingFailed(context.getString(R.string.no_image_picked_error_text))
         }
     }
 
