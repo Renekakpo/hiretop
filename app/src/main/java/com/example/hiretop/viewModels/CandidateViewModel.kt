@@ -1,5 +1,6 @@
 package com.example.hiretop.viewModels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hiretop.R
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -85,7 +87,7 @@ class CandidateViewModel @Inject constructor(
             applicationRepos.getJobOfferApplicationsForCandidate(
                 candidateID = profileId,
                 onSuccess = { items ->
-                    _jobApplications.update { items }
+                    _jobApplications.value = items
                     onSuccess(items)
                 },
                 onFailure = { message -> onFailure(message) })
@@ -250,51 +252,6 @@ class CandidateViewModel @Inject constructor(
     }
 
     /**
-     * Function to add or edit banner image for candidate profile
-     */
-    fun addOrEditBannerImage(
-        profileId: String,
-        bannerUrl: String,
-        onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            candidateProfilesCollection.document(profileId)
-                .update("bannerUrl", bannerUrl)
-                .addOnSuccessListener {
-                    onSuccess()
-                }
-                .addOnFailureListener {
-                    onFailure(it.message ?: "Échec de mise à jour de la bannière")
-                }
-        }
-    }
-
-    /**
-     * Function to add or edit profile picture for candidate profile
-     */
-    fun addOrEditProfilePicture(
-        profileId: String,
-        pictureUrl: String,
-        onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            candidateProfilesCollection.document(profileId)
-                .update("pictureUrl", pictureUrl)
-                .addOnSuccessListener {
-                    onSuccess()
-                }
-                .addOnFailureListener {
-                    onFailure(
-                        it.message ?: it.localizedMessage
-                        ?: appContext.getString(R.string.update_candidate_profile_picture_failure_text)
-                    )
-                }
-        }
-    }
-
-    /**
      * Function to increment view count of job offer
      */
     fun incrementJobOfferViewCount(
@@ -317,26 +274,25 @@ class CandidateViewModel @Inject constructor(
         }
     }
 
-    fun canApplyToJobOffer(jobOfferId: String, onFailure: (String) -> Unit) {
-        viewModelScope.launch {
-            val candidateId = candidateProfileId.firstOrNull()
-            if (candidateId != null) {
-                try {
-                    val applicationQuery = jobApplicationsCollection
-                        .whereEqualTo("candidateId", candidateId)
-                        .whereEqualTo("jobOfferId", jobOfferId)
-                        .limit(1)
-                        .get().await()
+    fun canApplyToJobOffer(candidateId: String, jobOfferId: String, onFailure: (String) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                jobApplicationsCollection
+                    .whereEqualTo("candidateProfileId", candidateId)
+                    .whereEqualTo("jobOfferId", jobOfferId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        updateCanApplyToJobOffer(snapshot.isEmpty)
+                    }
+                    .addOnFailureListener {
+                        onFailure(
+                            it.message
+                                ?: appContext.getString(R.string.check_job_application_status_failure_text)
+                        )
+                    }
 
-                    _canApplyToJobOffer.update { applicationQuery.isEmpty }
-                } catch (e: Exception) {
-                    onFailure(
-                        e.message
-                            ?: appContext.getString(R.string.check_job_application_status_failure_text)
-                    )
-                }
-            } else {
-                onFailure(appContext.getString(R.string.found_candidate_profile_failure_text))
+            } catch (e: Exception) {
+                Log.d("canApplyToJobOffer", "${e.message}")
             }
         }
     }
@@ -345,34 +301,43 @@ class CandidateViewModel @Inject constructor(
         _canApplyToJobOffer.update { value }
     }
 
-    fun applyToJobOffer(jobOffer: JobOffer, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val jobApplication = JobApplication(
-            candidateProfileId = candidateProfileId.toString(),
-            enterpriseProfileId = jobOffer.enterpriseID,
-            jobOfferId = "${jobOffer.jobOfferID}",
-            jobOfferTitle = jobOffer.title,
-            companyName = jobOffer.company ?: "",
-            candidateFullName = candidateProfile.value?.lastname ?: "",
-            candidatePictureUrl = candidateProfile.value?.pictureUrl,
-            location = jobOffer.location ?: "",
-            locationType = jobOffer.locationType ?: "",
-            status = appContext.getString(R.string.on_hold_application_status_text), // Set initial status
-            stages = "", // Set initial stages
-            appliedAt = System.currentTimeMillis() // Set application timestamp
-        )
+    fun applyToJobOffer(
+        jobOffer: JobOffer,
+        candidateProfile: CandidateProfile,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val jobApplication = JobApplication(
+                candidateProfileId = candidateProfile.profileId,
+                enterpriseProfileId = jobOffer.enterpriseID,
+                jobOfferId = "${jobOffer.jobOfferID}",
+                jobOfferTitle = jobOffer.title,
+                companyName = jobOffer.company ?: "",
+                candidateFullName = candidateProfile.name,
+                candidatePictureUrl = candidateProfile.pictureUrl,
+                location = jobOffer.location ?: "",
+                locationType = jobOffer.locationType ?: "",
+                status = appContext.getString(R.string.on_hold_application_status_text), // Set initial status
+                stages = "", // Set initial stages
+                appliedAt = System.currentTimeMillis() // Set application timestamp
+            )
 
-        // Adding the job application to Firestore
-        jobApplicationsCollection
-            .add(jobApplication)
-            .addOnSuccessListener {
-                onSuccess.invoke()
-            }
-            .addOnFailureListener { exception ->
-                onError.invoke(
-                    exception.message
-                        ?: appContext.getString(R.string.send_job_application_failure_text)
-                )
-            }
+            // Adding the job application to Firestore
+            jobApplicationsCollection
+                .add(jobApplication)
+                .addOnSuccessListener {
+                    _canApplyToJobOffer.value = false
+                    onSuccess()
+                }
+                .addOnFailureListener { exception ->
+                    _canApplyToJobOffer.value = true
+                    onFailure(
+                        exception.message
+                            ?: appContext.getString(R.string.send_job_application_failure_text)
+                    )
+                }
+        }
     }
 
     fun withdrawJobApplication(

@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.hiretop.R
 import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.data.datastore.HireTopDataStoreRepos
+import com.example.hiretop.di.repository.ChatItemRepository
 import com.example.hiretop.di.repository.JobOfferApplicationRepository
 import com.example.hiretop.helpers.FirebaseHelper
 import com.example.hiretop.models.CandidateProfile
+import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.EnterpriseProfile
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
@@ -29,6 +31,7 @@ import kotlinx.coroutines.tasks.await
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 @HiltViewModel
 class EnterpriseViewModel @Inject constructor(
@@ -42,6 +45,7 @@ class EnterpriseViewModel @Inject constructor(
     private val appDataStore: HireTopDataStoreRepos,
     private val firebaseHelper: FirebaseHelper,
     private val jobOfferApplicationRepository: JobOfferApplicationRepository,
+    private val chatItemRepository: ChatItemRepository,
 ) : ViewModel() {
 
     // Flow to hold the enterprise profile id
@@ -245,45 +249,6 @@ class EnterpriseViewModel @Inject constructor(
 
     }
 
-    fun addOrEditBannerImage(
-        enterpriseId: String,
-        bannerUrl: String,
-        onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            enterprisesCollection.document(enterpriseId)
-                .update("bannerUrl", bannerUrl)
-                .addOnSuccessListener {
-                    onSuccess()
-                }
-                .addOnFailureListener {
-                    onFailure(it.message ?: "Échec de modification de la bannière.")
-                }
-        }
-    }
-
-    fun addOrEditProfilePicture(
-        enterpriseId: String,
-        pictureUrl: String,
-        onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            enterprisesCollection.document(enterpriseId)
-                .update("pictureUrl", pictureUrl)
-                .addOnSuccessListener {
-                    onSuccess()
-                }
-                .addOnFailureListener {
-                    onFailure(
-                        it.message ?: it.localizedMessage
-                        ?: "Échec de modification de la photo de profil."
-                    )
-                }
-        }
-    }
-
     fun calculateRetention(
         enterpriseId: String,
         onSuccess: () -> Unit,
@@ -466,14 +431,12 @@ class EnterpriseViewModel @Inject constructor(
 
     fun getJobApplicationsList(
         enterpriseProfileId: String,
-        companyName: String,
         onSuccess: (List<JobApplication>) -> Unit,
         onFailure: (String) -> Unit
     ) {
         viewModelScope.launch {
             jobOfferApplicationRepository.getJobOfferApplicationsForCompany(
                 enterpriseProfileId = enterpriseProfileId,
-                companyName = companyName,
                 onSuccess = { applications ->
                     _jobApplications.value = applications
                     onSuccess(applications)
@@ -506,4 +469,17 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    fun chatExists(
+        jobApplicationId: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            chatItemRepository.chatExists(
+                applicationId = jobApplicationId,
+                onSuccess = { onSuccess(it) },
+                onFailure = { onFailure(it) }
+            )
+        }
+    }
 }

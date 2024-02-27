@@ -54,6 +54,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
     val roomVersion = "2.6.1"
     val hiltVersion = "2.48.1"
 

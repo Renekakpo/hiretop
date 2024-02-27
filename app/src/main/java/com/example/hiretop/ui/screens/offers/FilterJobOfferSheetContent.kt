@@ -31,12 +31,15 @@ import com.example.hiretop.R
 
 @Composable
 fun FilterSheetContent(
+    currentSelectedJobTypes: Set<String>,
+    currentSelectedEducations: Set<String>,
+    currentSelectedLocationTypes: Set<String>,
     onApplyFilter: (Set<String>, Set<String>, Set<String>) -> Unit,
     onResetFilter: () -> Unit
 ) {
-    var selectedJobTypes by rememberSaveable { mutableStateOf(setOf<String>()) }
-    var selectedEducations by remember { mutableStateOf(setOf<String>()) }
-    var selectedLocationTypes by remember { mutableStateOf(setOf<String>()) }
+    var selectedJobTypes by rememberSaveable { mutableStateOf(currentSelectedJobTypes) }
+    var selectedEducations by remember { mutableStateOf(currentSelectedEducations) }
+    var selectedLocationTypes by remember { mutableStateOf(currentSelectedLocationTypes) }
 
     Column(
         modifier = Modifier
@@ -57,8 +60,8 @@ fun FilterSheetContent(
             modifier = Modifier.padding(bottom = 8.dp)
         )
         CheckboxList(
-            stringArrayResource(id = R.array.job_types).toList(),
-            selectedJobTypes
+            items = stringArrayResource(id = R.array.job_types).toList(),
+            selectedItems = selectedJobTypes
         ) { jobType ->
             selectedJobTypes = if (selectedJobTypes.contains(jobType)) {
                 selectedJobTypes - jobType
@@ -93,7 +96,7 @@ fun FilterSheetContent(
             modifier = Modifier.padding(bottom = 8.dp)
         )
         CheckboxList(
-            stringArrayResource(id = R.array.location_type_list).drop(1).toList(),
+            stringArrayResource(id = R.array.location_type_list).toList(),
             selectedLocationTypes
         ) { skill ->
             selectedLocationTypes = if (selectedLocationTypes.contains(skill)) {

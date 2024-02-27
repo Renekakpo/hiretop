@@ -1,6 +1,8 @@
 package com.example.hiretop.models
 
+import com.example.hiretop.utils.Utils.convertLongToDate
 import com.google.firebase.firestore.DocumentId
+import java.util.Date
 
 data class Message(
     @DocumentId
@@ -14,6 +16,10 @@ data class Message(
     val createdAt: Long? = null
 ) {
     constructor() : this(null, null, null, null, null, false, false, null)
+
+    fun getCreatedDate(): Date? {
+        return createdAt?.let { convertLongToDate(it) }
+    }
 }
 
 // Mock data

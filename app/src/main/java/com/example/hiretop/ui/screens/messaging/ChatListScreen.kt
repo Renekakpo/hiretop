@@ -57,7 +57,6 @@ fun ChatListScreen(
     navController: NavController,
     chatViewModel: ChatViewModel = hiltViewModel()
 ) {
-
     val candidateProfileId by chatViewModel.candidateProfileId.collectAsState(null)
     val enterpriseProfileId by chatViewModel.enterpriseProfileId.collectAsState(null)
     val isEnterpriseAccount by chatViewModel.isEnterpriseAccount.collectAsState(null)
@@ -207,8 +206,8 @@ fun ChatItemRow(chatItemUI: ChatItemUI, onChatItemClicked: (ChatItemUI) -> Unit)
                 .build(),
             contentDescription = stringResource(R.string.chat_item_profile_image_desc),
             contentScale = ContentScale.Crop,
-            error = painterResource(id = R.drawable.ai_profile_picture),
-            placeholder = painterResource(id = R.drawable.ai_profile_picture),
+            error = painterResource(id = R.drawable.user_profile_placeholder),
+            placeholder = painterResource(id = R.drawable.user_profile_placeholder),
             modifier = Modifier
                 .size(60.dp)
                 .padding(4.dp)
@@ -223,8 +222,12 @@ fun ChatItemRow(chatItemUI: ChatItemUI, onChatItemClicked: (ChatItemUI) -> Unit)
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = chatItemUI.profileName,
+                    text = if (chatItemUI.profileName.isNullOrEmpty())
+                        stringResource(R.string.unknown_text)
+                    else
+                        chatItemUI.profileName,
                     style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.wrapContentWidth()
@@ -236,7 +239,7 @@ fun ChatItemRow(chatItemUI: ChatItemUI, onChatItemClicked: (ChatItemUI) -> Unit)
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Titre de l'emploi",
+                    text = chatItemUI.offerTitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,

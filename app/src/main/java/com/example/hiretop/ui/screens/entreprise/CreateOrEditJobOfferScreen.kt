@@ -286,7 +286,9 @@ fun CreateOrEditJobOfferScreen(
                             jobType = selectedJobType,
                             skills = requiredSkills.split(","),
                             education = requiredEducationLevel.split(","),
-                            description = offerDescription
+                            description = offerDescription,
+                            company = enterpriseProfile?.name,
+                            enterpriseID = enterpriseProfile?.enterpriseID
                         ) ?: JobOffer(
                             title = offerName,
                             location = requiredLocation,

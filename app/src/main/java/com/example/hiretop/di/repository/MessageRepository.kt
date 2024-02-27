@@ -85,7 +85,6 @@ class MessageRepository @Inject constructor(
     ) {
         messagesCollection
             .whereEqualTo("subject", chatId)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { snapshot ->
                 val messages = mutableListOf<Message>()
@@ -97,7 +96,9 @@ class MessageRepository @Inject constructor(
                     }
                 }
 
-                onSuccess(messages)
+                // Sort messages by createdAt property in descending order (from new to old)
+                val sortedMessages = messages.sortedByDescending { it.getCreatedDate() }
+                onSuccess(sortedMessages)
             }
             .addOnFailureListener {
                 onFailure(it.message ?: appContext.getString(R.string.fetch_messages_failure_text))

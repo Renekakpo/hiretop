@@ -158,4 +158,8 @@ object Utils {
         val matchResult = regex.find(link)
         return matchResult?.groupValues?.getOrNull(1)
     }
+
+    fun convertLongToDate(longTime: Long): Date {
+        return Date(longTime)
+    }
 }

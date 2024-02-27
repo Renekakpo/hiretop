@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -166,11 +168,15 @@ fun EnterpriseOffersScreen(
             value = searchInput,
             onValueChange = {
                 searchInput = it
-                if (searchInput.length >= 3) {
-                    filteredJobOffers = jobOffers?.filter { jobOffer ->
-                        "${jobOffer.title}".lowercase()
-                            .contains(searchInput.lowercase(), ignoreCase = true)
-                    } ?: emptyList()
+                if (searchInput.isEmpty()) {
+                    filteredJobOffers = jobOffers ?: emptyList()
+                } else {
+                    if (searchInput.length >= 3) {
+                        filteredJobOffers = jobOffers?.filter { jobOffer ->
+                            "${jobOffer.title}".lowercase()
+                                .contains(searchInput.lowercase(), ignoreCase = true)
+                        } ?: emptyList()
+                    }
                 }
             },
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
@@ -288,7 +294,7 @@ private fun OfferItemRow(
             Spacer(modifier = Modifier.weight(0.1f))
 
             if (jobOffer.viewCount > 0) {
-                Badge(
+                /*Badge(
                     modifier = Modifier.size(33.dp),
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -296,6 +302,26 @@ private fun OfferItemRow(
                     Text(
                         text = if (jobOffer.viewCount > 99) "+99" else "${jobOffer.viewCount}",
                         style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+                */
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Visibility,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = if (jobOffer.viewCount > 99) "+99" else "${jobOffer.viewCount}",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.align(alignment = Alignment.CenterVertically)
                     )
                 }
@@ -353,5 +379,7 @@ private fun OfferItemRow(
 }
 
 private fun onEnterpriseJobOfferClicked(navController: NavController, jobOffer: JobOffer) {
-    navController.navigate(route = "${JobOfferDetailsScreen.route}/${Gson().toJson(jobOffer)}/${true}")
+    val jobOfferJSON: String = Gson().toJson(jobOffer)
+    val isEditable = true
+    navController.navigate(route = "${JobOfferDetailsScreen.route}/$jobOfferJSON/$isEditable")
 }

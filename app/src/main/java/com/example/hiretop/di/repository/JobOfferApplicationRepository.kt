@@ -89,7 +89,8 @@ class JobOfferApplicationRepository @Inject constructor(
         onFailure: (String) -> Unit
     ) {
         jobApplicationsCollection
-            .whereEqualTo("candidateID", candidateID)
+            .whereEqualTo("candidateProfileId", candidateID)
+            .whereEqualTo("withdraw", false)
             .get()
             .addOnSuccessListener { snapshot ->
                 val applications = mutableListOf<JobApplication>()
@@ -113,13 +114,12 @@ class JobOfferApplicationRepository @Inject constructor(
     // Function to retrieve job offer applications for a specific company
     suspend fun getJobOfferApplicationsForCompany(
         enterpriseProfileId: String,
-        companyName: String,
         onSuccess: (List<JobApplication>) -> Unit,
         onFailure: (String) -> Unit
     ) {
         jobApplicationsCollection
-            .whereEqualTo("companyName", companyName)
             .whereEqualTo("enterpriseProfileId", enterpriseProfileId)
+            .whereEqualTo("withdraw", false)
             .get()
             .addOnSuccessListener { snapshot ->
                 val applications = mutableListOf<JobApplication>()
@@ -147,7 +147,7 @@ class JobOfferApplicationRepository @Inject constructor(
         onFailure: (String) -> Unit
     ) {
         jobApplicationsCollection
-            .whereEqualTo("jobOfferID", jobOfferId)
+            .whereEqualTo("jobOfferId", jobOfferId)
             .get()
             .addOnSuccessListener { snapshot ->
                 val applications = mutableListOf<JobApplication>()

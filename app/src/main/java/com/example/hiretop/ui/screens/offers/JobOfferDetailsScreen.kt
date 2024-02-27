@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.hiretop.R
+import com.example.hiretop.app.HireTop
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.ui.extras.FailurePopup
@@ -76,6 +77,7 @@ fun JobOfferDetailsScreen(
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
     val candidateId by candidateViewModel.candidateProfileId.collectAsState(initial = null)
+    val candidateProfile by candidateViewModel.candidateProfile.collectAsState(initial = null)
     val canApplyToJobOffer by candidateViewModel.canApplyToJobOffer.collectAsState()
     var onErrorMessage by remember { mutableStateOf<String?>(null) }
     var sheetTitle by remember { mutableStateOf("") }
@@ -97,13 +99,26 @@ fun JobOfferDetailsScreen(
     }
 
     LaunchedEffect(candidateViewModel) {
-        if (!isEditable && candidateId.toString().isNotEmpty()) {
-            candidateViewModel.canApplyToJobOffer(
-                jobOfferId = "${jobOffer.jobOfferID}",
-                onFailure = { errorMessage ->
-                    onErrorMessage = errorMessage
-                }
-            )
+        if (!isEditable) { // Candidate's viewing the application
+            if (!candidateId.isNullOrEmpty()) {
+                // Check if candidate has already applied to this offer
+                candidateViewModel.canApplyToJobOffer(
+                    candidateId = candidateId!!,
+                    jobOfferId = "${jobOffer.jobOfferID}",
+                    onFailure = { errorMessage ->
+                        onErrorMessage = errorMessage
+                    }
+                )
+
+                // Fetch candidate profile data
+                candidateViewModel.getCandidateProfile(
+                    profileId = candidateId!!,
+                    onSuccess = {},
+                    onFailure = {}
+                )
+            } else {
+                onErrorMessage = mContext.getString(R.string.found_candidate_profile_failure_text)
+            }
         }
     }
 
@@ -160,7 +175,9 @@ fun JobOfferDetailsScreen(
                         style = MaterialTheme.typography.titleLarge,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp)
                     )
                 }
             )
@@ -219,16 +236,19 @@ fun JobOfferDetailsScreen(
                     shape = MaterialTheme.shapes.small,
                     enabled = canApplyToJobOffer,
                     onClick = {
-                        candidateViewModel.applyToJobOffer(
-                            jobOffer = jobOffer,
-                            onSuccess = {
-                                candidateViewModel.updateCanApplyToJobOffer(false)
-                            },
-                            onError = { errorMessage ->
-                                // Show a pop-up or error message to inform the user about the failure
-                                onErrorMessage = errorMessage
-                            }
-                        )
+                        candidateProfile?.let {
+                            candidateViewModel.applyToJobOffer(
+                                jobOffer = jobOffer,
+                                candidateProfile = it,
+                                onSuccess = {
+                                    candidateViewModel.updateCanApplyToJobOffer(false)
+                                },
+                                onFailure = { errorMessage ->
+                                    // Show a pop-up or error message to inform the user about the failure
+                                    onErrorMessage = errorMessage
+                                }
+                            )
+                        }
                     }
                 ) {
                     Row(
@@ -258,16 +278,18 @@ fun JobOfferDetailsScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(5.dp))
+            if (!isEditable) {
+                Spacer(modifier = Modifier.height(5.dp))
 
-            Text(
-                text = stringResource(R.string.profile_insights_info_text),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
-            )
+                Text(
+                    text = stringResource(R.string.profile_insights_info_text),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             Spacer(modifier = Modifier.height(15.dp))
 

@@ -16,6 +16,8 @@ import com.example.hiretop.utils.Constant.JOB_OFFERS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.MESSAGES_COLLECTION_NAME
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Named
@@ -47,12 +49,16 @@ class ChatItemRepository @Inject constructor(
 
         // Fetch candidate profile
         val candidateProfileDoc =
-            chatItem.profileId?.let { candidateProfilesCollection.document(it).get().await() }
+            chatItem.candidateProfileId?.let {
+                candidateProfilesCollection.document(it).get().await()
+            }
         val candidateProfile = candidateProfileDoc?.toObject(CandidateProfile::class.java)
 
         // Fetch enterprise profile
         val enterpriseProfileDoc =
-            chatItem.enterpriseId?.let { enterpriseProfilesCollection.document(it).get().await() }
+            chatItem.enterpriseProfileId?.let {
+                enterpriseProfilesCollection.document(it).get().await()
+            }
         val enterpriseProfile = enterpriseProfileDoc?.toObject(EnterpriseProfile::class.java)
 
         // Fetch job offer
@@ -79,7 +85,8 @@ class ChatItemRepository @Inject constructor(
             profileName = if (!isEnterpriseAccount) candidateProfile?.name
                 ?: "" else enterpriseProfile?.name ?: "",
             offerTitle = jobOffer?.title ?: "",
-            unreadMessageCount = unreadMessageCount
+            unreadMessageCount = unreadMessageCount,
+            jobApplicationId = jobApplicationId
         )
     }
 
@@ -92,9 +99,9 @@ class ChatItemRepository @Inject constructor(
         try {
             // Init conditional field
             val field = if (isEnterpriseAccount) {
-                "enterpriseId"
+                "enterpriseProfileId"
             } else {
-                "profileId"
+                "candidateProfileId"
             }
 
             // Query Firestore collection to get ChatItem documents
@@ -129,7 +136,7 @@ class ChatItemRepository @Inject constructor(
                     if (isEnterpriseAccount) {
                         // Fetch enterprise profile
                         val enterpriseProfileDoc =
-                            chatItem.enterpriseId?.let {
+                            chatItem.enterpriseProfileId?.let {
                                 enterpriseProfilesCollection.document(it).get()
                                     .await()
                             }
@@ -142,12 +149,13 @@ class ChatItemRepository @Inject constructor(
                             pictureUrl = enterpriseProfile?.pictureUrl ?: "",
                             profileName = enterpriseProfile?.name ?: "",
                             offerTitle = jobOffer?.title ?: "",
-                            unreadMessageCount = unreadMessageCount
+                            unreadMessageCount = unreadMessageCount,
+                            jobApplicationId = "${chatItem.jobApplicationId}"
                         )
                     } else {
                         // Fetch candidate profile
                         val candidateProfileDoc =
-                            chatItem.profileId?.let {
+                            chatItem.candidateProfileId?.let {
                                 candidateProfilesCollection.document(it).get().await()
                             }
                         val candidateProfile =
@@ -159,7 +167,8 @@ class ChatItemRepository @Inject constructor(
                             pictureUrl = candidateProfile?.pictureUrl ?: "",
                             profileName = candidateProfile?.name ?: "",
                             offerTitle = jobOffer?.title ?: "",
-                            unreadMessageCount = unreadMessageCount
+                            unreadMessageCount = unreadMessageCount,
+                            jobApplicationId = "${chatItem.jobApplicationId}"
                         )
                     }
 
@@ -176,5 +185,55 @@ class ChatItemRepository @Inject constructor(
         } catch (e: Exception) {
             onFailure(e.message ?: appContext.getString(R.string.chat_list_creation_failure_text))
         }
+    }
+
+    suspend fun createOrEditChatItem(
+        chatItem: ChatItem,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        if (chatItem.chatId.isNullOrEmpty()) {
+            chatsCollection.add(chatItem)
+                .addOnSuccessListener {
+                    onSuccess(it.id)
+                }
+                .addOnFailureListener {
+                    onFailure(it.message ?: appContext.getString(R.string.create_chat_failure_info))
+                }
+        } else {
+            chatsCollection
+                .document(chatItem.chatId)
+                .set(chatItem, SetOptions.merge())
+                .addOnSuccessListener {
+                    onSuccess(chatItem.chatId)
+                }
+                .addOnFailureListener {
+                    onFailure(
+                        it.message ?: appContext.getString(R.string.edit_chat_item_failure_info)
+                    )
+                }
+        }
+    }
+
+    suspend fun chatExists(
+        applicationId: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        chatsCollection.whereEqualTo("jobApplicationId", applicationId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.isEmpty) {
+                    onSuccess("")
+                } else {
+                    val chatItems = mutableListOf<ChatItem>()
+                    snapshot.forEach {
+                        val obj = it.toObject(ChatItem::class.java)
+                        chatItems.add(obj)
+                    }
+                    onSuccess(chatItems.first().chatId ?: "")
+                }
+            }
+            .addOnFailureListener { onFailure(it.localizedMessage ?: "") }
     }
 }

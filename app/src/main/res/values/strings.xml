@@ -235,7 +235,7 @@
     <string name="conversion_text">Conversion</string>
     <string name="productivity_text">Productivité</string>
     <string name="dahsboard_analytics_text">Tableaux de Bord Analytiques</string>
-    <string name="offers_view_count_text">Offres d\'Emploi Vues</string>
+    <string name="offers_view_count_text">Nombre de vues des offres d\'emploi</string>
     <string name="candidatures_text">Candidatures</string>
     <string name="recrutements_text">Recrutements</string>
     <string name="entretiens_planifies_text">Entretiens Planifiés</string>
@@ -256,6 +256,9 @@
     <string name="year_text">Année</string>
     <string name="media_permission_alert_message">Cette permission est nécessaire pour définir la photo et la bannière de votre profil.</string>
     <string name="required_job_offer_location_info">Entrez le lieu de l\'offre d\'emploi</string>
+    <string name="create_chat_failure_info">Échec de création de la discussion</string>
+    <string name="edit_chat_item_failure_info">Échec de modification de la discussion.</string>
+    <string name="unknown_text">Inconnu</string>
     <string-array name="job_type_list">
         <item>Temps plein</item>
         <item>Temps partiel</item>

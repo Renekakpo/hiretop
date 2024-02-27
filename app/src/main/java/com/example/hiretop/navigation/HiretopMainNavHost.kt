@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
@@ -15,7 +16,6 @@ import com.example.hiretop.ui.screens.WelcomeScreen
 import com.example.hiretop.ui.screens.auth.LoginScreen
 import com.example.hiretop.ui.screens.auth.SignupScreen
 import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
-import com.example.hiretop.ui.screens.entreprise.CreateOrEditJobOfferScreen
 import com.example.hiretop.ui.screens.entreprise.applications.EditApplicationsDetailsScreen
 import com.example.hiretop.ui.screens.entreprise.applications.EnterpriseApplicationsScreen
 import com.example.hiretop.ui.screens.entreprise.presentation.EnterpriseProfileScreen
@@ -58,7 +58,7 @@ fun HireTopNavHost(
         }
 
         composable(
-            route = "${EditApplicationsDetailsScreen.route}/jobApplication/isViewMode",
+            route = "${EditApplicationsDetailsScreen.route}/{jobApplication}/{isViewMode}",
             arguments = listOf(
                 navArgument(name = "jobApplication") { type = NavType.StringType },
                 navArgument(name = "isViewMode") { type = NavType.BoolType }
@@ -85,7 +85,7 @@ fun HireTopNavHost(
         }
 
         composable(
-            route = "${ChatScreen.route}/chatItemUIJson",
+            route = "${ChatScreen.route}/{chatItemUIJson}",
             arguments = listOf(
                 navArgument(name = "chatItemUIJson") { type = NavType.StringType }
             )
@@ -93,7 +93,6 @@ fun HireTopNavHost(
             val chatItemUIJson = backStackEntry.arguments?.getString("chatItemUIJson")
             if (!chatItemUIJson.isNullOrEmpty()) {
                 val chatItemUI = Gson().fromJson(chatItemUIJson, ChatItemUI::class.java)
-
                 ChatScreen(navController = navController, chatItemUI = chatItemUI)
             } else {
                 // Navigate back
@@ -102,7 +101,7 @@ fun HireTopNavHost(
         }
 
         composable(
-            route = "${JobOfferDetailsScreen.route}/jobOffer/isEditable",
+            route = "${JobOfferDetailsScreen.route}/{jobOffer}/{isEditable}",
             arguments = listOf(
                 navArgument(name = "jobOffer") { type = NavType.StringType },
                 navArgument(name = "isEditable") { type = NavType.BoolType }
@@ -125,7 +124,7 @@ fun HireTopNavHost(
         }
 
         composable(
-            route = "${CandidateProfileScreen.route}/isPreviewMode/profileId",
+            route = "${CandidateProfileScreen.route}/{isPreviewMode}/{profileId}",
             arguments = listOf(
                 navArgument(name = "isPreviewMode") { type = NavType.BoolType },
                 navArgument(name = "profileId") { type = NavType.StringType }
@@ -142,7 +141,7 @@ fun HireTopNavHost(
         }
 
         composable(
-            route = "${EnterpriseProfileScreen.route}/isPreviewMode/profileId",
+            route = "${EnterpriseProfileScreen.route}/{isPreviewMode}/{profileId}",
             arguments = listOf(
                 navArgument(name = "isPreviewMode") { type = NavType.BoolType },
                 navArgument(name = "profileId") { type = NavType.StringType }

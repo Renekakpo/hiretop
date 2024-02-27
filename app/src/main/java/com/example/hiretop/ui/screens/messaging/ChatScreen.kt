@@ -52,6 +52,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
+import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.Message
 import com.example.hiretop.navigation.NavDestination
@@ -75,7 +76,9 @@ fun ChatScreen(
     val enterpriseProfileId by chatViewModel.enterpriseProfileId.collectAsState(initial = null)
     val candidateProfileId by chatViewModel.candidateProfileId.collectAsState(initial = null)
     val messages by chatViewModel.messages.collectAsState()
+    val jobApplication by chatViewModel.jobApplication.collectAsState()
     var onErrorMessage by remember { mutableStateOf<String?>(null) }
+    var chatItemUIState by remember { mutableStateOf(chatItemUI) }
 
     if (!onErrorMessage.isNullOrEmpty()) {
         FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
@@ -88,19 +91,27 @@ fun ChatScreen(
     }
 
     LaunchedEffect(chatViewModel) {
-        chatViewModel.getListOfMessages(
-            chatId = chatItemUI.chatId,
-            onSuccess = { },
-            onFailure = {
-                onErrorMessage = it
-            }
-        )
+        if (!chatItemUIState.chatId.isNullOrEmpty()) { // Not the first time
+            chatViewModel.getListOfMessages(
+                chatId = chatItemUIState.chatId!!,
+                onSuccess = { },
+                onFailure = {
+                    onErrorMessage = it
+                }
+            )
 
-        // Observe new messages
-        chatViewModel.observeNewMessageByChatId(
-            chatId = chatItemUI.chatId,
+            // Observe new messages
+            chatViewModel.observeNewMessageByChatId(
+                chatId = chatItemUIState.chatId!!,
+                onSuccess = {},
+                onFailure = { onErrorMessage = it }
+            )
+        }
+
+        chatViewModel.getJobApplicationFromChatItemUI(
+            jobApplicationId = chatItemUIState.jobApplicationId,
             onSuccess = {},
-            onFailure = { onErrorMessage = it }
+            onFailure = {}
         )
     }
 
@@ -122,10 +133,11 @@ fun ChatScreen(
                 },
                 title = {
                     TopBarContent(
-                        chatItemUI = chatItemUI,
+                        chatItemUI = chatItemUIState,
                         onTopBarClicked = {
-                            navController.navigate(route = CandidateProfileScreen.route)
-                            TODO("Navigate to sender profile in preview mode.")
+                            val isPreviewMode = true
+                            val profileId = candidateProfileId
+                            navController.navigate(route = "${CandidateProfileScreen.route}/$isPreviewMode/$profileId")
                         }
                     )
                 }
@@ -139,9 +151,9 @@ fun ChatScreen(
                 .padding(innerPadding)
         ) {
 
-            messages?.let {
+            if (!messages.isNullOrEmpty()) {
                 MessageList(
-                    messages = it,
+                    messages = messages!!,
                     currentProfileId = "${if (isEnterpriseAccount != null && isEnterpriseAccount == true) enterpriseProfileId else candidateProfileId}"
                 )
             }
@@ -149,13 +161,90 @@ fun ChatScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             NewMessageForm(onSendMessageClicked = { input ->
-                chatViewModel.sendMessage(
-                    input = input,
-                    onSuccess = {},
-                    onFailure = {
-                        onErrorMessage = it
-                    }
-                )
+                if (chatItemUIState.chatId.isNullOrEmpty()) { // New chat
+                    var chatItem = ChatItem(
+                        jobApplicationId = jobApplication?.jobApplicationId,
+                        jobOfferId = jobApplication?.jobOfferId,
+                        candidateProfileId = jobApplication?.candidateProfileId,
+                        enterpriseProfileId = jobApplication?.enterpriseProfileId
+                    )
+
+                    chatViewModel.createOrEditChatItem(
+                        chatItem = chatItem,
+                        onSuccess = { chatId ->
+                            chatItemUIState = chatItemUIState.copy(chatId = chatId)
+                            chatItem = chatItem.copy(chatId = chatId)
+
+                            val message = Message(
+                                subject = chatId,
+                                to = if (isEnterpriseAccount != null && isEnterpriseAccount == true)
+                                    chatItem.candidateProfileId
+                                else
+                                    chatItem.enterpriseProfileId,
+                                from = if (isEnterpriseAccount != null && isEnterpriseAccount == true)
+                                    chatItem.enterpriseProfileId
+                                else
+                                    chatItem.candidateProfileId,
+                                content = input,
+                                received = false,
+                                isRead = false,
+                                createdAt = System.currentTimeMillis()
+                            )
+
+                            chatViewModel.sendMessage(
+                                message = message,
+                                onSuccess = { sentMessageId ->
+                                    if (sentMessageId.isNotEmpty()) {
+
+                                        chatViewModel.getListOfMessages(
+                                            chatId = message.subject ?: "",
+                                            onSuccess = {},
+                                            onFailure = {}
+                                        )
+                                    }
+                                },
+                                onFailure = {
+                                    onErrorMessage = it
+                                }
+                            )
+                        },
+                        onFailure = {
+                            onErrorMessage = it
+                        }
+                    )
+                } else {
+                    val message = Message(
+                        subject = chatItemUIState.chatId,
+                        to = if (isEnterpriseAccount != null && isEnterpriseAccount == true)
+                            jobApplication?.candidateProfileId
+                        else
+                            jobApplication?.enterpriseProfileId,
+                        from = if (isEnterpriseAccount != null && isEnterpriseAccount == true)
+                            jobApplication?.enterpriseProfileId
+                        else
+                            jobApplication?.candidateProfileId,
+                        content = input,
+                        received = false,
+                        isRead = false,
+                        createdAt = System.currentTimeMillis()
+                    )
+
+                    chatViewModel.sendMessage(
+                        message = message,
+                        onSuccess = { sentMessageId ->
+                            if (sentMessageId.isNotEmpty()) {
+                                chatViewModel.getListOfMessages(
+                                    chatId = message.subject ?: "",
+                                    onSuccess = {},
+                                    onFailure = {}
+                                )
+                            }
+                        },
+                        onFailure = {
+                            onErrorMessage = it
+                        }
+                    )
+                }
             })
 
             Spacer(modifier = Modifier.height(height = 10.dp))
@@ -179,8 +268,8 @@ fun TopBarContent(chatItemUI: ChatItemUI, onTopBarClicked: (ChatItemUI) -> Unit)
                 .build(),
             contentDescription = stringResource(id = R.string.user_profile_picture_desc_text),
             contentScale = ContentScale.Crop,
-            error = painterResource(id = R.drawable.ai_profile_picture),
-            placeholder = painterResource(id = R.drawable.ai_profile_picture),
+            error = painterResource(id = R.drawable.user_profile_placeholder),
+            placeholder = painterResource(id = R.drawable.user_profile_placeholder),
             modifier = Modifier
                 .size(60.dp)
                 .padding(4.dp)
@@ -191,7 +280,7 @@ fun TopBarContent(chatItemUI: ChatItemUI, onTopBarClicked: (ChatItemUI) -> Unit)
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = chatItemUI.profileName,
+                text = if (chatItemUI.profileName.isNullOrEmpty()) stringResource(id = R.string.unknown_text) else chatItemUI.profileName,
                 style = MaterialTheme.typography.headlineSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -237,7 +326,10 @@ fun NewMessageForm(onSendMessageClicked: (String) -> Unit) {
                     imageVector = Icons.AutoMirrored.Outlined.Send,
                     contentDescription = stringResource(R.string.send_icon_desc_text),
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { onSendMessageClicked(messageText) }
+                    modifier = Modifier.clickable {
+                        onSendMessageClicked(messageText)
+                        messageText = ""
+                    }
                 )
             },
             colors = OutlinedTextFieldDefaults.colors(

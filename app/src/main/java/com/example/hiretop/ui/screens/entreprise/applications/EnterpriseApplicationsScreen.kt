@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,6 +51,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
 import com.example.hiretop.models.ChatItem
+import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.UIState
 import com.example.hiretop.navigation.NavDestination
@@ -77,7 +79,11 @@ fun EnterpriseApplicationsScreen(
     val enterpriseProfileId by enterpriseViewModel.enterpriseProfileId.collectAsState(initial = null)
     val enterpriseProfile by enterpriseViewModel.enterpriseProfile.collectAsState(initial = null)
     val jobApplicationsList by enterpriseViewModel.jobApplications.collectAsState()
-    var filteredJobApplicationsList by remember { mutableStateOf(jobApplicationsList) }
+    var filteredJobApplicationsList by remember {
+        mutableStateOf(
+            jobApplicationsList ?: emptyList()
+        )
+    }
     var uiState by remember { mutableStateOf(UIState.LOADING) }
     var onErrorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -89,16 +95,16 @@ fun EnterpriseApplicationsScreen(
     }
 
     LaunchedEffect(enterpriseViewModel) {
-        if (enterpriseProfileId == null || enterpriseProfile == null) {
+        if (enterpriseProfileId == null) {
             uiState = UIState.FAILURE
         } else {
             enterpriseViewModel.getJobApplicationsList(
                 enterpriseProfileId = "$enterpriseProfileId",
-                companyName = "${enterpriseProfile?.name}",
                 onSuccess = { applications ->
                     uiState = if (applications.isEmpty()) {
                         UIState.FAILURE
                     } else {
+                        filteredJobApplicationsList = applications
                         UIState.SUCCESS
                     }
                 },
@@ -135,20 +141,24 @@ fun EnterpriseApplicationsScreen(
             value = searchInput,
             onValueChange = {
                 searchInput = it
-                if (searchInput.length >= 3) {
-                    filteredJobApplicationsList = jobApplicationsList?.filter { item ->
-                        "${item.candidateFullName}".lowercase()
-                            .contains(searchInput.lowercase(), ignoreCase = true) ||
-                                item.status?.lowercase()?.contains(
-                                    searchInput.lowercase(),
-                                    ignoreCase = true
-                                ) == true ||
-                                item.stages?.lowercase()?.contains(
-                                    searchInput.lowercase(),
-                                    ignoreCase = true
-                                ) == true ||
-                                "${item.jobOfferTitle}".lowercase()
-                                    .contains(searchInput.lowercase(), ignoreCase = true)
+                if (searchInput.isEmpty()) {
+                    filteredJobApplicationsList = jobApplicationsList ?: emptyList()
+                } else {
+                    if (searchInput.length >= 3) {
+                        filteredJobApplicationsList = jobApplicationsList?.filter { item ->
+                            "${item.candidateFullName}".lowercase()
+                                .contains(searchInput.lowercase(), ignoreCase = true) ||
+                                    item.status?.lowercase()?.contains(
+                                        searchInput.lowercase(),
+                                        ignoreCase = true
+                                    ) == true ||
+                                    item.stages?.lowercase()?.contains(
+                                        searchInput.lowercase(),
+                                        ignoreCase = true
+                                    ) == true ||
+                                    "${item.jobOfferTitle}".lowercase()
+                                        .contains(searchInput.lowercase(), ignoreCase = true)
+                        } ?: emptyList()
                     }
                 }
             },
@@ -177,12 +187,14 @@ fun EnterpriseApplicationsScreen(
 
         when (uiState) {
             UIState.LOADING -> {
-                // Display loader while fetching data
-                HireTopCircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    // Display loader while fetching data
+                    HireTopCircularProgressIndicator()
+                }
             }
 
             UIState.FAILURE -> {
-                val failureText = if (enterpriseProfileId == null || enterpriseProfile == null) {
+                val failureText = if (enterpriseProfileId == null) {
                     // Display text prompting user to complete profile
                     stringResource(R.string.empty_enterprise_applications_list_info)
                 } else {
@@ -190,20 +202,24 @@ fun EnterpriseApplicationsScreen(
                     stringResource(R.string.enterprise_no_job_application_found_info)
                 }
 
-                Text(
-                    text = failureText,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = failureText,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             UIState.SUCCESS -> {
-                filteredJobApplicationsList?.let {
+                if (filteredJobApplicationsList.isNotEmpty()) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-                        itemsIndexed(it) { _, item ->
+                        itemsIndexed(filteredJobApplicationsList) { _, item ->
+                            Spacer(modifier = Modifier.height(5.dp))
+
                             ApplicationItemRow(
                                 context = mContext,
                                 jobApplication = item,
@@ -213,16 +229,47 @@ fun EnterpriseApplicationsScreen(
                                 onPreviewCandidateProfile = {
                                     navigateToCandidateProfile(navController, it)
                                 },
-                                onChatIconClicked = {
-                                    val chatItem = ChatItem(
-                                        profileId = it.candidateProfileId,
-                                        enterpriseId = it.enterpriseProfileId,
-                                        jobOfferId = it.jobOfferId,
-                                        jobApplicationId = "${it.jobApplicationId}",
-                                    )
-                                    navigateToChatScreen(navController, chatItem)
+                                onChatIconClicked = { jobApplication ->
+                                    if (!jobApplication.jobApplicationId.isNullOrEmpty()) {
+                                        val onSuccess: (String) -> Unit = { chatId ->
+                                            val chatItemUI = ChatItemUI(
+                                                chatId = chatId,
+                                                pictureUrl = jobApplication.candidatePictureUrl ?: "",
+                                                profileName = jobApplication.candidateFullName ?: "",
+                                                offerTitle = jobApplication.jobOfferTitle ?: "",
+                                                unreadMessageCount = 0,
+                                                jobApplicationId = jobApplication.jobApplicationId
+                                            )
+                                            navigateToChatScreen(navController, chatItemUI)
+                                        }
+
+                                        val onFailure: () -> Unit = {
+                                            val chatItemUI = ChatItemUI(
+                                                pictureUrl = jobApplication.candidatePictureUrl ?: "",
+                                                profileName = jobApplication.candidateFullName ?: "",
+                                                offerTitle = jobApplication.jobOfferTitle ?: "",
+                                                unreadMessageCount = 0,
+                                                jobApplicationId = jobApplication.jobApplicationId
+                                            )
+                                            navigateToChatScreen(navController, chatItemUI)
+                                        }
+
+                                        enterpriseViewModel.chatExists(
+                                            jobApplicationId = jobApplication.jobApplicationId,
+                                            onSuccess = { chatIds ->
+                                                if (chatIds.isNotEmpty()) {
+                                                    onSuccess(chatIds)
+                                                } else {
+                                                    onFailure()
+                                                }
+                                            },
+                                            onFailure = { onFailure() }
+                                        )
+                                    }
                                 }
                             )
+
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
                 }
@@ -342,7 +389,10 @@ fun ApplicationItemRow(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = Utils.getAppliedTimeAgo(context, System.currentTimeMillis()),
+                text = Utils.getAppliedTimeAgo(
+                    context,
+                    jobApplication.appliedAt ?: System.currentTimeMillis()
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 maxLines = 2,
@@ -355,13 +405,14 @@ fun ApplicationItemRow(
     }
 }
 
-fun navigateToChatScreen(navController: NavController, chatItem: ChatItem) {
-    val chatItemJSON = Gson().toJson(chatItem)
-    navController.navigate(route = "${ChatScreen.route}/$chatItemJSON")
+fun navigateToChatScreen(navController: NavController, chatItemUI: ChatItemUI) {
+    val chatItemUIJSON = Gson().toJson(chatItemUI)
+    navController.navigate(route = "${ChatScreen.route}/$chatItemUIJSON")
 }
 
 private fun navigateToCandidateProfile(navController: NavController, candidateProfileId: String) {
-    navController.navigate(route = "${CandidateProfileScreen.route}/${true}/$candidateProfileId")
+    val isPreviewMode = true
+    navController.navigate(route = "${CandidateProfileScreen.route}/$isPreviewMode/$candidateProfileId")
 }
 
 private fun navigateToApplicationDetails(

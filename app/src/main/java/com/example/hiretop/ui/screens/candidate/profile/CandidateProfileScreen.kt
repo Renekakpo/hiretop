@@ -130,7 +130,7 @@ fun CandidateProfileScreen(
 
     LaunchedEffect(candidateViewModel) {
         if (isPreviewMode) {
-            if (!profileId.isNullOrEmpty()) {
+            if (!argCandidateProfileId.isNullOrEmpty()) {
                 candidateViewModel.getCandidateProfile(
                     profileId = "$argCandidateProfileId",
                     onSuccess = {},

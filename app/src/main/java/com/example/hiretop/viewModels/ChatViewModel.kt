@@ -1,12 +1,19 @@
 package com.example.hiretop.viewModels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.hiretop.R
+import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.data.datastore.HireTopDataStoreRepos
 import com.example.hiretop.di.repository.ChatItemRepository
 import com.example.hiretop.di.repository.MessageRepository
+import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.ChatItemUI
+import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.Message
+import com.example.hiretop.utils.Constant
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,11 +23,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val chatItemRepository: ChatItemRepository,
     private val messageRepository: MessageRepository,
+    @Named(Constant.JOB_APPLICATIONS_COLLECTION_NAME)
+    private val jobApplicationsCollection: CollectionReference,
     appDataStore: HireTopDataStoreRepos,
 ) : ViewModel() {
 
@@ -41,7 +51,27 @@ class ChatViewModel @Inject constructor(
     private val _messages = MutableStateFlow<List<Message>?>(null)
     val messages: StateFlow<List<Message>?> = _messages
 
+    // Flow to hold job application
+    private val _jobApplication = MutableStateFlow<JobApplication?>(null)
+    val jobApplication: StateFlow<JobApplication?> = _jobApplication
+
     private var snapshotListener: ListenerRegistration? = null
+
+    fun createOrEditChatItem(
+        chatItem: ChatItem,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            chatItemRepository.createOrEditChatItem(
+                chatItem = chatItem,
+                onSuccess = {
+                    onSuccess(it)
+                },
+                onFailure = { onFailure(it) }
+            )
+        }
+    }
 
     fun getChatItemsUI(
         profileId: String,
@@ -54,7 +84,9 @@ class ChatViewModel @Inject constructor(
                 profileId = profileId,
                 isEnterpriseAccount = isEnterpriseAccount,
                 onSuccess = { list ->
-                    _chatItemsUI.update { it }
+                    _chatItemsUI.value = list
+
+                    Thread.sleep(300)
                     onSuccess(list)
                 },
                 onFailure = { onFailure(it) }
@@ -80,19 +112,8 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun sendMessage(input: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+    fun sendMessage(message: Message, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            // Create message instance
-            val message = Message(
-                subject = "", // Chat ID
-                to = "", // Receiver ID
-                from = "", // Sender ID
-                content = input,
-                received = false,
-                isRead = false,
-                createdAt = System.currentTimeMillis()
-            )
-
             messageRepository.sendMessage(
                 message = message,
                 onSuccess = {
@@ -126,6 +147,27 @@ class ChatViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 onFailure(e.message ?: "Unknown error occurred")
+            }
+        }
+    }
+
+    fun getJobApplicationFromChatItemUI(jobApplicationId: String, onSuccess : () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                jobApplicationsCollection.document(jobApplicationId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val app = snapshot.toObject(JobApplication::class.java)
+                        _jobApplication.value = app
+                        onSuccess()
+                    }
+                    .addOnFailureListener {
+                        onFailure(
+                            it.localizedMessage ?: appContext.getString(R.string.unkown_error_text)
+                        )
+                    }
+            } catch (e: Exception) {
+                Log.d("getJobApplicationFromChatItemUI", "${e.message}")
             }
         }
     }

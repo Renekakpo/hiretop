@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,11 +66,14 @@ fun JobOffersScreen(
     // Observe candidate profile and recommended jobs states
     val candidateProfile by candidateViewModel.candidateProfile.collectAsState(null)
     val jobOffers by candidateViewModel.jobOffers.collectAsState(null)
-    var uiState by remember { mutableStateOf(UIState.LOADING) }
 
+
+    var selectedJobTypes by rememberSaveable { mutableStateOf(setOf<String>()) }
+    var selectedEducations by remember { mutableStateOf(setOf<String>()) }
+    var selectedLocationTypes by remember { mutableStateOf(setOf<String>()) }
+    var uiState by remember { mutableStateOf(UIState.LOADING) }
     var searchInput by remember { mutableStateOf("") }
     var filteredJobOffers by remember { mutableStateOf(jobOffers) }
-
     var sheetTitle by remember { mutableStateOf("") }
     var showBottomSheet by remember { mutableStateOf(false) }
     var bottomSheetContent by remember { mutableStateOf<@Composable (() -> Unit)?>(null) }
@@ -163,6 +167,9 @@ fun JobOffersScreen(
                             sheetTitle = mContext.getString(R.string.filter_sheet_title_text)
                             bottomSheetContent = {
                                 FilterSheetContent(
+                                    currentSelectedJobTypes = selectedJobTypes,
+                                    currentSelectedEducations = selectedEducations,
+                                    currentSelectedLocationTypes = selectedLocationTypes,
                                     onApplyFilter = { jobTypes, educations, locationTypes ->
                                         filteredJobOffers = jobOffers?.filter { jobOffer ->
                                             // Apply filter based on job types, educations, location types
@@ -170,6 +177,9 @@ fun JobOffersScreen(
                                                     educations.isEmpty() || jobOffer.education?.any { it in educations } == true &&
                                                     locationTypes.isEmpty() || jobOffer.locationType in locationTypes
                                         }
+                                        selectedJobTypes = jobTypes
+                                        selectedEducations = educations
+                                        selectedLocationTypes = locationTypes
                                         showBottomSheet = false
                                     },
                                     onResetFilter = {
@@ -201,8 +211,10 @@ fun JobOffersScreen(
 
         when (uiState) {
             UIState.LOADING -> {
-                // Display loader while fetching data
-                HireTopCircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    // Display loader while fetching data
+                    HireTopCircularProgressIndicator()
+                }
             }
 
             UIState.FAILURE -> {
@@ -217,14 +229,16 @@ fun JobOffersScreen(
                     stringResource(R.string.no_job_offers_found_text)
                 }
 
-                Text(
-                    text = failureText,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = failureText,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             UIState.SUCCESS -> {

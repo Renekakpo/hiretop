@@ -48,7 +48,6 @@ import coil.request.ImageRequest
 import com.example.hiretop.R
 import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.models.JobApplication
-import com.example.hiretop.models.jobApplicationsLists
 import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.ui.extras.DropdownListWords
 import com.example.hiretop.ui.extras.FailurePopup
@@ -141,7 +140,7 @@ fun EditApplicationsDetailsScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = Utils.getAppliedTimeAgo(context, System.currentTimeMillis()),
+            text = Utils.getAppliedTimeAgo(context, jobApplication.appliedAt ?: System.currentTimeMillis()),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             maxLines = 2,

@@ -216,7 +216,7 @@ fun EnterpriseApplicationsScreenPreview() {
 fun CandidateInteractionScreenPreview() {
     HiretopTheme {
         ChatScreen(
-            chatItemUI = ChatItemUI("", "", "", "", 0L),
+            chatItemUI = ChatItemUI("", "", "", "", 0L, ""),
             navController = rememberNavController()
         )
     }
