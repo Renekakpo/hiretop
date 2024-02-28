@@ -149,6 +149,22 @@ fun EnterpriseOffersScreen(
                                 },
                                 onSaveClicked = {
                                     showBottomSheet = false
+
+                                    enterpriseViewModel.getAllJobOffersForEnterprise(
+                                        enterpriseID = "$enterpriseProfileId",
+                                        onSuccess = {
+                                            uiState = if (it.isEmpty()) {
+                                                UIState.FAILURE
+                                            } else {
+                                                filteredJobOffers = it
+                                                UIState.SUCCESS
+                                            }
+                                        },
+                                        onFailure = {
+                                            onErrorMessage = it
+                                            uiState = UIState.FAILURE
+                                        }
+                                    )
                                 },
                                 onCloseClicked = { showBottomSheet = false }
                             )
@@ -234,7 +250,7 @@ fun EnterpriseOffersScreen(
             UIState.SUCCESS -> {
                 if (filteredJobOffers.isNotEmpty()) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-                        itemsIndexed(filteredJobOffers) { _, filteredJob ->
+                        itemsIndexed(filteredJobOffers.sortedByDescending { it.postedAt }) { _, filteredJob ->
                             OfferItemRow(
                                 context = mContext,
                                 jobOffer = filteredJob,

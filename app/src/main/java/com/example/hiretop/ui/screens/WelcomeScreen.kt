@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
@@ -78,7 +79,7 @@ fun WelcomeScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.weight(weight = 1F))
+        Spacer(modifier = Modifier.weight(weight = 1f))
 
         Text(
             text = stringResource(id = R.string.app_name),
@@ -110,18 +111,19 @@ fun WelcomeScreen(
 
         Spacer(modifier = Modifier.height(height = 25.dp))
 
-        when(uiState) {
+        when (uiState) {
             UIState.LOADING -> {
                 HireTopCircularProgressIndicator()
             }
+
             UIState.FAILURE -> {
                 if (isNetworkAvailable == null || isNetworkAvailable == false) {
                     onNavigateToNextScreen(navController, NetworkIssueScreen.route)
                 } else if (isEnterpriseAccount == null) {
                     Button(
                         modifier = Modifier
-                            .width(width = mWidth * 0.5F)
-                            .height(45.dp)
+                            .width(width = mWidth * 0.6F)
+                            .height(50.dp)
                             .padding(horizontal = 5.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.onPrimary,
@@ -141,7 +143,7 @@ fun WelcomeScreen(
                         ) {
                             Text(
                                 text = stringResource(R.string.let_get_started_text),
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
                             )
 
                             Spacer(modifier = Modifier.width(width = 15.dp))
@@ -155,6 +157,7 @@ fun WelcomeScreen(
                     }
                 }
             }
+
             UIState.SUCCESS -> {
                 if (isEnterpriseAccount == true) {
                     onNavigateToNextScreen(navController, EnterpriseBottomNavGraph.route)

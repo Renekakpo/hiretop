@@ -7,7 +7,19 @@ import com.google.firebase.storage.ktx.storage
 import java.io.InputStream
 import javax.inject.Inject
 
+/**
+ * Helper class for Firebase operations.
+ */
 class FirebaseHelper @Inject constructor() {
+
+    /**
+     * Uploads a file to Firebase Storage.
+     *
+     * @param inputStream The input stream of the file to be uploaded.
+     * @param fileName The name to be given to the file.
+     * @param onSuccess Callback function invoked when the file is successfully uploaded, providing the download URL.
+     * @param onFailure Callback function invoked when the upload fails, providing an error message.
+     */
     fun uploadFileToFirebaseStorage(
         inputStream: InputStream,
         fileName: String,

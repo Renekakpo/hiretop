@@ -25,19 +25,6 @@ class UtilsTest {
         assertEquals((currentYear - 1922).toString(), yearsList.size.toString())
     }
 
-    /*@Test
-    fun testCompressImage() {
-        val mockContext = InstrumentationRegistry.getInstrumentation().targetContext
-        val uri = // Provide a valid URI for testing
-        val filename = "test_image.png"
-
-        val file = Utils.compressImage(mockContext, uri, filename) { errorMessage ->
-            println("Compression error: $errorMessage")
-        }
-
-        assertTrue(file != null)
-    }*/
-
     @Test
     fun testGetPostedTimeAgo() {
         val timestamp = System.currentTimeMillis() - (24 * 60 * 60 * 1000) // 1 day ago
@@ -73,7 +60,7 @@ class UtilsTest {
 
     @Test
     fun testExtractStringFromLink() {
-        val link = "https://example.com/images%2Fimage_name.jpg?"
+        val link = "https://firebasestorage.googleapis.com/v0/b/hiretop-6c0ef.appspot.com/o/images%2F30c8df62-2199-410e-8a83-c4b7a7cbed43_compressed_profile_picture?alt=media&token=1742bcf2-c7a8-4892-965a-c14346bea954"
         val result = Utils.extractStringFromLink(link)
         assertEquals("image_name.jpg", result)
     }

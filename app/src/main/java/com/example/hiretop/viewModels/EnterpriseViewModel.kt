@@ -29,6 +29,18 @@ import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Named
 
+/**
+ * ViewModel for managing enterprise-related data and operations.
+ *
+ * @param db: Instance of FirebaseFirestore for database operations.
+ * @param jobOffersCollection: CollectionReference for job offers data.
+ * @param enterprisesCollection: CollectionReference for enterprise profiles data.
+ * @param jobApplicationsCollection: CollectionReference for job applications data.
+ * @param appDataStore: DataStore repository for storing enterprise profile ID.
+ * @param firebaseHelper: Helper class for Firebase operations.
+ * @param jobOfferApplicationRepository: Repository for managing job offer applications.
+ * @param chatItemRepository: Repository for managing chat items.
+ */
 @HiltViewModel
 class EnterpriseViewModel @Inject constructor(
     private val db: FirebaseFirestore,
@@ -80,17 +92,18 @@ class EnterpriseViewModel @Inject constructor(
     private val _jobApplications = MutableStateFlow<List<JobApplication>?>(null)
     val jobApplications: StateFlow<List<JobApplication>?> = _jobApplications
 
+    /**
+     * Function to add a new job offer to the database.
+     *
+     * @param jobOffer: JobOffer object representing the new job offer.
+     * @param onSuccess: Callback function to be called on successful addition.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun addJobOffer(jobOffer: JobOffer, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             jobOffersCollection.add(jobOffer)
                 .addOnSuccessListener { doc ->
                     _mJobOffer.value = jobOffer.copy(jobOfferID = doc.id)
-                    jobOffer.enterpriseID?.let {
-                        getAllJobOffersForEnterprise(
-                            it,
-                            onSuccess = {},
-                            onFailure = {})
-                    }
                     onSuccess(doc.id)
                 }
                 .addOnFailureListener {
@@ -101,6 +114,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to update an existing job offer in the database.
+     *
+     * @param jobOffer: JobOffer object representing the updated job offer.
+     * @param onSuccess: Callback function to be called on successful update.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun updateJobOffer(jobOffer: JobOffer, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             jobOffer.jobOfferID?.let { jobOfferID ->
@@ -118,6 +138,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to retrieve all job offers for a given enterprise from the database.
+     *
+     * @param enterpriseID: ID of the enterprise for which job offers are to be retrieved.
+     * @param onSuccess: Callback function to be called on successful retrieval.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun getAllJobOffersForEnterprise(
         enterpriseID: String,
         onSuccess: (List<JobOffer>) -> Unit,
@@ -146,7 +173,11 @@ class EnterpriseViewModel @Inject constructor(
     }
 
     /**
-     * Function to get auto-generated ID by Firestore when creating a new profile
+     * Function to create a new enterprise profile in the database.
+     *
+     * @param profile: EnterpriseProfile object representing the new enterprise profile.
+     * @param onSuccess: Callback function to be called on successful creation.
+     * @param onFailure: Callback function to be called on failure.
      */
     fun createNewEnterpriseProfile(
         profile: EnterpriseProfile,
@@ -170,12 +201,25 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to save the ID of the enterprise profile in the data store.
+     *
+     * @param profileId: ID of the enterprise profile to be saved.
+     */
     private fun saveEnterpriseProfileId(profileId: String) {
         viewModelScope.launch {
             appDataStore.saveEnterpriseProfileIdState(profileId)
         }
     }
 
+    /**
+     * Function to update an existing enterprise profile in the database.
+     *
+     * @param enterpriseId: ID of the enterprise profile to be updated.
+     * @param updatedProfile: Updated EnterpriseProfile object.
+     * @param onSuccess: Callback function to be called on successful update.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun updateEnterpriseProfile(
         enterpriseId: String,
         updatedProfile: EnterpriseProfile,
@@ -199,6 +243,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to retrieve the enterprise profile from the database.
+     *
+     * @param enterpriseId: ID of the enterprise profile to be retrieved.
+     * @param onSuccess: Callback function to be called on successful retrieval.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun getEnterpriseProfile(
         enterpriseId: String,
         onSuccess: (EnterpriseProfile) -> Unit,
@@ -225,6 +276,14 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to upload a file to Firebase Storage and retrieve the download URL.
+     *
+     * @param inputStream: InputStream representing the file to be uploaded.
+     * @param fileName: Name of the file.
+     * @param onSuccess: Callback function to be called on successful upload.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun uploadFileToFirebaseStorageAndGetUrl(
         inputStream: InputStream,
         fileName: String,
@@ -239,6 +298,13 @@ class EnterpriseViewModel @Inject constructor(
 
     }
 
+    /**
+     * Function to calculate the retention rate for an enterprise.
+     *
+     * @param enterpriseId: ID of the enterprise.
+     * @param onSuccess: Callback function to be called on successful calculation.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun calculateRetention(
         enterpriseId: String,
         onSuccess: () -> Unit,
@@ -273,6 +339,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to calculate the conversion rate for an enterprise.
+     *
+     * @param enterpriseId: ID of the enterprise.
+     * @param onSuccess: Callback function to be called on successful calculation.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun calculateConversion(
         enterpriseId: String,
         onSuccess: () -> Unit,
@@ -307,6 +380,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to calculate the productivity for an enterprise.
+     *
+     * @param enterpriseId: ID of the enterprise.
+     * @param onSuccess: Callback function to be called on successful calculation.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun calculateProductivity(
         enterpriseId: String,
         onSuccess: (Double) -> Unit,
@@ -328,6 +408,13 @@ class EnterpriseViewModel @Inject constructor(
             }
     }
 
+    /**
+     * Function to calculate the total views for all job offers of an enterprise.
+     *
+     * @param enterpriseId: ID of the enterprise.
+     * @param onSuccess: Callback function to be called on successful calculation.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun calculateViews(
         enterpriseId: String,
         onSuccess: () -> Unit,
@@ -352,6 +439,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to calculate the total number of applications for an enterprise.
+     *
+     * @param enterpriseId: ID of the enterprise.
+     * @param onSuccess: Callback function to be called on successful calculation.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun calculateApplications(
         enterpriseId: String,
         onSuccess: () -> Unit,
@@ -373,6 +467,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to calculate the total number of hires for an enterprise.
+     *
+     * @param enterpriseId: ID of the enterprise.
+     * @param onSuccess: Callback function to be called on successful calculation.
+     * @param onFailure: Callback function to be called on failure.
+     */
     suspend fun calculateHires(
         enterpriseId: String,
         onSuccess: () -> Unit,
@@ -397,6 +498,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to calculate the total number of interviews scheduled for an enterprise.
+     *
+     * @param enterpriseId: ID of the enterprise.
+     * @param onSuccess: Callback function to be called on successful calculation.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun calculateInterviews(
         enterpriseId: String,
         onSuccess: () -> Unit,
@@ -421,6 +529,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to retrieve a list of job applications for a specific enterprise.
+     *
+     * @param enterpriseProfileId: ID of the enterprise profile.
+     * @param onSuccess: Callback function to be called on successful retrieval.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun getJobApplicationsList(
         enterpriseProfileId: String,
         onSuccess: (List<JobApplication>) -> Unit,
@@ -440,6 +555,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to edit an existing job application.
+     *
+     * @param jobApplication: Updated JobApplication object.
+     * @param onSuccess: Callback function to be called on successful update.
+     * @param onFailure: Callback function to be called on failure.
+     */
     fun editJobApplication(
         jobApplication: JobApplication,
         onSuccess: () -> Unit,
@@ -461,6 +583,13 @@ class EnterpriseViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to check if a chat exists for a given job application.
+     *
+     * @param jobApplicationId: ID of the job application.
+     * @param onSuccess: Callback function to be called if a chat exists.
+     * @param onFailure: Callback function to be called if a chat does not exist.
+     */
     fun chatExists(
         jobApplicationId: String,
         onSuccess: (String) -> Unit,

@@ -19,20 +19,24 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
+// Repository for managing chat items
 @Singleton
 class ChatItemRepository @Inject constructor(
     @Named(MESSAGES_COLLECTION_NAME)
-    private val messagesCollection: CollectionReference,
+    private val messagesCollection: CollectionReference, // Collection reference for messages
     @Named(CHATS_COLLECTION_NAME)
-    private val chatsCollection: CollectionReference,
+    private val chatsCollection: CollectionReference, // Collection reference for chats
     @Named(CANDIDATES_COLLECTION_NAME)
-    private val candidateProfilesCollection: CollectionReference,
+    private val candidateProfilesCollection: CollectionReference, // Collection reference for candidate profiles
     @Named(ENTERPRISES_COLLECTION_NAME)
-    private val enterpriseProfilesCollection: CollectionReference,
+    private val enterpriseProfilesCollection: CollectionReference, // Collection reference for enterprise profiles
     @Named(JOB_OFFERS_COLLECTION_NAME)
-    private val jobOffersCollection: CollectionReference
+    private val jobOffersCollection: CollectionReference // Collection reference for job offers
 ) {
 
+    /**
+     * Get the list of chat items
+     */
     suspend fun getChatItemUIList(
         profileId: String,
         isEnterpriseAccount: Boolean,
@@ -40,7 +44,7 @@ class ChatItemRepository @Inject constructor(
         onFailure: (String) -> Unit
     ) {
         try {
-            // Init conditional field
+            // Determine the field to query based on the account type
             val field = if (isEnterpriseAccount) {
                 "enterpriseProfileId"
             } else {
@@ -77,29 +81,11 @@ class ChatItemRepository @Inject constructor(
                     var chatItemUI: ChatItemUI
 
                     if (isEnterpriseAccount) {
-                        // Fetch enterprise profile
-                        val enterpriseProfileDoc =
-                            chatItem.enterpriseProfileId?.let {
-                                enterpriseProfilesCollection.document(it).get()
-                                    .await()
-                            }
-                        val enterpriseProfile =
-                            enterpriseProfileDoc?.toObject(EnterpriseProfile::class.java)
-
-                        // Create ChatItemUI object and add it to the list
-                        chatItemUI = ChatItemUI(
-                            chatId = chatItem.chatId ?: "",
-                            pictureUrl = enterpriseProfile?.pictureUrl ?: "",
-                            profileName = enterpriseProfile?.name ?: "",
-                            offerTitle = jobOffer?.title ?: "",
-                            unreadMessageCount = unreadMessageCount,
-                            jobApplicationId = "${chatItem.jobApplicationId}"
-                        )
-                    } else {
                         // Fetch candidate profile
                         val candidateProfileDoc =
                             chatItem.candidateProfileId?.let {
-                                candidateProfilesCollection.document(it).get().await()
+                                candidateProfilesCollection.document(it).get()
+                                    .await()
                             }
                         val candidateProfile =
                             candidateProfileDoc?.toObject(CandidateProfile::class.java)
@@ -109,6 +95,24 @@ class ChatItemRepository @Inject constructor(
                             chatId = chatItem.chatId ?: "",
                             pictureUrl = candidateProfile?.pictureUrl ?: "",
                             profileName = candidateProfile?.name ?: "",
+                            offerTitle = jobOffer?.title ?: "",
+                            unreadMessageCount = unreadMessageCount,
+                            jobApplicationId = "${chatItem.jobApplicationId}"
+                        )
+                    } else {
+                        // Fetch enterprise profile
+                        val enterpriseProfileDoc =
+                            chatItem.enterpriseProfileId?.let {
+                                enterpriseProfilesCollection.document(it).get().await()
+                            }
+                        val enterpriseProfile =
+                            enterpriseProfileDoc?.toObject(EnterpriseProfile::class.java)
+
+                        // Create ChatItemUI object and add it to the list
+                        chatItemUI = ChatItemUI(
+                            chatId = chatItem.chatId ?: "",
+                            pictureUrl = enterpriseProfile?.pictureUrl ?: "",
+                            profileName = enterpriseProfile?.name ?: "",
                             offerTitle = jobOffer?.title ?: "",
                             unreadMessageCount = unreadMessageCount,
                             jobApplicationId = "${chatItem.jobApplicationId}"
@@ -125,12 +129,16 @@ class ChatItemRepository @Inject constructor(
         }
     }
 
+    /**
+     * Create or edit chat Item
+     */
     fun createOrEditChatItem(
         chatItem: ChatItem,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
         if (chatItem.chatId.isNullOrEmpty()) {
+            // Create a new chat item in the Firestore collection
             chatsCollection.add(chatItem)
                 .addOnSuccessListener {
                     onSuccess(it.id)
@@ -139,6 +147,7 @@ class ChatItemRepository @Inject constructor(
                     onFailure(it.message ?: appContext.getString(R.string.create_chat_failure_info))
                 }
         } else {
+            // Edit an existing chat item in the Firestore collection
             chatsCollection
                 .document(chatItem.chatId)
                 .set(chatItem, SetOptions.merge())
@@ -153,6 +162,9 @@ class ChatItemRepository @Inject constructor(
         }
     }
 
+    /**
+     * Check if a chat exists for a given application ID
+     */
     fun chatExists(
         applicationId: String,
         onSuccess: (String) -> Unit,

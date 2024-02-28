@@ -24,6 +24,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
+/**
+ * ViewModel for managing chat-related data and operations.
+ *
+ * @property chatItemRepository Repository for chat items.
+ * @property messageRepository Repository for messages.
+ * @property jobApplicationsCollection Collection reference for job applications.
+ * @property appDataStore Data store for HireTop application.
+ */
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val chatItemRepository: ChatItemRepository,
@@ -56,6 +64,13 @@ class ChatViewModel @Inject constructor(
 
     private var snapshotListener: ListenerRegistration? = null
 
+    /**
+     * Function to create or edit a chat item.
+     *
+     * @param chatItem The chat item to create or edit.
+     * @param onSuccess Callback function invoked on successful operation.
+     * @param onFailure Callback function invoked on failure.
+     */
     fun createOrEditChatItem(
         chatItem: ChatItem,
         onSuccess: (String) -> Unit,
@@ -72,6 +87,14 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to retrieve chat items for the UI.
+     *
+     * @param profileId The profile ID.
+     * @param isEnterpriseAccount Boolean indicating if the account is enterprise.
+     * @param onSuccess Callback function invoked on successful operation.
+     * @param onFailure Callback function invoked on failure.
+     */
     fun getChatItemsUI(
         profileId: String,
         isEnterpriseAccount: Boolean,
@@ -93,6 +116,13 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to retrieve messages for a chat.
+     *
+     * @param chatId The ID of the chat.
+     * @param onSuccess Callback function invoked on successful operation.
+     * @param onFailure Callback function invoked on failure.
+     */
     fun getListOfMessages(
         chatId: String,
         onSuccess: (List<Message>) -> Unit,
@@ -111,6 +141,13 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to send a message.
+     *
+     * @param message The message to send.
+     * @param onSuccess Callback function invoked on successful operation.
+     * @param onFailure Callback function invoked on failure.
+     */
     fun sendMessage(message: Message, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             messageRepository.sendMessage(
@@ -125,6 +162,13 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to observe new messages by chat ID.
+     *
+     * @param chatId The ID of the chat.
+     * @param onSuccess Callback function invoked on successful operation.
+     * @param onFailure Callback function invoked on failure.
+     */
     fun observeNewMessageByChatId(
         chatId: String,
         onSuccess: (List<Message>) -> Unit,
@@ -150,6 +194,11 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to mark a message as read.
+     *
+     * @param messageId The ID of the message to mark as read.
+     */
     fun markMessageAsRead(messageId: String) {
         viewModelScope.launch {
             messageRepository.markMessageAsRead(
@@ -160,6 +209,13 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function to retrieve a job application from a chat item UI.
+     *
+     * @param jobApplicationId The ID of the job application.
+     * @param onSuccess Callback function invoked on successful operation.
+     * @param onFailure Callback function invoked on failure.
+     */
     fun getJobApplicationFromChatItemUI(jobApplicationId: String, onSuccess : () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -181,9 +237,12 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Function invoked when the ViewModel is cleared.
+     */
     override fun onCleared() {
         super.onCleared()
-        // Add the listener to the coroutine scope
+        // Remove the listener from the coroutine scope
         snapshotListener?.remove()
     }
 }

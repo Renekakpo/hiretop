@@ -1,6 +1,5 @@
 package com.example.hiretop.viewModels
 
-import android.app.Activity
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +7,6 @@ import com.example.hiretop.R
 import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.data.datastore.HireTopDataStoreRepos
 import com.example.hiretop.helpers.NetworkHelper
-import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.Auth.GoogleSignInApi
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -18,31 +16,49 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel for the main functionality of the application.
+ * Handles user authentication, network connectivity, and user data storage.
+ */
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val appDataStore: HireTopDataStoreRepos,
     private val networkHelper: NetworkHelper,
     private val firebaseAuth: FirebaseAuth
-) :
-    ViewModel() {
+) : ViewModel() {
 
+    // Current user authenticated with Firebase
     val currentUser = firebaseAuth.currentUser
+
+    // Flow representing network connectivity status
     val isNetworkAvailable: Flow<Boolean> = flow {
         emit(networkHelper.isConnectedToInternet())
     }.flowOn(Dispatchers.IO)
+
+    // Flow representing if the current user has an enterprise account
     val isEnterpriseAccount: Flow<Boolean?> = appDataStore.isEnterpriseAccount
 
+    /**
+     * Saves the user's account type to the data store.
+     * @param value Boolean indicating if the user has an enterprise account.
+     */
     fun saveAccountType(value: Boolean) {
         viewModelScope.launch {
             appDataStore.saveIsEnterpriseAccountState(value)
         }
     }
 
+    /**
+     * Performs user login using email and password authentication.
+     * @param email User's email address.
+     * @param password User's password.
+     * @param onSuccess Callback function to be executed on successful login.
+     * @param onFailure Callback function to be executed on login failure.
+     */
     fun loginWithEmailAndPassword(
         email: String,
         password: String,
@@ -59,7 +75,10 @@ class MainViewModel @Inject constructor(
             }
     }
 
-    // Function to obtain Google Sign-In Intent
+    /**
+     * Generates the intent for Google Sign-In.
+     * @return Intent for Google Sign-In.
+     */
     fun getGoogleSignInIntent(): Intent {
         // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -74,8 +93,12 @@ class MainViewModel @Inject constructor(
         return mGoogleSignInClient.signInIntent
     }
 
-
-    // Handle the result of the Google Sign-In Intent in the activity's onActivityResult method
+    /**
+     * Handles the result of Google Sign-In.
+     * @param data Intent data containing Google Sign-In result.
+     * @param onSuccess Callback function to be executed on successful sign-in.
+     * @param onFailure Callback function to be executed on sign-in failure.
+     */
     fun handleGoogleSignInResult(data: Intent?, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val task = data?.let { GoogleSignInApi.getSignInResultFromIntent(it) }
         if (task != null && task.isSuccess) {
@@ -92,7 +115,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // Authenticate with Firebase using the Google ID token
+    /**
+     * Authenticates with Firebase using the Google ID token.
+     * @param idToken Google ID token obtained from Google Sign-In.
+     * @param onSuccess Callback function to be executed on successful authentication.
+     * @param onFailure Callback function to be executed on authentication failure.
+     */
     private fun firebaseAuthWithGoogle(idToken: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         FirebaseAuth.getInstance().signInWithCredential(credential)
@@ -107,6 +135,13 @@ class MainViewModel @Inject constructor(
             }
     }
 
+    /**
+     * Signs up a new user to Firebase using email and password.
+     * @param email User's email address.
+     * @param password User's password.
+     * @param onSuccess Callback function to be executed on successful sign-up.
+     * @param onFailure Callback function to be executed on sign-up failure.
+     */
     fun signUpToFirebaseWithEmailAndPassword(
         email: String,
         password: String,
@@ -123,6 +158,12 @@ class MainViewModel @Inject constructor(
             }
     }
 
+    /**
+     * Initiates the password reset process for a user.
+     * @param email User's email address.
+     * @param onSuccess Callback function to be executed on successful password reset.
+     * @param onFailure Callback function to be executed on password reset failure.
+     */
     fun forgotPasswordProcess(email: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         FirebaseAuth.getInstance().sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->

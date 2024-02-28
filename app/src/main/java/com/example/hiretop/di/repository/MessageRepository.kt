@@ -5,90 +5,89 @@ import com.example.hiretop.app.HireTop.Companion.appContext
 import com.example.hiretop.models.Message
 import com.example.hiretop.utils.Constant.MESSAGES_COLLECTION_NAME
 import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
+/**
+ * Repository class for managing messages.
+ * This class handles sending, marking as read, and fetching messages.
+ */
 @Singleton
 class MessageRepository @Inject constructor(
-    private val db: FirebaseFirestore,
     @Named(MESSAGES_COLLECTION_NAME)
     private val messagesCollection: CollectionReference,
 ) {
 
     /**
-     * Function to send a message
+     * Function to send a message.
+     * @param message The message to be sent.
+     * @param onSuccess Callback function invoked upon successful message sending, providing the message ID.
+     * @param onFailure Callback function invoked upon failure, providing an error message.
      */
-    suspend fun sendMessage(
+    fun sendMessage(
         message: Message,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
+        // Add message to the messages collection
         messagesCollection
             .add(message)
             .addOnSuccessListener {
+                // Invoke onSuccess callback with the message ID
                 onSuccess(it.id)
             }
             .addOnFailureListener {
+                // Invoke onFailure callback with an error message, fallback to a default string resource if message is null
                 onFailure(it.message ?: appContext.getString(R.string.send_message_failure_text))
             }
     }
 
     /**
-     * Function to mark a message as received
+     * Function to mark a message as read.
+     * @param messageID The ID of the message to mark as read.
+     * @param onSuccess Callback function invoked upon successful marking as read.
+     * @param onFailure Callback function invoked upon failure, providing an error message.
      */
-    suspend fun markMessageAsReceived(
+    fun markMessageAsRead(
         messageID: String,
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
     ) {
-        messagesCollection
-            .document(messageID)
-            .update("received", true)
-            .addOnSuccessListener {
-                onSuccess()
-            }
-            .addOnFailureListener {
-                onFailure(it.message ?: appContext.getString(R.string.fetch_messages_failure_text))
-            }
-    }
-
-    /**
-     * Function to mark a message as read
-     */
-    suspend fun markMessageAsRead(
-        messageID: String,
-        onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
-    ) {
+        // Update the 'isRead' field of the message document to true
         messagesCollection
             .document(messageID)
             .update("isRead", true)
             .addOnSuccessListener {
+                // Invoke onSuccess callback
                 onSuccess()
             }
             .addOnFailureListener {
+                // Invoke onFailure callback with an error message, fallback to a default string resource if message is null
                 onFailure(it.message ?: appContext.getString(R.string.fetch_messages_failure_text))
             }
     }
 
     /**
-     * Function to fetch messages for a specific user
+     * Function to fetch messages for a specific user.
+     * @param chatId The ID of the chat for which messages are fetched.
+     * @param onSuccess Callback function invoked upon successful fetching of messages, providing the list of messages.
+     * @param onFailure Callback function invoked upon failure, providing an error message.
      */
-    suspend fun fetchMessages(
+    fun fetchMessages(
         chatId: String,
         onSuccess: (List<Message>) -> Unit,
         onFailure: (String) -> Unit
     ) {
+        // Query messages collection for messages with the specified chat ID
         messagesCollection
             .whereEqualTo("subject", chatId)
             .get()
             .addOnSuccessListener { snapshot ->
                 val messages = mutableListOf<Message>()
 
+                // If snapshot is not empty, convert documents to Message objects and add to messages list
                 if (!snapshot.isEmpty) {
                     snapshot.forEach { item ->
                         val message = item.toObject(Message::class.java)
@@ -96,79 +95,24 @@ class MessageRepository @Inject constructor(
                     }
                 }
 
-                // Sort messages by createdAt property in descending order (from new to old)
+                // Sort messages by createdAt property in ascending order (from old to new)
                 val sortedMessages = messages.sortedBy { it.createdAt }
+                // Invoke onSuccess callback with the sorted list of messages
                 onSuccess(sortedMessages)
             }
             .addOnFailureListener {
+                // Invoke onFailure callback with an error message, fallback to a default string resource if message is null
                 onFailure(it.message ?: appContext.getString(R.string.fetch_messages_failure_text))
             }
     }
 
     /**
-     * Function to fetch unread messages for a specific user
+     * Function to listen for new messages.
+     * @param chatId The ID of the chat to listen for new messages.
+     * @param onException Callback function invoked upon exception, providing an error message.
+     * @param onUpdate Callback function invoked upon receiving new messages, providing the updated list of messages.
+     * @return ListenerRegistration object for managing the snapshot listener.
      */
-    suspend fun fetchUnreadMessages(
-        userID: String,
-        onSuccess: (List<Message>) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        messagesCollection
-            .whereEqualTo("to", userID)
-            .whereEqualTo("isRead", false)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val unreadMessages = mutableListOf<Message>()
-
-                if (!snapshot.isEmpty) {
-                    snapshot.forEach { item ->
-                        val message = item.toObject(Message::class.java)
-                        unreadMessages.add(message)
-                    }
-                }
-
-                onSuccess(unreadMessages)
-            }
-            .addOnFailureListener {
-                onFailure(
-                    it.message ?: appContext.getString(R.string.fetch_unread_messages_failure_text)
-                )
-            }
-    }
-
-    /**
-     * Function to fetch received messages for a specific user
-     */
-    suspend fun fetchReceivedMessages(
-        chatId: String,
-        onSuccess: (List<Message>) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        messagesCollection
-            .whereEqualTo("subject", chatId)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val receivedMessages = mutableListOf<Message>()
-
-                if (!snapshot.isEmpty) {
-                    snapshot.forEach { item ->
-                        val message = item.toObject(Message::class.java)
-                        receivedMessages.add(message)
-                    }
-                }
-
-                onSuccess(receivedMessages)
-            }
-            .addOnFailureListener {
-                onFailure(
-                    it.message
-                        ?: appContext.getString(R.string.fetch_received_messages_failure_text)
-                )
-            }
-    }
-
     fun getNewMessagesSnapshotListener(
         chatId: String,
         onException: (String) -> Unit,
@@ -180,7 +124,7 @@ class MessageRepository @Inject constructor(
         // Create and return the snapshot listener
         return messagesRef.addSnapshotListener { snapshot, exception ->
             if (exception != null) {
-                // Handle any errors
+                // Invoke onException callback with an error message, fallback to a default string resource if message is null
                 onException(exception.message ?: appContext.getString(R.string.unknown_error_text))
                 return@addSnapshotListener
             }
@@ -190,7 +134,7 @@ class MessageRepository @Inject constructor(
                 val messages = snap.documents.mapNotNull { doc ->
                     doc.toObject(Message::class.java)
                 }
-                // Invoke onUpdate with the list of messages
+                // Invoke onUpdate callback with the list of messages
                 onUpdate(messages)
             }
         }

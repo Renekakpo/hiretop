@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -128,7 +129,7 @@ fun SignupScreen(navController: NavHostController, mainViewModel: MainViewModel 
             },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
             modifier = Modifier
-                .fillMaxWidth()
+                .width(width = mWidth * 0.8f)
                 .align(alignment = Alignment.CenterHorizontally),
             placeholder = {
                 Text(
@@ -155,19 +156,19 @@ fun SignupScreen(navController: NavHostController, mainViewModel: MainViewModel 
             label = {
                 Text(
                     text = stringResource(R.string.password_field_lable_text),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
             visualTransformation = if (passwordVisibilityState) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
             modifier = Modifier
-                .fillMaxWidth()
+                .width(width = mWidth * 0.8f)
                 .align(alignment = Alignment.CenterHorizontally),
             placeholder = {
                 Text(
                     text = stringResource(R.string.password_field_placeholder_text),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
                 )
             },
             trailingIcon = {
@@ -205,19 +206,19 @@ fun SignupScreen(navController: NavHostController, mainViewModel: MainViewModel 
             label = {
                 Text(
                     text = stringResource(R.string.confirm_password_field_label_text),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
             visualTransformation = if (confirmPasswordVisibilityState) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
             modifier = Modifier
-                .fillMaxWidth()
+                .width(width = mWidth * 0.8f)
                 .align(alignment = Alignment.CenterHorizontally),
             placeholder = {
                 Text(
                     text = stringResource(R.string.confirm_password_field_placeholder_text),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
                 )
             },
             trailingIcon = {
@@ -250,8 +251,8 @@ fun SignupScreen(navController: NavHostController, mainViewModel: MainViewModel 
 
         Button(
             modifier = Modifier
-                .width(width = mWidth * 0.7F)
-                .height(45.dp)
+                .width(width = mWidth * 0.6F)
+                .height(50.dp)
                 .align(alignment = Alignment.CenterHorizontally),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,

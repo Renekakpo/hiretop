@@ -81,11 +81,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideJobOfferApplicationRepository(
-        db: FirebaseFirestore,
-        @Named(JOB_APPLICATIONS_COLLECTION_NAME) jobApplicationsCollection: CollectionReference,
-        @Named(CANDIDATES_COLLECTION_NAME) candidateProfilesCollection: CollectionReference,
+        @Named(JOB_APPLICATIONS_COLLECTION_NAME) jobApplicationsCollection: CollectionReference
     ): JobOfferApplicationRepository {
-        return JobOfferApplicationRepository(db, jobApplicationsCollection, candidateProfilesCollection)
+        return JobOfferApplicationRepository(jobApplicationsCollection)
     }
 
     /**
@@ -115,10 +113,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMessageRepository(
-        db: FirebaseFirestore,
         @Named(MESSAGES_COLLECTION_NAME) messagesCollection: CollectionReference,
     ): MessageRepository {
-        return MessageRepository(db, messagesCollection)
+        return MessageRepository(messagesCollection)
     }
 
     /**

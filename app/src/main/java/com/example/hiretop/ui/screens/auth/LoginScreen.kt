@@ -51,6 +51,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
@@ -129,7 +130,7 @@ fun LoginScreen(
                 .padding(horizontal = 15.dp)
         )
 
-        Spacer(modifier = Modifier.height(height = mWidth * 0.2F))
+        Spacer(modifier = Modifier.height(height = mWidth * 0.1F))
 
         OutlinedTextField(
             value = emailState,
@@ -138,17 +139,17 @@ fun LoginScreen(
             label = {
                 Text(
                     text = stringResource(R.string.email_field_label_text),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                 )
             },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 25.dp),
+                .width(width = mWidth * 0.7f)
+                .padding(horizontal = 5.dp),
             placeholder = {
                 Text(
                     text = stringResource(R.string.email_field_placeholder_text),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
@@ -170,19 +171,19 @@ fun LoginScreen(
             label = {
                 Text(
                     text = stringResource(R.string.password_field_lable_text),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
             visualTransformation = if (passwordVisibilityState) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 25.dp),
+                .width(width = mWidth * 0.7f)
+                .padding(horizontal = 5.dp),
             placeholder = {
                 Text(
                     text = stringResource(R.string.password_field_placeholder_text),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
                 )
             },
             trailingIcon = {
@@ -219,7 +220,6 @@ fun LoginScreen(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
-                .align(alignment = Alignment.End)
                 .clickable {
                     if (emailState.isEmpty()) {
                         onErrorMessage = mContext.getString(R.string.empty_email_alert_text)
@@ -244,9 +244,9 @@ fun LoginScreen(
 
         Button(
             modifier = Modifier
-                .width(width = mWidth * 0.7F)
-                .height(45.dp)
-                .padding(horizontal = 15.dp),
+                .width(width = mWidth * 0.5F)
+                .height(50.dp)
+                .padding(horizontal = 5.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -387,7 +387,7 @@ private fun onLoginWithGoogleClicked(context: Context) {
 private fun onCreateAccountClicked(navController: NavHostController) {
     navController.navigate(route = SignupScreen.route) {
         popUpTo(route = LoginScreen.route) {
-            inclusive = true
+//            inclusive = true
         }
     }
 }
