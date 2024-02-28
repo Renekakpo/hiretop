@@ -268,7 +268,7 @@ fun JobApplicationItem(
 
         if (jobApplication.appliedAt != null) {
             Text(
-                text = getAppliedTimeAgo(context, jobApplication.appliedAt),
+                text = getAppliedTimeAgo(jobApplication.appliedAt),
                 color = statusContentColor,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.fillMaxWidth()

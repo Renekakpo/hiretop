@@ -398,7 +398,6 @@ fun ApplicationItemRow(
 
             Text(
                 text = Utils.getAppliedTimeAgo(
-                    context,
                     jobApplication.appliedAt ?: System.currentTimeMillis()
                 ),
                 style = MaterialTheme.typography.bodyMedium,

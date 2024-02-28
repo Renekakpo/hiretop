@@ -154,17 +154,15 @@ fun ChatScreen(
                 .background(color = MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
         ) {
-            if (!messages.isNullOrEmpty()) {
-                MessageList(
-                    modifier = Modifier.weight(1f),
-                    messages = messages!!.sortedBy { it.createdAt },
-                    currentProfileId = if (isEnterpriseAccount != null && isEnterpriseAccount == true)
-                        "$enterpriseProfileId" else "$candidateProfileId",
-                    onMessageDisplayed = { message ->
-                        message.messageId?.let { chatViewModel.markMessageAsRead(it) }
-                    }
-                )
-            }
+            MessageList(
+                modifier = Modifier.weight(1f),
+                messages = messages?.sortedBy { it.createdAt } ?: emptyList(),
+                currentProfileId = if (isEnterpriseAccount != null && isEnterpriseAccount == true)
+                    "$enterpriseProfileId" else "$candidateProfileId",
+                onMessageDisplayed = { message ->
+                    message.messageId?.let { chatViewModel.markMessageAsRead(it) }
+                }
+            )
 
             NewMessageForm(modifier = Modifier.align(Alignment.End), onSendMessageClicked = { input ->
                 if (chatItemUIState.chatId.isNullOrEmpty()) { // New chat

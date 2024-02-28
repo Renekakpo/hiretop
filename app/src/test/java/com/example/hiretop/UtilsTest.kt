@@ -1,20 +1,15 @@
 package com.example.hiretop
 
-import android.content.Context
 import com.example.hiretop.utils.Utils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import java.util.*
 
 @RunWith(MockitoJUnitRunner::class)
 class UtilsTest {
-
-    @Mock
-    private lateinit var mockContext: Context
 
     @Test
     fun testGetYearsList() {
@@ -26,43 +21,24 @@ class UtilsTest {
     }
 
     @Test
-    fun testGetPostedTimeAgo() {
-        val timestamp = System.currentTimeMillis() - (24 * 60 * 60 * 1000) // 1 day ago
-        val result = Utils.getPostedTimeAgo(mockContext, timestamp)
-        val expected = mockContext.getString(R.string.posted_days_ago_text, 1)
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun testGetAppliedTimeAgo() {
-        // Similar to testGetPostedTimeAgo
-    }
-
-    @Test
     fun testFormatDate() {
         // Mocking timestamp
-        val timestamp = 1613337600000 // 15 Feb 2021
+        val timestamp = 1613337600000 // 14 Feb 2021
         val result = Utils.formatDate(timestamp)
-        assertEquals("15 - février - 2021 à 00h00", result)
-    }
-
-    @Test
-    fun testGetFormattedDateOrHour() {
-        // Similar to testGetPostedTimeAgo
+        assertEquals("14 - février - 2021 à 22h20", result)
     }
 
     @Test
     fun testMonthToNumber() {
         assertEquals("01", Utils.monthToNumber("janvier"))
         assertEquals("02", Utils.monthToNumber("février"))
-        // Add similar assertions for other months
     }
 
     @Test
     fun testExtractStringFromLink() {
         val link = "https://firebasestorage.googleapis.com/v0/b/hiretop-6c0ef.appspot.com/o/images%2F30c8df62-2199-410e-8a83-c4b7a7cbed43_compressed_profile_picture?alt=media&token=1742bcf2-c7a8-4892-965a-c14346bea954"
         val result = Utils.extractStringFromLink(link)
-        assertEquals("image_name.jpg", result)
+        assertEquals("30c8df62-2199-410e-8a83-c4b7a7cbed43_compressed_profile_picture", result)
     }
 
     @Test

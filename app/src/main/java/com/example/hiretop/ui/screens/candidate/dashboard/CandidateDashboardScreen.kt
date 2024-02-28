@@ -355,7 +355,7 @@ fun RecommendationsItemRow(
 
         if (jobOffer.postedAt != null) {
             Text(
-                text = Utils.getPostedTimeAgo(context, jobOffer.postedAt),
+                text = Utils.getPostedTimeAgo(jobOffer.postedAt),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 maxLines = 4,

@@ -44,7 +44,6 @@ import com.example.hiretop.R
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.models.generateFakeJobOffers
 import com.example.hiretop.ui.extras.HireTopBottomSheet
-import com.example.hiretop.ui.screens.offers.FilterSheetContent
 import com.example.hiretop.utils.Utils.getPostedTimeAgo
 
 @Composable
@@ -211,7 +210,7 @@ private fun JobOfferItemRow(context: Context, jobOffer: JobOffer, onJobOfferClic
 
         if (jobOffer.postedAt != null) {
             Text(
-                text = getPostedTimeAgo(context, jobOffer.postedAt),
+                text = getPostedTimeAgo(jobOffer.postedAt),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 maxLines = 4,

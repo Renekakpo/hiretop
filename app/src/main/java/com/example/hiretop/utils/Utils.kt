@@ -72,11 +72,10 @@ object Utils {
 
     /**
      * Converts a timestamp into a human-readable "time ago" format.
-     * @param context The application context.
      * @param timestamp The timestamp to convert.
      * @return A string representing the time difference in a human-readable format.
      */
-    fun getPostedTimeAgo(context: Context, timestamp: Long): String {
+    fun getPostedTimeAgo(timestamp: Long): String {
         val currentTime = System.currentTimeMillis()
         val timeDiff = currentTime - timestamp
 
@@ -86,21 +85,20 @@ object Utils {
         val days = TimeUnit.MILLISECONDS.toDays(timeDiff)
 
         return when {
-            seconds < 60 -> context.getString(R.string.posted_seconds_ago_text, seconds)
-            minutes < 60 -> context.getString(R.string.posted_minutes_ago_text, minutes)
-            hours < 24 -> context.getString(R.string.posted_hours_ago_text, hours)
-            days < 7 -> context.getString(R.string.posted_days_ago_text, days)
-            else -> context.getString(R.string.posted_weeks_ago_text, days / 7)
+            seconds < 60 -> appContext.getString(R.string.posted_seconds_ago_text, seconds)
+            minutes < 60 -> appContext.getString(R.string.posted_minutes_ago_text, minutes)
+            hours < 24 -> appContext.getString(R.string.posted_hours_ago_text, hours)
+            days < 7 -> appContext.getString(R.string.posted_days_ago_text, days)
+            else -> appContext.getString(R.string.posted_weeks_ago_text, days / 7)
         }
     }
 
     /**
      * Converts a timestamp into a human-readable "time ago" format for job application.
-     * @param context The application context.
      * @param timestamp The timestamp to convert.
      * @return A string representing the time difference in a human-readable format.
      */
-    fun getAppliedTimeAgo(context: Context, timestamp: Long): String {
+    fun getAppliedTimeAgo(timestamp: Long): String {
         val currentTime = System.currentTimeMillis()
         val timeDiff = currentTime - timestamp
 
@@ -110,11 +108,11 @@ object Utils {
         val days = TimeUnit.MILLISECONDS.toDays(timeDiff)
 
         return when {
-            seconds < 60 -> context.getString(R.string.applied_seconds_ago_text, seconds)
-            minutes < 60 -> context.getString(R.string.applied_minutes_ago_text, minutes)
-            hours < 24 -> context.getString(R.string.applied_hours_ago_text, hours)
-            days < 7 -> context.getString(R.string.applied_days_ago_text, days)
-            else -> context.getString(R.string.applied_weeks_ago_text, days / 7)
+            seconds < 60 -> appContext.getString(R.string.applied_seconds_ago_text, seconds)
+            minutes < 60 -> appContext.getString(R.string.applied_minutes_ago_text, minutes)
+            hours < 24 -> appContext.getString(R.string.applied_hours_ago_text, hours)
+            days < 7 -> appContext.getString(R.string.applied_days_ago_text, days)
+            else -> appContext.getString(R.string.applied_weeks_ago_text, days / 7)
         }
     }
 

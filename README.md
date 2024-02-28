@@ -40,14 +40,14 @@ Pour installer et exécuter l'application localement, suivez les étapes suivant
 <div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
     <img src="./screenshots/welcome_screen.png" alt="Candidate Chat Screen" width="225" height="450" />
     <img src="./screenshots/login_screen.png" alt="Login Screen" width="225" height="450" />
-    <img src="./screenshots/sign_in_screen.png" alt="Sign In Screen" width="225" height="450" />
+    <img src="./screenshots/signin_screen.png" alt="Sign In Screen" width="225" height="450" />
     <img src="./screenshots/candidate_dashboard_screen.png" alt="Candidate Dashboard Screen" width="225" height="450" />
     <img src="./screenshots/candidate_explorer_screen.png" alt="Candidate Explorer Screen" width="225" height="450" />
     <img src="./screenshots/candidate_profile_screen.png" alt="Candidate Profile Screen" width="225" height="450" />
     <img src="./screenshots/candidate_chats_screen.png" alt="Candidate Chats Screen" width="225" height="450" />
     <img src="./screenshots/candidate_chat_screen.png" alt="Candidate Chat Screen" width="225" height="450" />
     <img src="./screenshots/enterprise_dashboard_screen.png" alt="Enterprise Dashboard Screen" width="225" height="450" />
-    <img src="./screenshots/enterprise_offers_Screen.png" alt="Enterprise Offers Screen" width="225" height="450" />
+    <img src="./screenshots/enterprise_offers_screen.png" alt="Enterprise Offers Screen" width="225" height="450" />
     <img src="./screenshots/enterprise_applications_tracking_screen.png" alt="Enterprise applications tracking Screen" width="225" height="450" />
 </div>
 
