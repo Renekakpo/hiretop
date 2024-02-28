@@ -2,22 +2,12 @@ package com.example.hiretop.helpers
 
 import com.example.hiretop.R
 import com.example.hiretop.app.HireTop.Companion.appContext
-import com.example.hiretop.models.JobOffer
-import com.example.hiretop.utils.Constant.JOB_OFFERS_COLLECTION_NAME
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import java.io.InputStream
 import javax.inject.Inject
-import javax.inject.Named
 
-class FirebaseHelper @Inject constructor(
-    private val db: FirebaseFirestore,
-    @Named(JOB_OFFERS_COLLECTION_NAME)
-    private val jobOffersCollection: CollectionReference,
-) {
-
+class FirebaseHelper @Inject constructor() {
     fun uploadFileToFirebaseStorage(
         inputStream: InputStream,
         fileName: String,
@@ -28,7 +18,7 @@ class FirebaseHelper @Inject constructor(
         val fileRef = storageRef.child("images/$fileName")
         val uploadTask = fileRef.putStream(inputStream)
 
-        uploadTask.addOnSuccessListener { taskSnapshot ->
+        uploadTask.addOnSuccessListener {
             // File uploaded successfully
             fileRef.downloadUrl.addOnSuccessListener { uri ->
                 onSuccess(uri.toString()) // Get the download URL and pass it to the onSuccess callback
@@ -40,20 +30,4 @@ class FirebaseHelper @Inject constructor(
             onFailure(it.message ?: appContext.getString(R.string.file_upload_failed_text))
         }
     }
-
-    fun getJobOffer(
-        jobOfferID: String,
-        onSuccess: (JobOffer) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        val snapshot = jobOffersCollection.document(jobOfferID).get()
-            .addOnSuccessListener { snapshot ->
-                val jobOffer = snapshot.toObject(JobOffer::class.java)
-                jobOffer?.let { onSuccess(it) }
-            }
-            .addOnFailureListener {
-                onFailure(it.message ?: appContext.getString(R.string.fetch_job_offer_error_text))
-            }
-    }
-
 }

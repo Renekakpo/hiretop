@@ -50,7 +50,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
-import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.UIState
@@ -62,6 +61,7 @@ import com.example.hiretop.ui.screens.messaging.ChatScreen
 import com.example.hiretop.utils.Utils
 import com.example.hiretop.viewModels.EnterpriseViewModel
 import com.google.gson.Gson
+import java.net.URLEncoder
 
 object EnterpriseApplicationsScreen : NavDestination {
     override val route: String = "enterprise_applications_Screen"
@@ -77,7 +77,6 @@ fun EnterpriseApplicationsScreen(
     var searchInput by remember { mutableStateOf("") }
 
     val enterpriseProfileId by enterpriseViewModel.enterpriseProfileId.collectAsState(initial = null)
-    val enterpriseProfile by enterpriseViewModel.enterpriseProfile.collectAsState(initial = null)
     val jobApplicationsList by enterpriseViewModel.jobApplications.collectAsState()
     var filteredJobApplicationsList by remember {
         mutableStateOf(
@@ -234,8 +233,10 @@ fun EnterpriseApplicationsScreen(
                                         val onSuccess: (String) -> Unit = { chatId ->
                                             val chatItemUI = ChatItemUI(
                                                 chatId = chatId,
-                                                pictureUrl = jobApplication.candidatePictureUrl ?: "",
-                                                profileName = jobApplication.candidateFullName ?: "",
+                                                pictureUrl = jobApplication.candidatePictureUrl
+                                                    ?: "",
+                                                profileName = jobApplication.candidateFullName
+                                                    ?: "",
                                                 offerTitle = jobApplication.jobOfferTitle ?: "",
                                                 unreadMessageCount = 0,
                                                 jobApplicationId = jobApplication.jobApplicationId
@@ -245,8 +246,10 @@ fun EnterpriseApplicationsScreen(
 
                                         val onFailure: () -> Unit = {
                                             val chatItemUI = ChatItemUI(
-                                                pictureUrl = jobApplication.candidatePictureUrl ?: "",
-                                                profileName = jobApplication.candidateFullName ?: "",
+                                                pictureUrl = jobApplication.candidatePictureUrl
+                                                    ?: "",
+                                                profileName = jobApplication.candidateFullName
+                                                    ?: "",
                                                 offerTitle = jobApplication.jobOfferTitle ?: "",
                                                 unreadMessageCount = 0,
                                                 jobApplicationId = jobApplication.jobApplicationId
@@ -305,7 +308,12 @@ fun ApplicationItemRow(
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(context = LocalContext.current)
-                        .data(jobApplication.candidatePictureUrl)
+                        .data(jobApplication.candidatePictureUrl?.let {
+                            URLEncoder.encode(
+                                it,
+                                "UTF-8"
+                            )
+                        })
                         .crossfade(true)
                         .build(),
                     contentDescription = stringResource(R.string.user_profile_picture_desc_text),

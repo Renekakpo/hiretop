@@ -19,16 +19,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
+import com.example.hiretop.navigation.CandidateBottomNavGraph
 import com.example.hiretop.navigation.EnterpriseBottomNavGraph
 import com.example.hiretop.navigation.NavDestination
-import com.example.hiretop.navigation.CandidateBottomNavGraph
 import com.example.hiretop.viewModels.MainViewModel
 
 object AccountTypeScreen : NavDestination {
@@ -40,7 +39,6 @@ fun AccountTypeScreen(
     navController: NavHostController,
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
-    val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
     Column(

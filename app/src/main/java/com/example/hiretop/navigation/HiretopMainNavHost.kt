@@ -7,10 +7,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
+import com.example.hiretop.ui.extras.NetworkIssueScreen
 import com.example.hiretop.ui.screens.AccountTypeScreen
 import com.example.hiretop.ui.screens.WelcomeScreen
 import com.example.hiretop.ui.screens.auth.LoginScreen
@@ -24,7 +24,7 @@ import com.example.hiretop.ui.screens.offers.JobOfferDetailsScreen
 import com.google.gson.Gson
 
 @Composable
-fun HireTopNavHost(
+fun HireTopMainNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
@@ -55,6 +55,10 @@ fun HireTopNavHost(
 
         composable(route = EnterpriseBottomNavGraph.route) {
             EnterpriseBottomNavHost(navController = navController)
+        }
+
+        composable(route = NetworkIssueScreen.route) {
+            NetworkIssueScreen()
         }
 
         composable(

@@ -54,6 +54,7 @@ import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.utils.Utils
 import com.example.hiretop.viewModels.CandidateViewModel
 import com.example.hiretop.viewModels.EnterpriseViewModel
+import java.net.URLEncoder
 
 object EditApplicationsDetailsScreen : NavDestination {
     override val route: String = "edit_applications_details_screen"
@@ -103,7 +104,12 @@ fun EditApplicationsDetailsScreen(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(jobApplication.candidatePictureUrl)
+                    .data(jobApplication.candidatePictureUrl?.let {
+                        URLEncoder.encode(
+                            it,
+                            "UTF-8"
+                        )
+                    })
                     .crossfade(true)
                     .build(),
                 contentDescription = stringResource(id = R.string.user_profile_picture_desc_text),
@@ -140,7 +146,10 @@ fun EditApplicationsDetailsScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = Utils.getAppliedTimeAgo(context, jobApplication.appliedAt ?: System.currentTimeMillis()),
+            text = Utils.getAppliedTimeAgo(
+                context,
+                jobApplication.appliedAt ?: System.currentTimeMillis()
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             maxLines = 2,

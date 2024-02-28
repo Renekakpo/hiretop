@@ -1,49 +1,78 @@
 package com.example.hiretop.models
 
 import com.google.firebase.firestore.DocumentId
-import java.io.Serializable
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
 data class CandidateProfile(
     @DocumentId
     val profileId: String? = null,
-    val bannerUrl: String? = null,
-    val pictureUrl: String? = null,
-    val firstname: String? = null,
-    val lastname: String? = null,
+    val bannerUrl: String?,
+    val pictureUrl: String?,
+    val firstname: String?,
+    val lastname: String?,
     val name: String = "$firstname $lastname",
-    val headline: String? = null,
-    val about: String? = null,
-    val experiences: List<Experience>? = null,
-    val educations: List<Education>? = null,
-    val certifications: List<Certification>? = null,
-    val projects: List<Project>? = null,
-    val skills: List<String>? = null,
-    val createdAt: Long? = null,
-    val updatedAt: Long? = null
-)
+    val headline: String?,
+    val about: String?,
+    val experiences: List<Experience>?,
+    val educations: List<Education>?,
+    val certifications: List<Certification>?,
+    val projects: List<Project>?,
+    val skills: List<String>?,
+    val createdAt: Long?,
+    val updatedAt: Long?
+) {
+    constructor() : this(
+        null,
+        null,
+        null,
+        null,
+        null,
+        "",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+    )
+}
 
 data class Experience(
-    val title: String? = null,
-    val employmentType: String? = null,
-    val companyName: String? = null,
-    val location: String? = null,
-    val locationType: String? = null,
+    val title: String?,
+    val employmentType: String?,
+    val companyName: String?,
+    val location: String?,
+    val locationType: String?,
     val isCurrentWork: Boolean,
-    val startMonth: String? = null,
-    val startYear: String? = null,
-    val endMonth: String? = null,
-    val endYear: String? = null,
-    val industry: String? = null,
-    val description: String? = null,
-    val skills: List<String>? = null
+    val startMonth: String?,
+    val startYear: String?,
+    val endMonth: String?,
+    val endYear: String?,
+    val industry: String?,
+    val description: String?,
+    val skills: List<String>?
 ) {
 
-    constructor() : this(null, null, null, null, null, false, null, null, null, null, null, null)
+    constructor() : this(
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    )
 
     private val dateFormatter: SimpleDateFormat = SimpleDateFormat("MMMM yyyy", Locale.FRENCH)
 
@@ -62,18 +91,18 @@ data class Experience(
 }
 
 data class Education(
-    val school: String? = null,
-    val degree: String? = null,
-    val fieldOfStudy: String? = null,
-    val grade: String? = null,
-    val startMonth: String? = null,
-    val startYear: String? = null,
-    val endMonth: String? = null,
-    val endYear: String? = null,
-    val activities: String? = null,
-    val description: String? = null
+    val school: String?,
+    val degree: String?,
+    val fieldOfStudy: String?,
+    val grade: String?,
+    val startMonth: String?,
+    val startYear: String?,
+    val endMonth: String?,
+    val endYear: String?,
+    val activities: String?,
+    val description: String?
 ) {
-    constructor() : this("")
+    constructor() : this(null, null, null, null, null, null, null, null, null, null)
 
     private val dateFormatter: SimpleDateFormat = SimpleDateFormat("MMMM yyyy", Locale.FRENCH)
 
@@ -89,15 +118,15 @@ data class Education(
 }
 
 data class Certification(
-    val name: String? = null,
-    val issuingOrganization: String? = null,
-    val issueMonth: String? = null,
-    val issueYear: String? = null,
-    val expireMonth: String? = null,
-    val expireYear: String? = null,
-    val credentialID: String? = null,
-    val credentialURL: String? = null,
-    val skills: List<String>? = null,
+    val name: String?,
+    val issuingOrganization: String?,
+    val issueMonth: String?,
+    val issueYear: String?,
+    val expireMonth: String?,
+    val expireYear: String?,
+    val credentialID: String?,
+    val credentialURL: String?,
+    val skills: List<String>?,
 ) {
     constructor() : this(null, null, null, null, null, null, null, null, null)
 
@@ -110,9 +139,9 @@ data class Certification(
 }
 
 data class Project(
-    val name: String? = null,
-    val description: String? = null,
-    val skills: List<String>? = null
+    val name: String?,
+    val description: String?,
+    val skills: List<String>?
 ) {
     constructor() : this(null, null, null)
 }
@@ -166,7 +195,8 @@ val mockCandidateProfile = CandidateProfile(
             endMonth = "Juin",
             endYear = "2018",
             activities = "Membre du club d'informatique.",
-            description = ""
+            description = null,
+            grade = null
         ),
         Education(
             school = "Lycée Louis-le-Grand",
@@ -177,7 +207,8 @@ val mockCandidateProfile = CandidateProfile(
             endMonth = "Juin",
             endYear = "2016",
             activities = "",
-            description = ""
+            description = "",
+            grade = null
         )
     ),
     certifications = listOf(

@@ -1,6 +1,5 @@
 package com.example.hiretop.ui.screens.auth
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,23 +12,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,20 +42,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
 import com.example.hiretop.navigation.NavDestination
+import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.screens.AccountTypeScreen
+import com.example.hiretop.utils.Utils.isEmailValid
+import com.example.hiretop.utils.Utils.isValidPassword
+import com.example.hiretop.viewModels.MainViewModel
 
 object SignupScreen : NavDestination {
     override val route: String = "signup_screen"
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignupScreen(navController: NavHostController) {
+fun SignupScreen(navController: NavHostController, mainViewModel: MainViewModel = hiltViewModel()) {
     val mContext = LocalContext.current
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
 
@@ -63,12 +69,21 @@ fun SignupScreen(navController: NavHostController) {
     var confirmPasswordState by rememberSaveable { mutableStateOf("") }
     var passwordVisibilityState by rememberSaveable { mutableStateOf(false) }
     var confirmPasswordVisibilityState by rememberSaveable { mutableStateOf(false) }
+    var onErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (!onErrorMessage.isNullOrEmpty()) {
+        FailurePopup(errorMessage = "$onErrorMessage", onDismiss = {
+            onErrorMessage = null
+        })
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .background(color = MaterialTheme.colorScheme.background)
-            .padding(15.dp)
+            .padding(15.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -118,15 +133,15 @@ fun SignupScreen(navController: NavHostController) {
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.email_field_placeholder_text),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
             ),
             shape = MaterialTheme.shapes.small
         )
@@ -172,11 +187,11 @@ fun SignupScreen(navController: NavHostController) {
                     )
                 }
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
             ),
             shape = MaterialTheme.shapes.small
         )
@@ -222,11 +237,11 @@ fun SignupScreen(navController: NavHostController) {
                     )
                 }
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
             ),
             shape = MaterialTheme.shapes.small
         )
@@ -243,7 +258,34 @@ fun SignupScreen(navController: NavHostController) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = MaterialTheme.shapes.small,
-            onClick = { onSignupClicked(mContext, navController) }
+            onClick = {
+                if (emailState.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.empty_email_alert_text)
+                } else if (!isEmailValid(emailState)) {
+                    onErrorMessage = mContext.getString(R.string.incorrect_email_alert_text)
+                } else if (passwordState.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.empty_password_alert_Text)
+                } else if (!isValidPassword(passwordState)) {
+                    onErrorMessage = mContext.getString(R.string.incorrect_password_alert_text)
+                } else if (confirmPasswordState.isEmpty()) {
+                    onErrorMessage = mContext.getString(R.string.empty_password_alert_Text)
+                } else if (!isValidPassword(passwordState)) {
+                    onErrorMessage = mContext.getString(R.string.incorrect_password_alert_text)
+                } else if (passwordState != confirmPasswordState) {
+                    onErrorMessage = mContext.getString(R.string.confirm_password_alert_text)
+                } else {
+                    mainViewModel.signUpToFirebaseWithEmailAndPassword(
+                        email = emailState,
+                        password = passwordState,
+                        onSuccess = {
+                            onNavigateToAccountTypeScreen(navController)
+                        },
+                        onFailure = {
+                            onErrorMessage = it
+                        }
+                    )
+                }
+            }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -256,6 +298,16 @@ fun SignupScreen(navController: NavHostController) {
             }
         }
 
+        Text(
+            text = stringResource(R.string.skip_text),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier
+                .padding(10.dp)
+                .clickable { onSkipAuthProcess(navController = navController) }
+        )
+
         Spacer(modifier = Modifier.height(height = 25.dp))
 
     }
@@ -265,7 +317,15 @@ private fun onBackClicked(navController: NavController) {
     navController.popBackStack()
 }
 
-fun onSignupClicked(mContext: Context, navController: NavHostController) {
+fun onNavigateToAccountTypeScreen(navController: NavHostController) {
+    navController.navigate(route = AccountTypeScreen.route) {
+        popUpTo(route = SignupScreen.route) {
+            inclusive = true
+        }
+    }
+}
+
+private fun onSkipAuthProcess(navController: NavHostController) {
     navController.navigate(route = AccountTypeScreen.route) {
         popUpTo(route = SignupScreen.route) {
             inclusive = true

@@ -12,7 +12,20 @@
           "package_name": "com.example.hiretop"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "702305220056-olbuddekrfdhqk1b25defr8r1atksknv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hiretop",
+            "certificate_hash": "61e4bf4d6bbb2bfd1f3d5c52b0988ce0e6356033"
+          }
+        },
+        {
+          "client_id": "702305220056-ljriibl8ho8b44r81gkt4vnnsebcnqhb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCGtBdBCKz8CDlAkBF4eWlfg9sP570Id0U"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "702305220056-ljriibl8ho8b44r81gkt4vnnsebcnqhb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

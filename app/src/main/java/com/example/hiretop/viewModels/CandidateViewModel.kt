@@ -203,6 +203,7 @@ class CandidateViewModel @Inject constructor(
                 .addOnSuccessListener {
                     _candidateProfile.value = editedProfile.copy(profileId = profileId)
                     onSuccess()
+                    updateCandidateJobApplicationDetails(editedProfile)
                 }
                 .addOnFailureListener {
                     onFailure(
@@ -319,8 +320,10 @@ class CandidateViewModel @Inject constructor(
                 location = jobOffer.location ?: "",
                 locationType = jobOffer.locationType ?: "",
                 status = appContext.getString(R.string.on_hold_application_status_text), // Set initial status
-                stages = "", // Set initial stages
-                appliedAt = System.currentTimeMillis() // Set application timestamp
+                stages = null, // Set initial stages
+                appliedAt = System.currentTimeMillis(), // Set application timestamp
+                interviewDate = null,
+                offerContent = null
             )
 
             // Adding the job application to Firestore
@@ -358,6 +361,42 @@ class CandidateViewModel @Inject constructor(
                             ?: appContext.getString(R.string.withdraw_job_application_failure_info)
                     )
                 }
+        }
+    }
+
+    private fun updateCandidateJobApplicationDetails(updatedProfile: CandidateProfile) {
+        try {
+            jobApplicationsCollection
+                .whereEqualTo("candidateProfileId", updatedProfile.profileId)
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    if (!snapshot.isEmpty) { // If candidate has job applications
+                        val updatedCandidacies = mutableListOf<JobApplication>()
+
+                        snapshot.forEach { item ->
+                            val candidacy = item.toObject(JobApplication::class.java)
+                            val candidacyCopy = candidacy.copy(
+                                candidateFullName = updatedProfile.name,
+                                candidatePictureUrl = updatedProfile.pictureUrl
+                            )
+                            updatedCandidacies.add(candidacyCopy)
+                        }
+
+                        viewModelScope.launch(Dispatchers.IO){
+                            updatedCandidacies.forEach { candidacy ->
+                                jobApplicationsCollection
+                                    .document(candidacy.jobApplicationId ?: "")
+                                    .set(candidacy, SetOptions.merge())
+                                    .await()
+                            }
+                        }
+                    }
+                }
+                .addOnFailureListener {
+                    Log.d("updateCandidateJobApplicationDetails", "${it.message}")
+                }
+        } catch (e: Exception) {
+            Log.d("updateCandidateJobApplicationDetails", "${e.message}")
         }
     }
 }

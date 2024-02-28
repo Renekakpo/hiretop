@@ -9,14 +9,15 @@ import com.example.hiretop.di.repository.ChatItemRepository
 import com.example.hiretop.di.repository.JobOfferApplicationRepository
 import com.example.hiretop.di.repository.MessageRepository
 import com.example.hiretop.helpers.FirebaseHelper
+import com.example.hiretop.helpers.NetworkHelper
 import com.example.hiretop.helpers.PermissionsHelper
-import com.example.hiretop.utils.Constant
 import com.example.hiretop.utils.Constant.CANDIDATES_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.CHATS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.ENTERPRISES_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.JOB_APPLICATIONS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.JOB_OFFERS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.MESSAGES_COLLECTION_NAME
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
@@ -57,15 +58,21 @@ object AppModule {
     }
 
     /**
+     * Annotation to tell Hilt this method provides an instance of FirebaseAuth
+     */
+    @Singleton
+    @Provides
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
+    }
+
+    /**
      * Annotation to tell Hilt this method provides an instance of FirebaseHelper
      */
     @Provides
     @Singleton
-    fun provideFirebaseHelper(
-        db: FirebaseFirestore,
-        @Named(JOB_OFFERS_COLLECTION_NAME) jobOffersCollection: CollectionReference
-    ): FirebaseHelper {
-        return FirebaseHelper(db, jobOffersCollection)
+    fun provideFirebaseHelper(): FirebaseHelper {
+        return FirebaseHelper()
     }
 
     /**
@@ -87,22 +94,18 @@ object AppModule {
     @Provides
     @Singleton
     fun provideChatItemRepository(
-        db: FirebaseFirestore,
         @Named(MESSAGES_COLLECTION_NAME) messagesCollection: CollectionReference,
         @Named(CHATS_COLLECTION_NAME) chatsCollection: CollectionReference,
         @Named(CANDIDATES_COLLECTION_NAME) candidateProfilesCollection: CollectionReference,
         @Named(ENTERPRISES_COLLECTION_NAME) enterpriseProfilesCollection: CollectionReference,
-        @Named(JOB_OFFERS_COLLECTION_NAME) jobOffersCollection: CollectionReference,
-        @Named(JOB_APPLICATIONS_COLLECTION_NAME) jobApplicationsCollection: CollectionReference,
+        @Named(JOB_OFFERS_COLLECTION_NAME) jobOffersCollection: CollectionReference
     ): ChatItemRepository {
         return ChatItemRepository(
-            db,
             messagesCollection,
             chatsCollection,
             candidateProfilesCollection,
             enterpriseProfilesCollection,
             jobOffersCollection,
-            jobApplicationsCollection
         )
     }
 
@@ -115,7 +118,7 @@ object AppModule {
         db: FirebaseFirestore,
         @Named(MESSAGES_COLLECTION_NAME) messagesCollection: CollectionReference,
     ): MessageRepository {
-        return MessageRepository(db, messagesCollection,)
+        return MessageRepository(db, messagesCollection)
     }
 
     /**
@@ -194,6 +197,15 @@ object AppModule {
     @Provides
     fun providePermissionsHelper(@ApplicationContext context: Context): PermissionsHelper {
         return PermissionsHelper(context)
+    }
+
+    /**
+     * Methode to provide NetworkHelper for network capability check.
+     */
+    @Singleton
+    @Provides
+    fun provideNetworkHelper(@ApplicationContext context: Context): NetworkHelper {
+        return NetworkHelper(context)
     }
 
 }

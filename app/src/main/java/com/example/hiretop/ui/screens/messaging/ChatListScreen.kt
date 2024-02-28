@@ -1,5 +1,6 @@
 package com.example.hiretop.ui.screens.messaging
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
 import com.example.hiretop.viewModels.ChatViewModel
 import com.google.gson.Gson
+import java.net.URLEncoder
 
 @Composable
 fun ChatListScreen(
@@ -176,8 +178,14 @@ fun ChatListScreen(
                             ChatItemRow(
                                 chatItemUI = chatItemUI,
                                 onChatItemClicked = {
-                                    val chatItemUIJson = Gson().toJson(it)
-                                    navController.navigate(route = "${ChatScreen.route}/$chatItemUIJson")
+                                    try {
+                                        val encodedURL = URLEncoder.encode(it.pictureUrl, "UTF-8")
+                                        val chatItemUIJson =
+                                            Gson().toJson(it.copy(pictureUrl = encodedURL))
+                                        navController.navigate(route = "${ChatScreen.route}/$chatItemUIJson")
+                                    } catch (e: Exception) {
+                                        Log.d("onChatItemClicked", "${e.message}")
+                                    }
                                 }
                             )
                         }
@@ -201,7 +209,7 @@ fun ChatItemRow(chatItemUI: ChatItemUI, onChatItemClicked: (ChatItemUI) -> Unit)
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context = LocalContext.current)
-                .data(chatItemUI.pictureUrl)
+                .data(chatItemUI.pictureUrl?.let { URLEncoder.encode(it, "UTF-8") })
                 .crossfade(true)
                 .build(),
             contentDescription = stringResource(R.string.chat_item_profile_image_desc),

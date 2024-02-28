@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -151,6 +150,16 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    fun markMessageAsRead(messageId: String) {
+        viewModelScope.launch {
+            messageRepository.markMessageAsRead(
+                messageID = messageId,
+                onSuccess = {},
+                onFailure = {}
+            )
+        }
+    }
+
     fun getJobApplicationFromChatItemUI(jobApplicationId: String, onSuccess : () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -163,7 +172,7 @@ class ChatViewModel @Inject constructor(
                     }
                     .addOnFailureListener {
                         onFailure(
-                            it.localizedMessage ?: appContext.getString(R.string.unkown_error_text)
+                            it.localizedMessage ?: appContext.getString(R.string.unknown_error_text)
                         )
                     }
             } catch (e: Exception) {

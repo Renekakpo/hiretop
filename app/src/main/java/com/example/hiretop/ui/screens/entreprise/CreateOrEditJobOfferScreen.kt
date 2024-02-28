@@ -299,7 +299,9 @@ fun CreateOrEditJobOfferScreen(
                             description = offerDescription,
                             company = enterpriseProfile?.name,
                             enterpriseID = enterpriseProfile?.enterpriseID,
-                            postedAt = System.currentTimeMillis()
+                            postedAt = System.currentTimeMillis(),
+                            updatedAt = null,
+                            closedAt = null
                         )
 
 

@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -31,10 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.hiretop.R
+import com.example.hiretop.models.UIState
+import com.example.hiretop.navigation.CandidateBottomNavGraph
 import com.example.hiretop.navigation.EnterpriseBottomNavGraph
 import com.example.hiretop.navigation.NavDestination
-import com.example.hiretop.navigation.CandidateBottomNavGraph
 import com.example.hiretop.ui.extras.HireTopCircularProgressIndicator
+import com.example.hiretop.ui.extras.NetworkIssueScreen
 import com.example.hiretop.ui.screens.auth.LoginScreen
 import com.example.hiretop.viewModels.MainViewModel
 
@@ -47,19 +51,23 @@ fun WelcomeScreen(
     navController: NavHostController,
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
-    // Collect the isEnterpriseAccount Flow and observe its values
+    // Collect flows and observe its values
+    val isNetworkAvailable by mainViewModel.isNetworkAvailable.collectAsState(null)
     val isEnterpriseAccount by mainViewModel.isEnterpriseAccount.collectAsState(null)
+    var uiState by remember { mutableStateOf(UIState.LOADING) }
 
     val mWidth = LocalConfiguration.current.screenWidthDp.dp
     val mHeight = LocalConfiguration.current.screenHeightDp.dp
 
     LaunchedEffect(isEnterpriseAccount) {
-        if (isEnterpriseAccount != null) {
-            if (isEnterpriseAccount == true) {
-                onNavigateToNextScreen(navController, EnterpriseBottomNavGraph.route)
+        uiState = if (isNetworkAvailable == true) {
+            if (isEnterpriseAccount != null) {
+                UIState.SUCCESS
             } else {
-                onNavigateToNextScreen(navController, CandidateBottomNavGraph.route)
+                UIState.FAILURE
             }
+        } else {
+            UIState.FAILURE
         }
     }
 
@@ -102,44 +110,58 @@ fun WelcomeScreen(
 
         Spacer(modifier = Modifier.height(height = 25.dp))
 
-        if (isEnterpriseAccount == null) {
-            Button(
-                modifier = Modifier
-                    .width(width = mWidth * 0.6F)
-                    .height(45.dp)
-                    .padding(horizontal = 5.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
-                shape = MaterialTheme.shapes.small,
-                onClick = {
-                    onNavigateToNextScreen(
-                        navController = navController,
-                        destination = LoginScreen.route
-                    )
-                }
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.let_get_started_text),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+        when(uiState) {
+            UIState.LOADING -> {
+                HireTopCircularProgressIndicator()
+            }
+            UIState.FAILURE -> {
+                if (isNetworkAvailable == null || isNetworkAvailable == false) {
+                    onNavigateToNextScreen(navController, NetworkIssueScreen.route)
+                } else if (isEnterpriseAccount == null) {
+                    Button(
+                        modifier = Modifier
+                            .width(width = mWidth * 0.5F)
+                            .height(45.dp)
+                            .padding(horizontal = 5.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onPrimary,
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ),
+                        shape = MaterialTheme.shapes.small,
+                        onClick = {
+                            onNavigateToNextScreen(
+                                navController = navController,
+                                destination = LoginScreen.route
+                            )
+                        }
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.let_get_started_text),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
 
-                    Spacer(modifier = Modifier.width(width = 15.dp))
+                            Spacer(modifier = Modifier.width(width = 15.dp))
 
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
-                        contentDescription = stringResource(R.string.started_button_icon_des),
-                        modifier = Modifier.size(size = 35.dp)
-                    )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
+                                contentDescription = stringResource(R.string.started_button_icon_des),
+                                modifier = Modifier.size(size = 35.dp)
+                            )
+                        }
+                    }
                 }
             }
-        } else {
-            HireTopCircularProgressIndicator()
+            UIState.SUCCESS -> {
+                if (isEnterpriseAccount == true) {
+                    onNavigateToNextScreen(navController, EnterpriseBottomNavGraph.route)
+                } else {
+                    onNavigateToNextScreen(navController, CandidateBottomNavGraph.route)
+                }
+            }
         }
 
         Spacer(modifier = Modifier.weight(weight = 1F))

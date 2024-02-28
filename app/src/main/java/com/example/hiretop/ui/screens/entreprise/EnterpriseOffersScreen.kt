@@ -25,9 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.Badge
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -146,11 +144,13 @@ fun EnterpriseOffersScreen(
                             CreateOrEditJobOfferScreen(
                                 isEditing = false,
                                 jobOffer = null,
-                                onCancelClicked = { },
+                                onCancelClicked = {
+                                    showBottomSheet = false
+                                },
                                 onSaveClicked = {
                                     showBottomSheet = false
                                 },
-                                onCloseClicked = { }
+                                onCloseClicked = { showBottomSheet = false }
                             )
                         }
                         showBottomSheet = true
@@ -261,7 +261,6 @@ fun EnterpriseOffersScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OfferItemRow(
     context: Context,

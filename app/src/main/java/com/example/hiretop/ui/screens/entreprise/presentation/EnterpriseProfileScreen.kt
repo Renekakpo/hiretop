@@ -54,19 +54,18 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hiretop.R
-import com.example.hiretop.models.CandidateProfile
 import com.example.hiretop.models.EnterpriseProfile
 import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopBottomSheet
 import com.example.hiretop.utils.Utils
 import com.example.hiretop.utils.Utils.extractStringFromLink
-import com.example.hiretop.viewModels.CandidateViewModel
 import com.example.hiretop.viewModels.EnterpriseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.net.URLEncoder
 import java.util.UUID
 
 object EnterpriseProfileScreen : NavDestination {
@@ -396,7 +395,7 @@ private fun HeaderSection(
                     profilePictureFile?.let { onUploadProfilePictureFile(it) }
                 }
             } catch (e: Exception) {
-                onImageLoadingFailed(e.message ?: context.getString(R.string.unkown_error_text))
+                onImageLoadingFailed(e.message ?: context.getString(R.string.unknown_error_text))
             }
         } else {
 //            onImageLoadingFailed(context.getString(R.string.no_image_picked_error_text))
@@ -411,7 +410,7 @@ private fun HeaderSection(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(bannerFilePath)
+                    .data(URLEncoder.encode(bannerFilePath, "UTF-8"))
                     .crossfade(true)
                     .build(),
                 contentDescription = stringResource(R.string.profile_banner_desc_text),
@@ -462,7 +461,7 @@ private fun HeaderSection(
             // Profile picture
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(profilePictureFilePath)
+                    .data(URLEncoder.encode(profilePictureFilePath, "UTF-8"))
                     .crossfade(true)
                     .build(),
                 contentDescription = stringResource(R.string.user_profile_picture_desc_text),
@@ -513,10 +512,10 @@ private fun HeaderSection(
         Column(modifier = Modifier.clickable {
             if (!isPreviewMode) {
                 onEditHeaderClicked(
-                    "${profile?.name}",
-                    "${profile?.industry}",
-                    "${profile?.headline}",
-                    "${profile?.location}",
+                    profile?.name ?: "",
+                    profile?.industry ?: "",
+                    profile?.headline ?: "",
+                    profile?.location ?: "",
                 )
             }
         }) {
@@ -640,7 +639,7 @@ private fun CultureAndValuesSection(
                 Icon(
                     imageVector = Icons.Outlined.Edit,
                     contentDescription = stringResource(R.string.edit_icon_desc_text),
-                    modifier = Modifier.clickable { onEditCultureAndValuesClicked("$updatedCultureAndValues") }
+                    modifier = Modifier.clickable { onEditCultureAndValuesClicked(updatedCultureAndValues ?: "") }
                 )
             }
         }

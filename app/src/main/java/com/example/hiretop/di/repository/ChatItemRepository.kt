@@ -6,18 +6,14 @@ import com.example.hiretop.models.CandidateProfile
 import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.ChatItemUI
 import com.example.hiretop.models.EnterpriseProfile
-import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
 import com.example.hiretop.utils.Constant.CANDIDATES_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.CHATS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.ENTERPRISES_COLLECTION_NAME
-import com.example.hiretop.utils.Constant.JOB_APPLICATIONS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.JOB_OFFERS_COLLECTION_NAME
 import com.example.hiretop.utils.Constant.MESSAGES_COLLECTION_NAME
 import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Named
@@ -25,7 +21,6 @@ import javax.inject.Singleton
 
 @Singleton
 class ChatItemRepository @Inject constructor(
-    private val db: FirebaseFirestore,
     @Named(MESSAGES_COLLECTION_NAME)
     private val messagesCollection: CollectionReference,
     @Named(CHATS_COLLECTION_NAME)
@@ -35,60 +30,8 @@ class ChatItemRepository @Inject constructor(
     @Named(ENTERPRISES_COLLECTION_NAME)
     private val enterpriseProfilesCollection: CollectionReference,
     @Named(JOB_OFFERS_COLLECTION_NAME)
-    private val jobOffersCollection: CollectionReference,
-    @Named(JOB_APPLICATIONS_COLLECTION_NAME)
-    private val jobApplicationsCollection: CollectionReference,
+    private val jobOffersCollection: CollectionReference
 ) {
-
-    suspend fun getChatItemUI(jobApplicationId: String, isEnterpriseAccount: Boolean): ChatItemUI? {
-        val chatItemSnapshot = chatsCollection.document(jobApplicationId)
-            .get()
-            .await()
-
-        val chatItem = chatItemSnapshot.toObject(ChatItem::class.java) ?: return null
-
-        // Fetch candidate profile
-        val candidateProfileDoc =
-            chatItem.candidateProfileId?.let {
-                candidateProfilesCollection.document(it).get().await()
-            }
-        val candidateProfile = candidateProfileDoc?.toObject(CandidateProfile::class.java)
-
-        // Fetch enterprise profile
-        val enterpriseProfileDoc =
-            chatItem.enterpriseProfileId?.let {
-                enterpriseProfilesCollection.document(it).get().await()
-            }
-        val enterpriseProfile = enterpriseProfileDoc?.toObject(EnterpriseProfile::class.java)
-
-        // Fetch job offer
-        val jobOfferDoc =
-            chatItem.jobOfferId?.let { jobOffersCollection.document(it).get().await() }
-        val jobOffer = jobOfferDoc?.toObject(JobOffer::class.java)
-
-        // Fetch job application
-        val jobApplicationDoc =
-            chatItem.jobApplicationId?.let { jobApplicationsCollection.document(it).get().await() }
-        val jobApplication = jobApplicationDoc?.toObject(JobApplication::class.java)
-
-        // Query Firestore collection to get Message documents related to this chat
-        val messageQuery = messagesCollection
-            .whereEqualTo("subject", chatItem.chatId)
-            .whereEqualTo("isRead", false)
-        val unreadMessageCount = messageQuery.get().await().size().toLong()
-
-        // Create ChatItemUI object and return it
-        return ChatItemUI(
-            chatId = chatItem.chatId ?: "",
-            pictureUrl = if (!isEnterpriseAccount) candidateProfile?.pictureUrl
-                ?: "" else enterpriseProfile?.pictureUrl ?: "",
-            profileName = if (!isEnterpriseAccount) candidateProfile?.name
-                ?: "" else enterpriseProfile?.name ?: "",
-            offerTitle = jobOffer?.title ?: "",
-            unreadMessageCount = unreadMessageCount,
-            jobApplicationId = jobApplicationId
-        )
-    }
 
     suspend fun getChatItemUIList(
         profileId: String,
@@ -172,11 +115,6 @@ class ChatItemRepository @Inject constructor(
                         )
                     }
 
-                    // Fetch job application
-//                val jobApplicationDoc =
-//                    jobApplicationsCollection.document(chatItem.jobApplicationId).get().await()
-//                val jobApplication = jobApplicationDoc.toObject(JobApplication::class.java)
-
                     chatItemUIList.add(chatItemUI)
                 }
 
@@ -187,7 +125,7 @@ class ChatItemRepository @Inject constructor(
         }
     }
 
-    suspend fun createOrEditChatItem(
+    fun createOrEditChatItem(
         chatItem: ChatItem,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
@@ -215,7 +153,7 @@ class ChatItemRepository @Inject constructor(
         }
     }
 
-    suspend fun chatExists(
+    fun chatExists(
         applicationId: String,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit

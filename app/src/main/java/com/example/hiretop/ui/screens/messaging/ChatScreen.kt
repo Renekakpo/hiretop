@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -31,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +47,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,6 +63,7 @@ import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.screens.candidate.profile.CandidateProfileScreen
 import com.example.hiretop.utils.toHourMinuteString
 import com.example.hiretop.viewModels.ChatViewModel
+import java.net.URLEncoder
 
 object ChatScreen : NavDestination {
     override val route: String = "chat_screen"
@@ -150,17 +154,19 @@ fun ChatScreen(
                 .background(color = MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
         ) {
-
             if (!messages.isNullOrEmpty()) {
                 MessageList(
-                    messages = messages!!,
-                    currentProfileId = "${if (isEnterpriseAccount != null && isEnterpriseAccount == true) enterpriseProfileId else candidateProfileId}"
+                    modifier = Modifier.weight(1f),
+                    messages = messages!!.sortedBy { it.createdAt },
+                    currentProfileId = if (isEnterpriseAccount != null && isEnterpriseAccount == true)
+                        "$enterpriseProfileId" else "$candidateProfileId",
+                    onMessageDisplayed = { message ->
+                        message.messageId?.let { chatViewModel.markMessageAsRead(it) }
+                    }
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            NewMessageForm(onSendMessageClicked = { input ->
+            NewMessageForm(modifier = Modifier.align(Alignment.End), onSendMessageClicked = { input ->
                 if (chatItemUIState.chatId.isNullOrEmpty()) { // New chat
                     var chatItem = ChatItem(
                         jobApplicationId = jobApplication?.jobApplicationId,
@@ -247,7 +253,7 @@ fun ChatScreen(
                 }
             })
 
-            Spacer(modifier = Modifier.height(height = 10.dp))
+            Spacer(modifier = Modifier.height(height = 5.dp))
         }
     }
 }
@@ -263,7 +269,7 @@ fun TopBarContent(chatItemUI: ChatItemUI, onTopBarClicked: (ChatItemUI) -> Unit)
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context = LocalContext.current)
-                .data(chatItemUI.pictureUrl)
+                .data(chatItemUI.pictureUrl?.let { URLEncoder.encode(it, "UTF-8") })
                 .crossfade(true)
                 .build(),
             contentDescription = stringResource(id = R.string.user_profile_picture_desc_text),
@@ -299,12 +305,12 @@ fun TopBarContent(chatItemUI: ChatItemUI, onTopBarClicked: (ChatItemUI) -> Unit)
 }
 
 @Composable
-fun NewMessageForm(onSendMessageClicked: (String) -> Unit) {
+fun NewMessageForm(modifier: Modifier, onSendMessageClicked: (String) -> Unit) {
     val mHeight = LocalConfiguration.current.screenHeightDp.dp
     var messageText by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
@@ -342,14 +348,34 @@ fun NewMessageForm(onSendMessageClicked: (String) -> Unit) {
 }
 
 @Composable
-fun MessageList(messages: List<Message>, currentProfileId: String) {
+fun MessageList(
+    modifier: Modifier,
+    messages: List<Message>,
+    currentProfileId: String,
+    onMessageDisplayed: (Message) -> Unit
+) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(messages) {
+        // Scroll to the first unread message
+        val firstUnreadMessageIndex =
+            messages.indexOfFirst { !it.isRead && it.from != currentProfileId }
+        if (firstUnreadMessageIndex != -1) {
+            listState.scrollToItem(firstUnreadMessageIndex)
+        }
+    }
+
     LazyColumn(
-        modifier = Modifier
-            .wrapContentSize()
-            .padding(16.dp)
+        state = listState,
+        modifier = modifier
+            .padding(horizontal = 5.dp, vertical = 2.dp)
     ) {
         items(messages) { message ->
-            MessageItem(message = message, currentProfileId = currentProfileId)
+            MessageItem(
+                message = message,
+                currentProfileId = currentProfileId,
+                onMessageDisplayed = onMessageDisplayed
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
         }
@@ -357,7 +383,17 @@ fun MessageList(messages: List<Message>, currentProfileId: String) {
 }
 
 @Composable
-fun MessageItem(message: Message, currentProfileId: String) {
+fun MessageItem(
+    message: Message,
+    currentProfileId: String,
+    onMessageDisplayed: (Message) -> Unit
+) {
+    // Inside your composable, when the message is displayed:
+    DisposableEffect(Unit) {
+        onMessageDisplayed(message)
+        onDispose { }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -365,7 +401,7 @@ fun MessageItem(message: Message, currentProfileId: String) {
                 .contains(currentProfileId.lowercase())
         ) Arrangement.End else Arrangement.Start
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .wrapContentSize()
                 .background(
@@ -377,15 +413,20 @@ fun MessageItem(message: Message, currentProfileId: String) {
             Text(
                 text = message.content ?: "",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier
+                    .padding(horizontal = 5.dp)
             )
+
+            Spacer(modifier = Modifier.size(10.dp))
 
             if (message.createdAt != null) {
                 Text(
                     text = message.createdAt.toHourMinuteString(),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal),
                     color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.align(alignment = Alignment.End)
+                    modifier = Modifier
+                        .padding(top = 15.dp)
                 )
             }
         }

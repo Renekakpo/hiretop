@@ -50,7 +50,7 @@ object Utils {
 
             return file
         } catch (e: Exception) {
-            callback(e.message ?: appContext.getString(R.string.unkown_error_text))
+            callback(e.message ?: appContext.getString(R.string.unknown_error_text))
             return null
         }
     }
@@ -159,7 +159,25 @@ object Utils {
         return matchResult?.groupValues?.getOrNull(1)
     }
 
-    fun convertLongToDate(longTime: Long): Date {
-        return Date(longTime)
+    fun isEmailValid(email: String): Boolean {
+        val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
+        return email.matches(emailRegex.toRegex())
+    }
+
+    fun isValidPassword(password: String): Boolean {
+        // Define your criteria for a valid password
+        val minLength = 8
+        val maxLength = 20
+        val containsUpperCase = password.any { it.isUpperCase() }
+        val containsLowerCase = password.any { it.isLowerCase() }
+        val containsDigit = password.any { it.isDigit() }
+        val containsSpecialChar = password.any { !it.isLetterOrDigit() }
+
+        // Check if the password meets all criteria
+        return password.length in minLength..maxLength &&
+                containsUpperCase &&
+                containsLowerCase &&
+                containsDigit &&
+                containsSpecialChar
     }
 }

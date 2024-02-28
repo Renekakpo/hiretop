@@ -61,7 +61,6 @@ import com.example.hiretop.models.Certification
 import com.example.hiretop.models.Education
 import com.example.hiretop.models.Experience
 import com.example.hiretop.models.Project
-import com.example.hiretop.models.UIState
 import com.example.hiretop.navigation.NavDestination
 import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.extras.HireTopBottomSheet
@@ -72,6 +71,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.net.URLEncoder
 import java.util.UUID
 
 object CandidateProfileScreen : NavDestination {
@@ -201,9 +201,22 @@ fun CandidateProfileScreen(
                         fileName = file.nameWithoutExtension,
                         onSuccess = { downloadUrl ->
                             val profileCopy = candidateProfile?.copy(
-                                bannerUrl = downloadUrl
+                                bannerUrl = downloadUrl,
+                                pictureUrl = candidateProfile?.pictureUrl
                             ) ?: CandidateProfile(
-                                bannerUrl = downloadUrl
+                                bannerUrl = downloadUrl,
+                                pictureUrl = null,
+                                firstname = null,
+                                lastname = null,
+                                headline = null,
+                                about = null,
+                                experiences = null,
+                                educations = null,
+                                certifications = null,
+                                projects = null,
+                                skills = null,
+                                createdAt = System.currentTimeMillis(),
+                                updatedAt = System.currentTimeMillis()
                             )
 
                             CoroutineScope(Dispatchers.IO).launch {
@@ -226,7 +239,19 @@ fun CandidateProfileScreen(
                             val profileCopy = candidateProfile?.copy(
                                 pictureUrl = downloadUrl
                             ) ?: CandidateProfile(
-                                pictureUrl = downloadUrl
+                                pictureUrl = downloadUrl,
+                                bannerUrl = downloadUrl,
+                                firstname = null,
+                                lastname = null,
+                                headline = null,
+                                about = null,
+                                experiences = null,
+                                educations = null,
+                                certifications = null,
+                                projects = null,
+                                skills = null,
+                                createdAt = System.currentTimeMillis(),
+                                updatedAt = System.currentTimeMillis()
                             )
 
                             CoroutineScope(Dispatchers.IO).launch {
@@ -256,7 +281,17 @@ fun CandidateProfileScreen(
                                 ) ?: CandidateProfile(
                                     firstname = firstname,
                                     lastname = lastname,
-                                    headline = headline
+                                    headline = headline,
+                                    bannerUrl = null,
+                                    pictureUrl = null,
+                                    about = null,
+                                    experiences = null,
+                                    educations = null,
+                                    certifications = null,
+                                    projects = null,
+                                    skills = null,
+                                    createdAt = System.currentTimeMillis(),
+                                    updatedAt = System.currentTimeMillis()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -286,7 +321,19 @@ fun CandidateProfileScreen(
                                 val profileCopy = candidateProfile?.copy(
                                     about = about,
                                 ) ?: CandidateProfile(
-                                    about = about
+                                    about = about,
+                                    bannerUrl = null,
+                                    pictureUrl = null,
+                                    firstname = null,
+                                    lastname = null,
+                                    headline = null,
+                                    experiences = null,
+                                    educations = null,
+                                    certifications = null,
+                                    projects = null,
+                                    skills = null,
+                                    createdAt = System.currentTimeMillis(),
+                                    updatedAt = System.currentTimeMillis()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -340,7 +387,19 @@ fun CandidateProfileScreen(
                                 val profileCopy = candidateProfile?.copy(
                                     experiences = editedExperiences.toList()
                                 ) ?: CandidateProfile(
-                                    experiences = editedExperiences.toList()
+                                    experiences = editedExperiences.toList(),
+                                    bannerUrl = null,
+                                    pictureUrl = null,
+                                    firstname = null,
+                                    lastname = null,
+                                    headline = null,
+                                    about = null,
+                                    educations = null,
+                                    certifications = null,
+                                    projects = null,
+                                    skills = null,
+                                    createdAt = System.currentTimeMillis(),
+                                    updatedAt = System.currentTimeMillis()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -394,7 +453,19 @@ fun CandidateProfileScreen(
                                 val profileCopy = candidateProfile?.copy(
                                     educations = updatedEducations.toList()
                                 ) ?: CandidateProfile(
-                                    educations = updatedEducations.toList()
+                                    educations = updatedEducations.toList(),
+                                    bannerUrl = null,
+                                    pictureUrl = null,
+                                    firstname = null,
+                                    lastname = null,
+                                    headline = null,
+                                    about = null,
+                                    experiences = null,
+                                    certifications = null,
+                                    projects = null,
+                                    skills = null,
+                                    createdAt = System.currentTimeMillis(),
+                                    updatedAt = System.currentTimeMillis()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -449,7 +520,19 @@ fun CandidateProfileScreen(
                                 val profileCopy = candidateProfile?.copy(
                                     certifications = updatedCertifications.toList()
                                 ) ?: CandidateProfile(
-                                    certifications = updatedCertifications.toList()
+                                    certifications = updatedCertifications.toList(),
+                                    bannerUrl = null,
+                                    pictureUrl = null,
+                                    firstname = null,
+                                    lastname = null,
+                                    headline = null,
+                                    about = null,
+                                    experiences = null,
+                                    educations = null,
+                                    projects = null,
+                                    skills = null,
+                                    createdAt = System.currentTimeMillis(),
+                                    updatedAt = System.currentTimeMillis()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -503,7 +586,19 @@ fun CandidateProfileScreen(
                                 val profileCopy = candidateProfile?.copy(
                                     projects = updatedProjects.toList()
                                 ) ?: CandidateProfile(
-                                    projects = updatedProjects.toList()
+                                    projects = updatedProjects.toList(),
+                                    bannerUrl = null,
+                                    pictureUrl = null,
+                                    firstname = null,
+                                    lastname = null,
+                                    headline = null,
+                                    about = null,
+                                    experiences = null,
+                                    educations = null,
+                                    certifications = null,
+                                    skills = null,
+                                    createdAt = System.currentTimeMillis(),
+                                    updatedAt = System.currentTimeMillis()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -533,7 +628,19 @@ fun CandidateProfileScreen(
                                 val profileCopy = candidateProfile?.copy(
                                     skills = skills.toList(),
                                 ) ?: CandidateProfile(
-                                    skills = skills.toList()
+                                    skills = skills.toList(),
+                                    bannerUrl = null,
+                                    pictureUrl = null,
+                                    firstname = null,
+                                    lastname = null,
+                                    headline = null,
+                                    about = null,
+                                    experiences = null,
+                                    educations = null,
+                                    certifications = null,
+                                    projects = null,
+                                    createdAt = System.currentTimeMillis(),
+                                    updatedAt = System.currentTimeMillis()
                                 )
 
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -597,7 +704,7 @@ private fun HeaderSection(
                     profilePictureFile?.let { onUploadProfilePictureFile(it) }
                 }
             } catch (e: Exception) {
-                onImageLoadingFailed(e.message ?: context.getString(R.string.unkown_error_text))
+                onImageLoadingFailed(e.message ?: context.getString(R.string.unknown_error_text))
             }
         } else {
 //            onImageLoadingFailed(context.getString(R.string.no_image_picked_error_text))
@@ -612,7 +719,7 @@ private fun HeaderSection(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(bannerFilePath)
+                    .data(bannerFilePath?.let { URLEncoder.encode(it, "UTF-8") })
                     .crossfade(true)
                     .build(),
                 contentDescription = stringResource(R.string.profile_banner_desc_text),
@@ -660,7 +767,7 @@ private fun HeaderSection(
             // Profile picture
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(profilePictureFilePath)
+                    .data(profilePictureFilePath?.let { URLEncoder.encode(it, "UTF-8") })
                     .crossfade(true)
                     .build(),
                 contentDescription = stringResource(R.string.user_profile_picture_desc_text),

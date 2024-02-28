@@ -188,7 +188,7 @@
     <string name="empty_issuing_organization_title_error_text">Entrez le nom de l\'organisme émettrice.</string>
     <string name="empty_project_name_error_text">Entrez le nom du projet.</string>
     <string name="empty_skill_title_error_text">Entrez le titre de la compétence</string>
-    <string name="unkown_error_text">Erreur inconnue</string>
+    <string name="unknown_error_text">Erreur inconnue</string>
     <string name="no_image_picked_error_text">Aucune image sélectionnée</string>
     <string name="profile_update_failed_error_text">Échec de mise à jour du profil.</string>
     <string name="no_experience_text">Aucune expérience ajoutée pour l\'instant.</string>
@@ -259,6 +259,14 @@
     <string name="create_chat_failure_info">Échec de création de la discussion</string>
     <string name="edit_chat_item_failure_info">Échec de modification de la discussion.</string>
     <string name="unknown_text">Inconnu</string>
+    <string name="network_issue_info">Connexion Internet indisponible. Veuillez vérifier vos paramètres réseau.</string>
+    <string name="empty_email_alert_text">Entrez votre adresse email.</string>
+    <string name="incorrect_email_alert_text">Adresse email incorrecte.</string>
+    <string name="empty_password_alert_Text">Entrez un mot de passe.</string>
+    <string name="incorrect_password_alert_text">Mot de passe incorrect. Celui-ci doit-être composeé de caractères majuscules, minuscules, spéciaux, de chiffres et avoir une taille de 8 à 20 caractères.</string>
+    <string name="skip_text">Passer</string>
+    <string name="confirm_password_alert_text">Le mot de passe doit être le même.</string>
+    <string name="default_web_client_id" translatable="false">702305220056-olbuddekrfdhqk1b25defr8r1atksknv.apps.googleusercontent.com</string>
     <string-array name="job_type_list">
         <item>Temps plein</item>
         <item>Temps partiel</item>

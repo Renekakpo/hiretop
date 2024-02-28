@@ -107,7 +107,7 @@ fun BottomNav(
                         alwaysShowLabel = false,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                            unselectedIconColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                         ),
                         onClick = { currentRoute.value = screen.route }
                     )

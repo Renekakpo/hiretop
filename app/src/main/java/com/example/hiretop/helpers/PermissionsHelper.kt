@@ -19,13 +19,29 @@ class PermissionsHelper @Inject constructor(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    fun hasNetworkStatePermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_NETWORK_STATE
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
     fun requestGalleryPermission(activity: ComponentActivity, onPermissionResult: (Boolean) -> Unit) {
-        val permissionLauncher = activity.registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            onPermissionResult(isGranted)
+        val permissions = mutableListOf<String>()
+        if (!hasGalleryPermission()) {
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        if (!hasNetworkStatePermission()) {
+            permissions.add(Manifest.permission.ACCESS_NETWORK_STATE)
         }
 
-        permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        val permissionLauncher = activity.registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissionsMap: Map<String, Boolean> ->
+            val allPermissionsGranted = permissionsMap.values.all { it }
+            onPermissionResult(allPermissionsGranted)
+        }
+
+        permissionLauncher.launch(permissions.toTypedArray())
     }
 }

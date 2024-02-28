@@ -2,6 +2,7 @@ package com.example.hiretop
 
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,7 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.hiretop.app.HireTopApp
 import com.example.hiretop.helpers.PermissionsHelper
-import com.example.hiretop.ui.extras.FailurePopup
 import com.example.hiretop.ui.theme.HiretopTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -37,6 +37,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         setContent {
             HiretopTheme {
                 // A surface container using the 'background' color from the theme
@@ -49,11 +51,11 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        requestNotificationPermission()
+        requestNeededPermissions()
     }
 
-    private fun requestNotificationPermission() {
-        if (!permissionsHelper.hasGalleryPermission()) {
+    private fun requestNeededPermissions() {
+        if (!permissionsHelper.hasGalleryPermission() || !permissionsHelper.hasNetworkStatePermission()) {
             permissionsHelper.requestGalleryPermission(
                 activity = this@MainActivity,
                 onPermissionResult = {

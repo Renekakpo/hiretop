@@ -1,25 +1,19 @@
 package com.example.hiretop.models
 
-import com.example.hiretop.utils.Utils.convertLongToDate
 import com.google.firebase.firestore.DocumentId
-import java.util.Date
 
 data class Message(
     @DocumentId
     val messageId: String? = null,
-    val subject: String? = null, // Chat ID
-    val to: String? = null, // Receiver ID
-    val from: String? = null, // Sender ID
-    val content: String? = null,
+    val subject: String?, // Chat ID
+    val to: String?, // Receiver ID
+    val from: String?, // Sender ID
+    val content: String?,
     val received: Boolean = false,
     val isRead: Boolean = false,
-    val createdAt: Long? = null
+    val createdAt: Long?
 ) {
     constructor() : this(null, null, null, null, null, false, false, null)
-
-    fun getCreatedDate(): Date? {
-        return createdAt?.let { convertLongToDate(it) }
-    }
 }
 
 // Mock data

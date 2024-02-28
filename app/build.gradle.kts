@@ -54,9 +54,11 @@ android {
 }
 
 dependencies {
-    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
     val roomVersion = "2.6.1"
     val hiltVersion = "2.48.1"
+    val navigationVersion = "2.7.7"
+    val androidXTestVersion = "1.5.0"
+    val mockitoVersion = "2.19.0"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -129,4 +131,20 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    // Also add the dependency for the Google Play services library and specify its version
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+    implementation("com.google.firebase:firebase-auth:22.3.1")
+
+    androidTestImplementation("androidx.navigation:navigation-testing:$navigationVersion")
+
+    // Optional -- Robolectric environment
+    testImplementation("androidx.test:core:$androidXTestVersion")
+    // Optional -- Mockito framework
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+
+    androidTestImplementation("com.google.dagger:hilt-android-testing:$hiltVersion")
+
+    kaptTest("com.google.dagger:hilt-android-compiler:2.48.1")
 }

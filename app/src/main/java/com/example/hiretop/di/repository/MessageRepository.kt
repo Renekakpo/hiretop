@@ -97,7 +97,7 @@ class MessageRepository @Inject constructor(
                 }
 
                 // Sort messages by createdAt property in descending order (from new to old)
-                val sortedMessages = messages.sortedByDescending { it.getCreatedDate() }
+                val sortedMessages = messages.sortedBy { it.createdAt }
                 onSuccess(sortedMessages)
             }
             .addOnFailureListener {
@@ -181,7 +181,7 @@ class MessageRepository @Inject constructor(
         return messagesRef.addSnapshotListener { snapshot, exception ->
             if (exception != null) {
                 // Handle any errors
-                onException(exception.message ?: appContext.getString(R.string.unkown_error_text))
+                onException(exception.message ?: appContext.getString(R.string.unknown_error_text))
                 return@addSnapshotListener
             }
 

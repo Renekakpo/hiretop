@@ -8,8 +8,6 @@ import com.example.hiretop.data.datastore.HireTopDataStoreRepos
 import com.example.hiretop.di.repository.ChatItemRepository
 import com.example.hiretop.di.repository.JobOfferApplicationRepository
 import com.example.hiretop.helpers.FirebaseHelper
-import com.example.hiretop.models.CandidateProfile
-import com.example.hiretop.models.ChatItem
 import com.example.hiretop.models.EnterpriseProfile
 import com.example.hiretop.models.JobApplication
 import com.example.hiretop.models.JobOffer
@@ -25,13 +23,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
 @HiltViewModel
 class EnterpriseViewModel @Inject constructor(
@@ -89,6 +85,12 @@ class EnterpriseViewModel @Inject constructor(
             jobOffersCollection.add(jobOffer)
                 .addOnSuccessListener { doc ->
                     _mJobOffer.value = jobOffer.copy(jobOfferID = doc.id)
+                    jobOffer.enterpriseID?.let {
+                        getAllJobOffersForEnterprise(
+                            it,
+                            onSuccess = {},
+                            onFailure = {})
+                    }
                     onSuccess(doc.id)
                 }
                 .addOnFailureListener {
@@ -113,18 +115,6 @@ class EnterpriseViewModel @Inject constructor(
                         )
                     }
             }
-        }
-    }
-
-    fun deleteJobOffer(jobOfferID: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            jobOffersCollection.document(jobOfferID).delete()
-                .addOnSuccessListener {
-                    TODO("Handle success")
-                }
-                .addOnFailureListener {
-                    TODO("Handle failure")
-                }
         }
     }
 
@@ -278,7 +268,7 @@ class EnterpriseViewModel @Inject constructor(
 
                 onSuccess()
             } catch (e: Exception) {
-                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+                onFailure(e.message ?: appContext.getString(R.string.unknown_error_text))
             }
         }
     }
@@ -312,28 +302,30 @@ class EnterpriseViewModel @Inject constructor(
 
                 onSuccess()
             } catch (e: Exception) {
-                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+                onFailure(e.message ?: appContext.getString(R.string.unknown_error_text))
             }
         }
     }
 
-    suspend fun calculateProductivity(
+    fun calculateProductivity(
         enterpriseId: String,
-        onSuccess: () -> Unit,
+        onSuccess: (Double) -> Unit,
         onFailure: (String) -> Unit
-    ): Double {
+    ) {
         // Fetch all job offers for the enterprise
-        val offersSnapshot = jobOffersCollection
+        jobOffersCollection
             .whereEqualTo("enterpriseID", enterpriseId)
-            .get().await()
-
-        // Count the number of hires
-        val totalHiresCount = offersSnapshot.sumBy { document ->
-            document.toObject<JobOffer>().hireCount.toInt()
-        }
-
-        // Calculate productivity
-        return totalHiresCount.toDouble()
+            .get()
+            .addOnSuccessListener { offersSnapshot ->
+                // Count the number of hires
+                val totalHiresCount = offersSnapshot.sumOf { document ->
+                    document.toObject<JobOffer>().hireCount.toInt()
+                }
+                onSuccess(totalHiresCount.toDouble())
+            }
+            .addOnFailureListener {
+                onFailure(it.message ?: appContext.getString(R.string.unknown_error_text))
+            }
     }
 
     fun calculateViews(
@@ -355,7 +347,7 @@ class EnterpriseViewModel @Inject constructor(
 
                 onSuccess()
             } catch (e: Exception) {
-                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+                onFailure(e.message ?: appContext.getString(R.string.unknown_error_text))
             }
         }
     }
@@ -376,7 +368,7 @@ class EnterpriseViewModel @Inject constructor(
 
                 onSuccess()
             } catch (e: Exception) {
-                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+                onFailure(e.message ?: appContext.getString(R.string.unknown_error_text))
             }
         }
     }
@@ -400,7 +392,7 @@ class EnterpriseViewModel @Inject constructor(
 
                 onSuccess()
             } catch (e: Exception) {
-                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+                onFailure(e.message ?: appContext.getString(R.string.unknown_error_text))
             }
         }
     }
@@ -424,7 +416,7 @@ class EnterpriseViewModel @Inject constructor(
 
                 onSuccess()
             } catch (e: Exception) {
-                onFailure(e.message ?: appContext.getString(R.string.unkown_error_text))
+                onFailure(e.message ?: appContext.getString(R.string.unknown_error_text))
             }
         }
     }
